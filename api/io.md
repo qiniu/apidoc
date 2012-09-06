@@ -132,14 +132,19 @@ title: 云存储接口 | 七牛云存储
 
 params 用于文件上传成功后执行回调，七牛云存储服务器会向您应用的ClientId关联的业务服务器POST这些指定的参数。一般用于回传 [EntryURI](/v3/api/words/#EntryURI)，这样客户方的业务服务器会知道一个文件上传成功后以某条目名称记录到了七牛云存储的哪个资源表。
 
+**网页直传**
+
 如果您觉得这个接口理解起来有难度，不妨以一种更简单的HTML Form结构来理解，以上接口描述等价于如下 HTML Form:
 
-    <form enctype="multipart/form-data" action="http://io-node-n.qbox.me/upload/{UploadHandle}" method="POST">
-        <input type="hidden" name="action" value="/rs-put/{EncodedEntryURI}/mimeType/{EncodedMimeType}/meta/{EncodedCustomMeta}/crc32/{FileCRC32Checksum}" />
-        <input type="hidden" name="params" value="filename={thisFileName}&fileKey={thisFileKey}&tbname={ResourceTableName}"
-        Choose a file to upload: <input name="file" type="file" />
+    <form method="POST" enctype="multipart/form-data" action="{putAuth-UploadURL}">
+        <input type="hidden" name="action" value="/rs-put/{URLSafeBase64Encode({bucket}:{key})}" />
+        <input type="hidden" name="params" value="bucket={bucketName}&key={fileUniqKey}&k1=v1&k2=v2..." />
+        <input type="hidden" name="return_url" value="http://DOMAIN/PATH?QUERY_STRING" />
+        <input name="file" type="file" />
         <input type="submit" value="Upload File" />
     </form>
+
+如果是采用如上 HTML 表单直传文件，倘若有入 `return_url` 字段，七牛云存储会在文件上传成功后执行301跳转，跳转的 URL 即 `return_url` 指定的值。
 
 **响应**
 
