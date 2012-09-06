@@ -62,7 +62,7 @@ title: 图像处理接口 | 七牛云存储
 
 
 <a name="fo-imageView"></a>
- 
+
 ### 3. 生成指定规格的缩略图
 
 **请求**
@@ -107,13 +107,13 @@ title: 图像处理接口 | 七牛云存储
 示例1：针对原图进行缩略，并从缩略图的中央部位裁剪为 200x200 的缩略图：
 
     http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageView/1/w/200/h/200
-    
+
 [![200x200](http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageView/1/w/200/h/200)](http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageView/1/w/200/h/200)
 
 示例2：针对原图进行缩略，并从缩略图的中央部位裁剪为 200x200，图像质量为 1，gif 格式的缩略图：
 
     http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageView/1/w/200/h/200/q/1/format/gif
-    
+
 [![200x200，图像质量:1，格式:gif](http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageView/1/w/200/h/200/q/1/format/gif)](http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageView/1/w/200/h/200/q/1/format/gif)
 
 示例3：针对原图进行缩略，并从缩略图的中央部位裁剪为 200x200，图像质量为 85，格式为 png，锐度指数为 10 的缩略图：
@@ -121,7 +121,7 @@ title: 图像处理接口 | 七牛云存储
     http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageView/1/w/200/h/200/q/85/format/png/sharpen/10
 
 [![200x200，图像质量:85，格式:png，锐度:10](http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageView/1/w/200/h/200/q/85/format/png/sharpen/10)](http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageView/1/w/200/h/200/q/85/format/png/sharpen/10)
-    
+
 示例4：针对原图进行缩略，并限定目标缩略图的长边为 200 px，短边自适应，缩略图宽和高都不会超出 200px：
 
     http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageView/2/w/200/h/200
@@ -149,7 +149,7 @@ title: 图像处理接口 | 七牛云存储
 
 **请求**
 
-    GET <ImageDownloadURL>/imageMogr
+    GET <ImageDownloadURL>?imageMogr
 
         /thumbnail/<ImageSizeGeometry>
         /gravity/<GravityType> =NorthWest, North, NorthEast, West, Center, East, SouthWest, South, SouthEast
@@ -168,7 +168,7 @@ title: 图像处理接口 | 七牛云存储
 
 示例：
 
-    GET <ImageDownloadURL>/imageMogr/auto-orient/thumbnail/!50x50r/gravity/center/crop/!50x50/quality/80
+    GET <ImageDownloadURL>?imageMogr/auto-orient/thumbnail/!50x50r/gravity/center/crop/!50x50/quality/80
 
 如此可对 \<ImageDownloadURL\> 文件进行缩略，根据原图EXIF信息进行自动旋转调正，并裁剪为 50x50 大小且以原图片格式压缩品质为80进行输出。
 
@@ -184,7 +184,7 @@ title: 图像处理接口 | 七牛云存储
 
 指定图片缩略或裁剪后的尺寸：
 
-  size | 规格说明 | 样例 
+  size | 规格说明 | 样例
 -------| ------- | ------------------------------------------------------
   scale% | 基于原图大小，按照指定的百分比进行缩放。 | [50%](http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageMogr/thumbnail/!50p)
   scale-x%xscale-y% | 以百分比的形式指定缩略图的宽或高，另一边自适应等比缩放，只能使用一个 % 限定。 | [50%x](http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageMogr/thumbnail/!50p) [x50%](http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageMogr/thumbnail/!x50p)
@@ -235,7 +235,7 @@ y 为正数时为从源图区域左上角的纵坐标，为负数时，左上角
 
 **请求**
 
-    POST <ImageDownloadURL>/imageMogr
+    POST <ImageDownloadURL>?imageMogr
         /thumbnail/<ImageSizeGeometry>
         /gravity/<GravityType> =NorthWest, North, NorthEast, West, Center, East, SouthWest, South, SouthEast
         /crop/<ImageSizeAndOffsetGeometry>
