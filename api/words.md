@@ -26,7 +26,7 @@ title: 理解常用术语 | 七牛云存储
 
 ### EntryURI
 
-用以定位资源（Entry）的 Key 称为 \<EntryURI\>，一般为文件路径的表示方法。每个 \<EntryURI\> 实际上是 \<TableName\>:\<Key\> 的描述形式。其中 \<TableName\> 是表名，\<Key\> 是资源的索引值，在同一个表中唯一。EntryURI 中可以包含 '/'，且 '/' 字符并无特殊意义，和普通字符一样对待。
+用以定位资源（Entry）的 Key 称为 \<EntryURI\>，一般为文件路径的表示方法。每个 \<EntryURI\> 实际上是 \<Bucket\>:\<Key\> 的描述形式。其中 \<Bucket\> 是表名，\<Key\> 是资源的索引值，在同一个表中唯一。EntryURI 中可以包含 '/'，且 '/' 字符并无特殊意义，和普通字符一样对待。
 
 <a name="EncodedEntryURI"></a>
 
