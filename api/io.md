@@ -4,88 +4,164 @@ title: 云存储接口 | 七牛云存储
 
 # 云存储接口
 
+**注意**：初次阅读本篇文档前，您需要理解一些常用术语比如 Entry, EntryURI, EncodedEntryURI 等。关于七牛云存储API术语您可以查阅另一篇专门解释术语的文档：[**理解常用术语**](/v3/api/words/)
+
+在请求七牛云存储各个接口之前，需要充分理解授权操作，可以参阅文档：[应用接入与认证授权](/v3/api/auth/) 。
+
+
 ## 目录
 
-- [客户端直传](#rs-PutAuth)
-    - [取得上传授权](#rs-PutAuth)
-    - [上传文件](#rs-PutFile)
-- [服务端直传](#server-upload)
-- [获取指定资源信息](#rs-Stat)
-- [获取指定资源内容（可下载）](#rs-Get)
-- [发布公开资源](#rs-Publish)
-- [取消资源发布](#rs-Unpublish)
-- [删除指定资源](#rs-Delete)
-- [删除整张资源表](#rs-Drop)
-- [批量处理接口](#rs-Batch)
-- [移动或重命名操作接口](#rs-Move)
+- [创建空间](#mkbucket)
+- [上传文件](#upload)
+    - [生成上传授权凭证](#upload-token)
+        - [算法](#upload-token-algorithm)
+        - [样例](#upload-token-examples)
+    - [授权直传文件](#upload-file)
+        - [API（multipart/form-data）](#upload-file-by-multipart)
+        - [HTML表单形式直传](#upload-file-by-html-form)
+    - [回调处理](#callback-after-uploaded)
+        - [回调逻辑](#callback-logic)
+        - [作为代理](#callback-as-proxy)
+- [断点续上传](#resumable-upload)
+    - [术语](#resumable-upload-keywords)
+    - [工作模型](#resumable-upload-model)    
+    - [流程](#resumable-upload-workflow)
+    - [API](#resumable-upload-api)
+        - [授权](#resumable-upload-authorization)
+        - [创建分割块（Block）并上传第一个数据块（Chunk）](#resumable-upload-mkblk)
+        - [上传分割块（Block）中的数据块（Chunk）](#resumable-upload-bput)
+        - [合并文件](#resumable-upload-mkfile)
+    - [样例](#resumable-upload-examples)
+- [下载文件](#download)
+    - [动态获取文件授权后的临时下载链接](#get)
+    - [直接绑定域名为文件创建公开外链](#publish)
+    - [解除域名绑定取消文件的公开外链](#unpublish)
+    - [断点续下载](#download-by-range-bytes)
+    - [针对下载出现 404 NotFound 智能化处理](#download-if-notfound)
+    - [设置源文件(比如原图)保护](#set-protected)
+        - [为指定的存储空间设置保护模式](#pub-access-mode)
+        - [设置友好URL访问中的连接符](#pub-separator)
+        - [设置URL友好的风格样式名](#pub-style)
+        - [取消URL友好风格的样式名访问](#pub-unstyle)
+    - [防盗链设置](#anti-theft-chain)
+        - [设置防盗链模式](#uc-antiLeechMode)
+        - [更新防盗链记录值](#uc-referAntiLeech)
+- [查看文件基本属性信息](#stat)
+- [删除指定文件](#delete)
+- [删除所有文件（整个空间/Bucket）](#drop)
+- [批量操作](#batch)
+    - [批量获取文件基本属性信息](#batch-stat)
+    - [批量获取文件授权后的临时下载链接](#batch-get)
+    - [批量删除文件](#batch-delete)
+- [清除服务端缓存](#refresh-bucket)
 
+<a name="mkbucket"></a>
+### 1. 创建空间
 
-## 说明
-
-**注意**：初次阅读本篇文档前，您需要理解一些常用术语比如 Entry, EntryURI, EncodedEntryURI 等。关于七牛云存储API术语您可以查阅另一篇文档：[**理解常用术语**](/v3/api/words/)
-
-在请求七牛云存储各接口之前，您的服务端应用程序需要完成 [应用接入与认证授权](/v3/api/auth/) 。
-
-且确保您服务端应用程序向七牛云存储接口的请求中隐式地包含 [QBox Token](/v3/api/auth/#req-auth) ，如此，您的服务端应用程序无需每次都显式地在参数中传递 Access Token 了。
-
-服务端返回给您应用程序的每个可操作的URL都是独立有效的，即返回的每个URL本身就是一个独立有效的凭证，无需关联Cookies等其他额外的授权操作。
-
-
-## 协议
-
-### 1. 客户端直传
-
-<a name="rs-PutAuth"></a>
-
-### 1.1 取得上传授权
-
-**请求**
-
-    POST http://iovip.qbox.me/put-auth/<ExpiresIn>/callback/<urlsafe-base64-encode-callback-url>
+      POST http://rs.qbox.me/mkbucket/<Bucket>
+      Content-Type: application/x-www-form-urlencoded
+      Request Headers: {
+          Authorization: QBox <ACCESS_TOKEN>
+      }
+      
+      HTTP/1.1 200 OK
 
 **参数**
 
-\<ExpiresIn\>
-: 生成一个指定有效期的上传URL，缺省情况下是3600秒。\<ExpiresIn\> 参数是用来限定此授权URL的有效时间，假设当前时间是
-10:00:00 ，如果 \<ExpiresIn\> 设置为3600秒，那么返回的这个授权URL的过期时间就是 11:00:00 之后 ，在
-10:59:59 这个时间点都还可以成功上传任意大小的文件，但过了 11:00:00，哪怕上传一个几Bytes的文件都将失败。此临时授权URL用来进行匿名上传，可以很巧妙地搭配使用 \<ExpiresIn\> 参数，比如可以让一个授权URL是一次性的，也可以是一段时间内长期有效的。
+`<Bucket>`
+: 具体的空间名称，仅限[a-zA-Z0-9_]组合。
 
-\<urlsafe-base64-encode-callback-url\>
-: 该 callback 参数为可选，是一个经过 [URLSafeBase64Encode](/v3/api/words/#URLSafeBase64Encode) 编码后的字符串。该 callback url 是客户方的业务服务端用于接收七牛云存储服务端向其发送POST请求的URL，POST 请求的数据即客户方客户端程序在上传文件时设定的回调参数。在一个直传过程中，客户方的客户端程序（终端用户）往七牛云存储直传文件，可以设定一些用于文件上传成功后向客户方的业务服务器发送回调请求的参数，七牛云存储在文件上传成功后会将这些参数原文返回给客户方的业务服务器（执行回调）。
+如果您不想通过 API 创建空间，也可以直接在七牛云存储开发者网站上直接 [新建空间](https://dev.qiniutek.com/buckets/new)。 
 
-如下是文件直传场景下的一个回调流程：
+<a name="upload"></a>
+### 2. 上传文件
 
-1. 客户方业务服务端程序拿到七牛云存储上传文件的授权URL
-2. 客户方业务服务端程序将该上传文件的授权URL返回给其客户端程序
-3. 客户端程序往七牛云存储直传文件（可设置回调参数）
-4. 七牛云存储接收完毕
-5. 如果有回调参数，七牛云存储向客户方业务服务器发送回调（HTTP POST Request）
-6. 如果有发起回调，七牛云存储接收客户方业务服务器的返回信息（HTTP Status Code, HTTP Response Body）
-7. 七牛云存储返回给客户方客户端程序 HTTP Response；如果客户方的业务服务器返回的 HTTP Response Body 为 JSON 并且 `HTTP Headers["Content-Type"] = 'application/json'`，七牛云存储服务端会将其 Response Body 按照 JSON 格式返回给客户方的客户端程序。
+要上传一个文件，首先需要获得上传授权，七牛云存储通过 `uploadToken` 的方式实现上传授权操作。`uploadToken` 可以根据 `accessKey` 和 `secretKey` 对一组数据进行数字签名生成。在文件上传时，该 `uploadToken` 作为文件上传流中 multipart/form-data 的一部分进行传输，也可以附带在上传请求的 HTTP Headers 中传输。
 
-**响应**
+<a name="upload-token"></a>
+#### 2.1 生成上传授权凭证
 
-    HTTP/1.1 200 OK
-    Content-Type: application/json
-    Cache-Control: no-store
+<a name="upload-token-algorithm"></a>
+##### 2.1.1 算法　
 
-    {
-        url: <UploadURL>, // 生成的 URL 为：http://iovip.qbox.me/upload/<UploadHandle>
-        expiresIn: <RealExpiresIn>
+`uploadToken` 算法如下：
+
+    // 步骤1：组织元数据
+    authInfo = {
+        scope: <targetBucket string>,
+        deadline: <UnixTimestamp int64>,
+        callbackUrl: <callbackUrl string>,
+        callbackBodyType: <callbackBodyType string>,
+        customer: <EndUserId string>
     }
+    
+    // 步骤2：编码元数据
+    authInfoEncoded = urlsafe_base64_encode(json_encode(authInfo))
+    
+    // 步骤3：将编码后的元数据经过私钥签名，提取摘要值
+    authDigest = hmac_sha1(authInfoEncoded, secretKey)
+    
+    // 步骤4：将公钥、摘要值、已编码的元数据进行字符串拼接，生成上传授权凭证
+    uploadToken = accessKey:authDigest:authInfoEncoded
 
-返回的 UploadURL 在有效期内支持同时并发上传多个文件。当然，同一时间获取多个UploadURL进行上传也是支持的。
+**步骤1** 
+
+`authInfo` 各个字段详解：
+
+字段名 | 类型 | 是否必须 | 说明
+----- | --- | ------- | ----
+scope | string | 可选 | 一般指定文件要上传到的目标存储空间（Bucket）
+deadline | int64 | 必须 | 定义 uploadToken 的失效时间，Unix时间戳，精确到秒
+callbackUrl | string | 可选 | 定义文件上传完毕后，云存储服务端执行回调的远程URL
+callbackBodyType | string | 可选 | 为执行远程回调指定Content-Type，比如可以是：application/x-www-form-urlencoded
+customer | string | 可选 | 给上传的文件添加唯一属主标识，特殊场景下非常有用，比如根据终端用户标识给图片打水印
+
+其中，`scope` 字段还可以有更灵活的定义：
+
+- 若为空，表示可以上传到任意Bucket（仅限于新增文件）
+- 若为"Bucket"，表示限定只能传到该Bucket（仅限于新增文件）
+- 若为"Bucket:Key"，表示限定特定的文档，可新增或修改文件
 
 
-<a name="rs-PutFile"></a>
+**步骤2** 
 
-### 1.2 上传文件
+- `authInfo` 数据结构首先必须转成标准的 [JSON](http://json.org/) 格式。
+- 将该JSON标准格式的元数据经过 [urlsafe_base64_encode](/v3/api/words/#URLSafeBase64Encode) 编码。
 
-**请求**
+**步骤3**
 
-    POST http://io-node-n.qbox.me/upload/<UploadHandle>
+- 通过 `hmac_sha1` 签名算法，将将编码后的元数据经过私钥（secretKey）进行计算签名
+
+**步骤4**
+
+- 将公钥（accessKey）、签名后的摘要值（authDigest）、已编码的元数据（authInfoEncoded）用冒号（:）进行字符串拼接，生成上传授权凭证 `uploadToken`。
+
+<a name="upload-token-examples"></a>
+##### 2.1.2 样例
+
+生成 uploadToken 样例代码可参考：
+
+- Python - <https://github.com/qiniu/python-sdk/blob/master/qbox/uptoken.py>
+
+- Ruby - <https://github.com/qiniu/ruby-sdk/blob/master/lib/qiniu/tokens/upload_token.rb>
+
+- PHP - <https://github.com/qiniu/php5-sdk/blob/master/qbox/authtoken.php>
+
+<a name="upload-file"></a>
+#### 2.2 直传文件
+
+<a name="upload-file-by-html-form"></a>
+##### 2.2.1 API（multipart/form-data）
+
+请求包，`multipart/form-data` 格式：
+
+    POST http://up.qbox.me/upload
     Content-Type: multipart/form-data; boundary=<Boundary>
-
+ 
+    <Boundary>
+    Content-Disposition: form-data; name="auth"
+ 
+    <UploadToken>
     <Boundary>
     Content-Disposition: form-data; name="action"
 
@@ -93,36 +169,47 @@ title: 云存储接口 | 七牛云存储
     <Boundary>
     Content-Disposition: form-data; name="file"; filename="<LocalFileName>"
     Content-Type: <ContentType>
-
+ 
     <FileContent>
     <Boundary>
     Content-Disposition: form-data; name="params"
-
+ 
     <CustomData>
 
-该请求POST的地址即 [取得上传授权](#rs-PutAuth) 成功后返回的用于文件上传的临时有效URL 。
+返回包(JSON)：
 
-注意：该协议接口不需要传递 Access Token ，因为 POST 的目标URL已经是一个带有凭证的短期有效地址。
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+    Cache-Control: no-store
+    Response Body: {
+        hash: <FileETag string>
+    }
 
-此请求传递三个必要参数，他们分别是 `action`，`file` 和 `params` 。
+**请求参数详解**
+
+此 `multipart/form-data` 请求包需传递三个必要参数，他们分别是 `auth`、`action` 和 `file` 。
+
+**auth**
+
+`auth` 字段的值即 [上传授权凭证(uploadToken)](#upload-token) 的值：`accessKey:authDigest:authInfoEncoded`。
 
 **action**
 
 `action=<PutAction>` 是要执行的上传行为，表示向具体的资源表里新建一个条目。具体规格如下：
 
-    action="/rs-put/{EncodedEntryURI}/mimeType/{EncodedMimeType}/meta/{EncodedCustomMeta}/crc32/{FileCRC32Checksum}"
+    action="/rs-put/<EncodedEntryURI>/mimeType/<EncodedMimeType>/meta/<EncodedCustomMeta>/crc32/<FileCRC32Checksum>"
 
-{[EncodedEntryURI](/v3/api/words/#EncodedEntryURI)} 定义了具体的资源表和条目，必须项。
+- [EncodedEntryURI](/v3/api/words/#EncodedEntryURI) 定义了具体的资源表和条目，必须项。
 
-{[EncodedMimeType](/v3/api/words/#EncodedMimeType)} 表明文件的 MIME 类型，缺省情况下为 `application/octet-stream`，可选项。
+- [EncodedMimeType](/v3/api/words/#EncodedMimeType) 表明文件的 MIME 类型，缺省情况下为 `application/octet-stream`，可选项。
 
-{[EncodedCustomMeta](/v3/api/words/#EncodedCustomMeta)} 文件备注信息，可选项。
+- [EncodedCustomMeta](/v3/api/words/#EncodedCustomMeta) 文件备注信息，可选项，一般不传入。
 
-{[FileCRC32Checksum](/v3/api/words/#FileCRC32Checksum)} 文件的 crc32 校验值，十进制整数，可选项。若不传此参数则无数据校验功能。
+- [FileCRC32Checksum](/v3/api/words/#FileCRC32Checksum) 文件的 crc32 校验值，十进制整数，可选项。若不传此参数则不执行数据校验。
 
-`action` 的值至少是 `/rs-put/{EncodedEntryURI}` ，其他可选。
+`action` 字段的值至少是 `/rs-put/<EncodedEntryURI>` ，其他可选。如其他参数不传入，`action` 字段的值中就不必出现该参数名称。
 
-注意：同一资源表下，已存在与当前上传条目名称（{[EncodedEntryURI](/v3/api/words/#EncodedEntryURI)} 元素中的 <[Key](/v3/api/words/#EntryURI)\>）相同的条目时，若当前上传文件内容与原有文件内容一致，则返回成功响应；若文件内容不一致，则上传失败，并返回失败响应。
+注意：同一存储空间（Bucket）下，已存在与当前上传条目名称（[EncodedEntryURI](/v3/api/words/#EncodedEntryURI) 元素中的 [Key](/v3/api/words/#EntryURI)）相同的条目时，若当前上传文件内容与原有文件内容一致，则返回成功响应；若文件内容不一致，则上传失败，并返回失败响应。
 
 **file**
 
@@ -130,210 +217,578 @@ title: 云存储接口 | 七牛云存储
 
 **params**
 
-params 用于文件上传成功后执行回调，七牛云存储服务器会向您应用的ClientId关联的业务服务器POST这些指定的参数。一般用于回传 [EntryURI](/v3/api/words/#EntryURI)，这样客户方的业务服务器会知道一个文件上传成功后以某条目名称记录到了七牛云存储的哪个资源表。
+`params` 用于文件上传成功后执行回调，七牛云存储服务器会向您应用的ClientId关联的业务服务器POST这些指定的参数。一般用于回传 [EntryURI](/v3/api/words/#EntryURI)，这样客户方的业务服务器会知道一个文件上传成功后以某条目名称记录到了七牛云存储的哪个资源表。
 
-**网页直传**
+<a name="upload-file-by-multipart"></a>
+##### 2.2.2 HTML表单形式直传
 
 如果您觉得这个接口理解起来有难度，不妨以一种更简单的HTML Form结构来理解，以上接口描述等价于如下 HTML Form:
 
-    <form method="POST" enctype="multipart/form-data" action="{putAuth-UploadURL}">
+    <form method="POST" enctype="multipart/form-data" action="http://up.qbox.me/upload">
+        <input type="hidden" name="auth" value="{uploadToken}" />
         <input type="hidden" name="action" value="/rs-put/{URLSafeBase64Encode({bucket}:{key})}" />
         <input type="hidden" name="params" value="bucket={bucketName}&key={fileUniqKey}&k1=v1&k2=v2..." />
         <input type="hidden" name="return_url" value="http://DOMAIN/PATH?QUERY_STRING" />
-        <input name="file" type="file" />
+        <input name="file" type="file" />        
         <input type="submit" value="Upload File" />
     </form>
 
 如果是采用如上 HTML 表单直传文件，倘若有入 `return_url` 字段，七牛云存储会在文件上传成功后执行301跳转，跳转的 URL 即 `return_url` 指定的值。
 
-**响应**
 
-上传成功，七牛云存储服务端返回 HTTP Status Code 为 200：
+<a name="callback-after-uploaded"></a>
+#### 2.3 回调处理
 
-    HTTP/1.1 200 OK
+<a name="callback-logic"></a>
+##### 2.3.1 回调逻辑
+
+七牛云存储允许一个文件直传成功后向指定的远程服务器执行回调。在 [生成上传授权凭证(uploadToken)](#upload-token) 这一过程中，元数据（authInfo）包含的 `callbackUrl` 字段即用于指定远程回调地址。在 [直传文件](#upload-file) 这一过程中，`multipart/form-data` 请求包中的 `params` 字段提供了回调请求的具体数据。如果 `callbackUrl` 和 `params` 都有指定的情况下，那么文件上传成功后，七牛云存储服务端即会将 `params` 字段的值以 HTTP POST 的方式发送到指定的 `callbackUrl`。如果 [生成上传授权凭证(uploadToken)](#upload-token) 这一过程中有指定 `callbackBodyType`，七牛云存储服务端执行远程回调发送 HTTP 请求的 Content-Type 将会是 `callbackBodyType` 提供的值，一般会是 `Content-Type: application/x-www-form-urlencoded`。
+
+<a name="callback-as-proxy"></a>
+##### 2.3.2 作为代理
+
+七牛云存储的回调处理还有代理作用。执行远程回调后，如果客户方的业务服务器返回的 HTTP Response Body 为标准的 [JSON](http://json.org/) 格式，并且 `HTTP Headers["Content-Type"] = 'application/json'`，那么七牛云存储服务端会将其 Response Body 按照 JSON 格式返回给客户方的客户端程序。
+
+<a name="resumable-upload"></a>
+### 3. 断点续上传
+
+七牛云存储提供断点续上传功能。该功能将单个文件分割成数个固定大小的块并发上传，可以在实现断点续传的同时加快上传速度（并发上传）。
+
+<a name="resumable-upload-keywords"></a>
+#### 3.1 术语
+
+1. 上传服务器（Up-Server）：提供断点续上传功能的服务器，负责启动新的上传过程、接受上传内容、合并生成最终上传文件。
+
+2. 业务服务器（Biz-Server）：七牛云存储的客户的业务服务器，负责上传操作鉴权、分配操作策略、生成UpToken、驱动上传端启动上传。
+
+3. 上传授权凭证（UpToken）：由业务服务器使用AccessKey和SecretKey，对操作策略进行数字签名防伪而生成的上传凭证。参考：[生成上传授权凭证](#upload-token)
+
+4. 操作策略（Policy）：由业务服务器填写、由上传服务器执行的操作信息。参考：[生成上传授权凭证](#upload-token)  
+    4.1. 操作域（Scope）：1）空，表示可以上传到任意Bucket（仅限于新增文件）；2) "Bucket"，表示限定只能传到该Bucket（仅限于新增文件）；3) "Bucket:Key"，表示限定特定的文档，可新增或修改文件;
+    4.2. 超时时限（DeadLine）：上传授权凭证的有效时间，单位是秒;  
+    4.3. 回调URL（CallbackURL）：如果指定，在合并文件后，由上传服务器调用此URL，以通知业务服务器做相应处理;  
+    4.4. 返回URL（ReturnURL）：如果指定，在合并文件后，由上传服务器重定向到此URL，以通知客户端继续表单处理流程。
+
+5. 上传端（Up-Client）：七牛云存储的客户的业务终端，负责提出、实施上传。
+
+6. 分割块（Block）：分割块是以指定大小（一般为4MB）为单位分割待传文件得到的内容块。最后一个分割块可以小于4MB。不同分割块可以乱序并行上传。所有分割块上传完毕后由服务器进行内容排序合并。
+
+7. 上传块（Chunk）：上传块是对分割块的进一步切分，可以由用户自行设定大小，以适应不同网络环境的限制。上传块必须顺序上传，同时根据需求保存上传过程中的上下文信息、同一分割块已传部分的校验值，以便在断点续传时恢复操作环境。
+
+8. 上下文信息（Context）：服务器成功保存上传块后返回的操作环境信息，可保存在上传端本地，以便恢复操作环境。上传开始后，每个分割块都有自己的上下文信息。上传端不能修改接收到的上下文信息。
+
+9. 校验值（CheckSum）：服务器成功保存上传块后返回的、当前分割块的已传部分的校验值，可保存在上传端本地，用于最后合并文件。上传开始后，每个分割块都有自己的校验值。上传端不能修改接收到的校验值。
+
+<a name="resumable-upload-model"></a>
+#### 3.2 工作模型
+
+                                                        |
+      CUSTOM                                            | QINIU
+                                                        |
+            +------------+                              |     +------------+
+            |            |    6.1 Invoke CallbackURL    |     |            |
+            |            | <----------------------------+---- |            |
+            | Biz-Server |                              |     | Up-Server  |
+            |            | -----------------------------+---> |            |
+            |            |    6.2 Return Result         |     |            |
+            +------------+                              |     +------------+
+                 ^  |                                   |       ^ |    ^ |
+                 |  |                                   |       | |    | |
+                 |  |                                   |       | |    | |
+      1 Request  |  | 2 Make Policy/                    |       | |    | |
+        Upload   |  |   UpToken                         |       | |    | |
+                 |  |                                   |       | |    | |
+      -----------+--+-----------                        |       | |    | |
+                 |  |                                   |       | |    | |
+      END-USER   |  |                                   |       | |    | |
+                 |  V                                   |       | |    | |
+            +------------+    4.1 Upload Blocks         |       | |    | |
+            |            | -----------------------------+-------/ |    | |
+            |            | <----------------------------+---------/    | |
+            |            |    4.2 Return Context/       |              | |
+            |            |        CheckSum              |              | |
+            | Up-Client  |                              |              | |
+            |            |                              |              | |
+            |            |    5   Make File             |              | |
+      3 Split File       | -----------------------------+--------------/ |
+            |            | <----------------------------+----------------/
+            +------------+    6.3 Return Result         |
+                                                        |
+                                                        |
+
+<a name="resumable-upload-workflow"></a>
+#### 3.3 流程
+
+1. 请求断点续上传（Request Upload）：由上传端发起，向业务服务器申请执行断点续上传;  
+
+2. 生成操作策略/上传凭证（Make Policy/UpToken）：业务服务器对上传端进行鉴权/签名上传凭证/授权;  
+
+3. 分割文件（Split File）：上传端获得授权后，以指定块大小（一般为4MB）为单位，将待传文件分割为数个分割块;  
+
+4. 上传分割块（Upload Blocks）：上传端将单个分割块至上传服务器（可以并发上传不同的分割块，加快上传速度）。每个分割块的上传过程必须顺序完成（串行上传每个上传块）。上传服务器会针对接受到的上传块，返回对应分割块的已上传部分的上下文信息和校验码;  
+
+5. 合并文件（Make File）：所有分割块均成功上传完毕后，由上传端通知上传服务器将其合并成原上传对象文件;  
+
+6. 若指定CallbackURL，上传服务器在合并文件后会调用此URL，通知业务服务器做相应处理; 否则返回响应结果。  
+
+注：在第4步的任何节点均可终止（Abort）上传分割块，或在断点处根据上下文信息恢复上传分割块。
 
 
-<a name="server-upload"></a>
+<a name="resumable-upload-api"></a>
+#### 3.4 API
 
-### 2. 服务端直传
+<a name="resumable-upload-authorization"></a>
+##### 3.4.1 授权
 
-如果上传文件并非您的终端用户（即非用户创造内容情况下），而是直接从您的服务端直接向七牛云存储服务器上传。可以参考如下规格：
+授权信息在 HTTP 头部表现如下：
 
-**请求**
+    Authorization UpToken <UploadToken>
 
-    POST <IO_HOST>/rs-put/<EncodedEntryURI>/mimeType/<MimeType>/meta/<CustomMeta>
-    Content-Type: application/octet-stream
-    Body: <Data>
+授权操作需要在 HTTP Headers 中新增一个名为 Authorization 的字段，并传入 [UploadToken](#upload-token) 作为值。
 
-其中 `<IO_HOST>` 一般为 http://iovip.qbox.me 。Body 部分的 `<Data>` 为二进制文件流。
+上述授权格式等价于：
 
-**响应**
+    Authorization UpToken accessKey:authDigest:authInfoEncoded
 
-返回包(JSON)：
+`<UploadToken>` 的细节可以参考文档：[生成上传授权凭证](#upload-token)
 
-    200 OK {
-        hash: <FileETag>
-    }
+<a name="resumable-upload-mkblk"></a>
+##### 3.4.2 创建分割块（Block）并上传第一个数据块（Chunk）
 
+      HTTP/1.1
+      POST http://up.qbox.me/mkblk/<BlockSize>
+      Content-Type: application/octet-stream
+      Request Headers: {
+          Authorization: UpToken <UploadToken>
+      }
+      Request Body: <First-Chunk-Binary>
+      
+      HTTP/1.1 200 OK
+      Content-Type: application/json
+      Cache-Control: no-store
+      Response Body: {
+          ctx: <BlockCtx string>,
+          checksum: <BlockChecksum string>,
+          crc32: <ChunkCrc32 int>
+      }
 
-<a name="rs-Put-NotFound-File"></a>
+<a name="resumable-upload-bput"></a>
+##### 3.4.3 上传分割块（Block）中的数据块（Chunk）
 
-**NotFound 处理**
+      HTTP/1.1
+      POST http://up.qbox.me/bput/<BlockCtx>/<Offset>
+      Content-Type: application/octet-stream
+      Request Headers: {
+          Authorization: UpToken <UploadToken>
+      }
+      Request Body: <Next-Chunk-Binary>
+      
+      HTTP/1.1 200 OK
+      Content-Type: application/json
+      Cache-Control: no-store
+      Response Body: {
+          ctx: <BlockCtx string>,
+          checksum: <BlockChecksum string>,
+          crc32: <ChunkCrc32 int>
+      }
 
-您可以上传一个应对HTTP 404出错处理的文件，当您 [发布公开资源](#rs-Publish) 后，若公开的外链找不到该文件，即可使用您上传的“自定义404文件”。要这么做，您只须在名为 action 的表单域中将 {[EncodedEntryURI](/v3/api/words/#EncodedEntryURI)} 元素中的 <[Key](/v3/api/words/#EntryURI)\> 设置为固定字符串类型的值 "errno-404" 即可。如果您是使用七牛的 SDK ，调用SDK提供的 PutFile() 方法时，向参数 key 传值字符串 "errno-404" 即可。
+<a name="resumable-upload-mkfile"></a>
+##### 3.4.4 合并文件
 
+      HTTP/1.1
+      POST http://up.qbox.me/rs-mkfile/<EncodedEntryURI>/fsize/<Fsize>/mimeType/<EncodedMimeType>/meta/<EncodedCustomMeta>/customer/<CustomerId>/params/<EncodedCallbackParams>
+      Content-Type: application/octet-stream
+      Request Headers: {
+          Authorization: UpToken <UploadToken>
+      }
+      Request Body: <Checksums-Sha1-Array>
+      
+      HTTP/1.1 200 OK
+      Content-Type: application/json
+      Cache-Control: no-store
+      Response Body: {
+          hash: <FileEtag string>
+      }
 
-<a name="rs-Stat"></a>
+<a name="resumable-upload-examples"></a>
+#### 3.5 样例
 
-### 3. 获取指定资源信息
+样例程序：
 
-**请求**
+- C/C++ - <https://github.com/qiniu/c-sdk/blob/master/qbox/up.c>
+- Java - <https://github.com/qiniu/java-sdk/blob/master/src/main/java/com/qiniu/qbox/up/UpService.java>
+- Perl - <https://github.com/qiniu/perl-sdk/blob/master/lib/QBox/UP.pm>
+- Ruby - <https://github.com/qiniu/ruby-sdk/blob/master/lib/qiniu/rs/up.rb>
 
-    POST http://rs.qbox.me:10100/stat/<EncodedEntryURI>
+参考资料：
 
-**响应**
+- [C/C++ SDK 使用指南——断点续上传](/v3/sdk/c/#rs-put-blocks)
 
-    HTTP/1.1 200 OK
-    Content-Type: application/json
-    Cache-Control: no-store
+<a name="download"></a>
+### 4. 下载文件
 
-    {
-        hash: <FileETag>,
-        fsize: <FileSize>,
-        putTime: <PutTime>, // 文件上传时候的七牛云存储服务器时间
-        mimeType: <MimeType>
-    }
+七牛云存储以下几种权限方式的下载文件：
 
-<a name="rs-Get"></a>
+1. 调用 API 动态获取临时授权的匿名下载链接，文件可公开匿名下载，但链接有生命周期，可自定义该有效期。
+2. 绑定域名，以公开外链的方式下载。
+3. 限制直接访问源文件，只限访问预处理后的目标文件。比如限制访问原图，只可访问打水印后的缩略图。
+4. 设置黑名单/白名单，仅限/或拒绝特地区域的用户访问下载。
 
-### 4. 获取指定资源内容（可下载）
+<a name="get"></a>
+#### 4.1 动态获取文件授权后的临时下载链接
 
-**请求**
+      HTTP/1.1
+      POST http://rs.qbox.me/get/<EncodedEntryURI>/base/<BaseHash>/attName/<AttName>/expires/<Seconds>
+      Content-Type: application/x-www-form-urlencoded
+      Request Headers: {
+          Authorization: QBox <AccessToken>
+      }
+      
+      HTTP/1.1 200 OK
+      Content-Type: application/json
+      Cache-Control: no-store
+      Response Body: {
+          url: <DownloadURL string>,
+          hash: <FileETag string>,
+          fsize: <FileSize int>,
+          mimeType: <MimeType string>,
+          expires:<ExpiresInSeconds int64>
+      }
 
-    POST http://rs.qbox.me:10100/get/<EncodedEntryURI>/base/<BaseHash>/attName/<AttName>/expires/<Seconds>
+**请求参数**
 
-**参数**
+`<EncodedEntryURI>`
+: 指定要下载的具体文件，必填。参考：[EncodedEntryURI](/v3/api/words/#EncodedEntryURI)
 
-- attName=\<AttachmentName\> 是下载时的名称，可选。如果未指定，直接是文件名。
-- base=\<BaseHash\> 是文件内容的基版本，可选。如果指定了base，那么当服务器端文件已经发生变化时，返回失败。
-- expires=\<Seconds\> 是希望返回的下载url的生命周期，精度为秒。如果未指定，默认 1 小时（3600）。
+`/base/<BaseHash>`
+: 指定文件内容的基版本，可选。如果指定了base，那么当服务器端文件已经发生变化时，返回失败。
 
-**响应**
+`/attName/<AttName>`
+: 指定下载时要保存的名称，可选。如果未指定，直接是文件名。
 
-    HTTP/1.1 200 OK
-    Content-Type: application/json
-    Cache-Control: no-store
+`/expires/<Seconds>`
+: 指定 返回的下载URL的生命周期，精度为秒。如果未指定，默认 1 小时（3600）。
 
-    {
-        url: <DownloadURL>
-        hash: <FileETag>
-        fsize: <FileSize>
-        mimeType: <MimeType>
-        expires:<Seconds>    //下载url的实际生命周期，精度为秒。
-    }
+<a name="publish"></a>
+#### 4.2 直接绑定域名为文件创建公开外链
 
-<a name="rs-Publish"></a>
+将一个存储空间 `<Bucket>` 里边的所有 `<Key>` 以静态外链的形式发布到某个指定域名 `<Domain>` 下。
 
-### 5. 发布公开资源
+生成的外链地址为：`http://<Domain>/<key>` （注意 <key> 首字符是不用带斜杠的）
 
-将一个资源表 `<TableName>` 里边的所有 `<key>` 以静态外链的形式发布到某个指定域名 `<Domain>` 下。
+      HTTP/1.1
+      POST http://rs.qbox.me/publish/<EncodedDomain>/from/<Bucket>
+      Content-Type: application/x-www-form-urlencoded
+      Request Headers: {
+          Authorization: QBox <AccessToken>
+      }
+      
+      HTTP/1.1 200 OK
+      Content-Type: application/json
+      Cache-Control: no-store
+
+**请求参数**
+
+`<EncodedDomain>`
+: 需要绑定的目标域名，例如：cdn.example.com，需经过 [URLSafeBase64Encode](/v3/api/words/#EncodedEntryURI)。
+
+`<Bucket>`
+: 空间名称
 
 `<Domain>` 可以是真实域名，真实的 `<Domain>` 需要在 DNS 管理里边 CNAME 到 iovip.qbox.me 。
 
-生成的外链地址为：`http://<Domain>/<key>` （注意 `<key>` 首字符是不用带斜杠的）
+由于众所周知的原因，使用 publish 接口绑定的域名若是您自己（或您公司）的域名，必须是已经备案过的。您需要将该域名备案信息发送到我们的邮箱 <support@qiniutek.com>，我们的工作人员会完成后续处理。
 
-若想让外链无法访问的那个资源有个文件可以替代，类似于自定义404页面，可以参考 [文件上传之 NotFound 处理](#rs-Put-NotFound-File)
+您也可以在 [七牛云存储开发者自助网站上进行域名绑定操作](https://dev.qiniutek.com/buckets)。
 
-**特别注意**
+<a name="unpublish"></a>
+#### 4.3 解除域名绑定取消文件的公开外链
 
-由于众所周知的原因，使用 `publish` 接口公开的 `<Domain>` 若是您自己（或您公司）的域名，必须是已经备案过的。您需要将该域名备案信息发送到我们的邮箱 [support@qiniutek.com](mailto:support@qiniutek.com)，我们的工作人员会完成后续处理。
+      HTTP/1.1
+      POST http://rs.qbox.me/unpublish/<EncodedDomain>
+      Content-Type: application/x-www-form-urlencoded
+      Request Headers: {
+          Authorization: QBox <AccessToken>
+      }
+      
+      HTTP/1.1 200 OK
+      Content-Type: application/json
+      Cache-Control: no-store
 
-**请求**
+您也可以在 [七牛云存储开发者自助网站上进行域名解绑操作](https://dev.qiniutek.com/buckets)。
 
-    POST http://rs.qbox.me:10100/publish/<EncodedDomain>/from/<TableName>
+<a name="download-by-range-bytes"></a>
+#### 4.4 断点续下载
 
-**参数**
+断点续下载协议标准参考：<http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.35>
 
-\<EncodedDomain\>
-: 资源发布的目标域名，例如：cdn.example.com，需经过 [URLSafeBase64Encode](/v3/api/words/#URLSafeBase64Encode)。
+七牛云存储按以上标准支持断点续下载，只需在 HTTP 请求下载链接的头部附带 `Range` 字段即可。
 
-\<TableName\>
-: 指定要发布的资源表名称
-
-**响应**
-
-    HTTP/1.1 200 OK
-
-<a name="rs-Unpublish"></a>
-
-### 6. 取消资源发布
-
-将一个已经公开的外链资源集合取消发布状态。
-
-**请求**
-
-    POST http://rs.qbox.me:10100/unpublish/<EncodedDomain>
+    Range: bytes=<first-byte-pos>-<last-byte-pos>
 
 **参数**
 
-\<EncodedDomain\>
-: 已发布资源对应的目标域名，例如：cdn.example.com，需经过 [URLSafeBase64Encode](/v3/api/words/#URLSafeBase64Encode)。
+`<first-byte-pos>`
+: 起始位置，从数字零（0）开始计算。
 
-**响应**
+`<last-byte-pos>`
+: 断点续下载中，最后一个字节所在的位置。
 
-    HTTP/1.1 200 OK
+<a name="download-if-notfound"></a>
+#### 4.5 针对下载出现 404 NotFound 智能化处理
 
-<a name="rs-Delete"></a>
+您可以上传一个应对HTTP 404出错处理的文件，当您 [绑定域名创建公开外链](#publish) 后，若公开的外链找不到该文件，即可使用您上传的“自定义404文件”。要这么做，您只须在名为 action 的表单域中将 [EncodedEntryURI](/v3/api/words/#EncodedEntryURI) 元素中的 `<Key>` 设置为固定字符串类型的值 `errno-404` 即可。
 
-### 7. 删除指定资源
+<a name="set-protected"></a>
+#### 4.6 设置源文件(比如原图)保护
+
+您可以在 [七牛云存储开发者自助网站上为指定的存储空间设置源文件保护](https://dev.qiniutek.com/buckets)。
+
+设置原图(或源文件)保护后，其原图(或源文件)为私有。不能通过如下方式公开访问：
+
+- http://绑定域名/文件key或相对路径
+- http://绑定域名/文件key或相对路径?操作符/操作符参数
+
+而只能通过如下方式进行公开访问（其中加号“+”忽略）：
+
+- http://绑定域名/文件key或相对路径 + 已设定的连接符 + 已设定的操作符规格别名
+
+其中，已设定的连接符可以是缩略图间隔标志符，已设定的操作符规格别名可以是缩略图样式名。
+
+    http://<Domain>/<Key><Separator><StyleName>
+
+<a name="pub-access-mode"></a>
+##### 4.6.1 为指定的存储空间设置保护模式
+
+      HTTP/1.1
+      POST http://pu.qbox.me:10200/accessMode/<Bucket>/mode/<ProtectedMode>
+      Content-Type: application/x-www-form-urlencoded
+      Request Headers: {
+          Authorization: QBox <AccessToken>
+      }
+      
+      HTTP/1.1 200 OK
+      Content-Type: application/json
+      Cache-Control: no-store
+
+**请求参数**
+
+`<Bucket>`
+: 指定目标存储空间名称，必须，字符串类型。
+
+`<ProtectedMode>`
+: 是否开启保护，可选值为数字 0 或者 1 。
+
+<a name="pub-separator"></a>
+##### 4.6.2 设置友好URL访问中的连接符
+
+以下操作在存储空间 `<ProtectedMode>=1` 时有效。
+
+      HTTP/1.1
+      POST http://pu.qbox.me:10200/separator/<Bucket>/sep/<EncodedSeparator>
+      Content-Type: application/x-www-form-urlencoded
+      Request Headers: {
+          Authorization: QBox <AccessToken>
+      }
+      
+      HTTP/1.1 200 OK
+      Content-Type: application/json
+      Cache-Control: no-store
+
+**请求参数**
+
+`<Bucket>`
+: 指定目标存储空间名称，必须，字符串类型。
+
+`<EncodedSeparator>`
+: 分割符，字符串类型类型，比如可以是 感叹号!、地址符（@）、美元符（$）、中划线（-）、下划线（_）、点（.）等。经过 [URLSafeBase64Encode](/v3/api/words/#URLSafeBase64Encode) 编码。
+
+<a name="pub-style"></a>
+##### 4.6.3 设置URL友好的风格样式名
+
+以下操作在存储空间 `<ProtectedMode>=1` 时有效。
+
+      HTTP/1.1
+      POST http://pu.qbox.me:10200/style/<Bucket>/name/<EncodedStyleName>/style/<EncodedStyle>
+      Content-Type: application/x-www-form-urlencoded
+      Request Headers: {
+          Authorization: QBox <AccessToken>
+      }
+      
+      HTTP/1.1 200 OK
+      Content-Type: application/json
+      Cache-Control: no-store
+
+**请求参数**
+
+`<Bucket>`
+: 指定目标存储空间名称，必须，字符串类型。
+
+`<EncodedStyleName>`
+: 风格样式名，字符串类型，经过 [URLSafeBase64Encode](/v3/api/words/#URLSafeBase64Encode) 编码。
+
+`<EncodedStyle>`
+: 样式定义，字符串类型，经过 [URLSafeBase64Encode](/v3/api/words/#URLSafeBase64Encode) 编码。
+
+若请求成功，文件可以如下链接形式进行访问：
+
+    [GET] http://<Domain>/<Key><Separator><StyleName> HTTP/1.1 200 OK
+
+<a name="pub-unstyle"></a>
+##### 4.6.4 取消URL友好风格的样式名访问
+
+以下操作在存储空间 `<ProtectedMode>=1` 时有效。
+
+      HTTP/1.1
+      POST http://pu.qbox.me:10200/unstyle/<Bucket>/name/<EncodedStyleName>
+      Content-Type: application/x-www-form-urlencoded
+      Request Headers: {
+          Authorization: QBox <AccessToken>
+      }
+      
+      HTTP/1.1 200 OK
+      Content-Type: application/json
+      Cache-Control: no-store
+
+**请求参数**
+
+`<Bucket>`
+: 指定目标存储空间名称，必须，字符串类型。
+
+`<EncodedStyleName>`
+: 风格样式名，字符串类型，经过 [URLSafeBase64Encode](/v3/api/words/#URLSafeBase64Encode) 编码。
+
+若请求成功，文件以如下链接形式进行访问将会出现404：
+
+    [GET] http://<Domain>/<Key><Separator><StyleName> HTTP/1.1 404 Not Found
+
+<a name="anti-theft-chain"></a>
+#### 4.7 防盗链设置
+
+您可以在 [七牛云存储开发者自助网站上为指定的存储空间进行防盗链设置](https://dev.qiniutek.com/buckets)。
+
+<a name="uc-antiLeechMode"></a>
+##### 4.7.1 设置防盗链模式
+
+      HTTP/1.1
+      POST http://uc.qbox.me/antiLeechMode
+      Content-Type: application/x-www-form-urlencoded
+      Request Headers: {
+          Authorization: QBox <AccessToken>
+      }
+      Request Body: {
+          bucket: <BucketName string>,
+          mode : <Mode int> // 0:n/a; 1:white list; 2:black list
+      }
+      
+      HTTP/1.1 200 OK
+      Content-Type: application/json
+      Cache-Control: no-store
+
+<a name="uc-referAntiLeech"></a>
+##### 4.7.2 更新防盗链记录值
+
+      HTTP/1.1
+      POST http://uc.qbox.me/referAntiLeech
+      Content-Type: application/x-www-form-urlencoded
+      Request Headers: {
+          Authorization: QBox <AccessToken>
+      }
+      Request Body: {
+          bucket: <BucketName string>,
+          mode : <Mode int> // 0:n/a; 1:white list; 2:black list
+          action: <Action string> // add | del
+          pattern: <Pattern string> // *.example.com | 12.34.56.*
+      }
+      
+      HTTP/1.1 200 OK
+      Content-Type: application/json
+      Cache-Control: no-store
+
+<a name="stat"></a>
+### 5. 查看文件基本属性信息
+
+      HTTP/1.1
+      POST http://rs.qbox.me/stat/<EncodedEntryURI>
+      Content-Type: application/x-www-form-urlencoded
+      Request Headers: {
+          Authorization: QBox <AccessToken>
+      }
+      
+      HTTP/1.1 200 OK
+      Content-Type: application/json
+      Cache-Control: no-store
+      Response Body: {
+          hash: <FileETag string>,
+          fsize: <FileSize int>,
+          putTime: <PutTime int64>, // 文件上传时候的七牛云存储服务器时间
+          mimeType: <MimeType string>
+      }
+
+**请求参数**
+
+`<EncodedEntryURI>`
+: 指定的具体文件，必填。参考：[EncodedEntryURI](/v3/api/words/#EncodedEntryURI)
+
+<a name="delete"></a>
+### 6. 删除指定文件
+
+      HTTP/1.1
+      POST http://rs.qbox.me/delete/<EncodedEntryURI>
+      Content-Type: application/x-www-form-urlencoded
+      Request Headers: {
+          Authorization: QBox <AccessToken>
+      }
+      
+      HTTP/1.1 200 OK
+      Content-Type: application/json
+      Cache-Control: no-store
+
+<a name="drop"></a>
+### 7. 删除所有文件（整个空间/Bucket）
+
+      HTTP/1.1
+      POST http://rs.qbox.me/drop/<Bucket>
+      Content-Type: application/x-www-form-urlencoded
+      Request Headers: {
+          Authorization: QBox <AccessToken>
+      }
+      
+      HTTP/1.1 200 OK
+      Content-Type: application/json
+      Cache-Control: no-store
+
+<a name="batch"></a>
+### 8. 批量操作
 
 **请求**
 
-    POST http://rs.qbox.me:10100/delete/<EncodedEntryURI>
-
-**响应**
-
-    HTTP/1.1 200 OK
-
-<a name="rs-Drop"></a>
-
-### 8. 删除整张资源表
-
-将指定资源表的条目及其数据全部删除，需谨慎操作。
-
-**请求**
-
-    POST http://rs.qbox.me:10100/drop/<TableName>
-
-**响应**
-
-    HTTP/1.1 200 OK
-
-<a name="rs-Batch"></a>
-
-### 9. 批量处理接口
-
-**请求**
-
-    POST http://rs.qbox.me:10100/batch
+    POST http://rs.qbox.me/batch
     Content-Type: application/x-www-form-urlencoded
-    Body: op=<Operation>&op=<Operation>&...
+    RequestBody: op=<Operation>&op=<Operation>&...
 
-其中 op=\<Operation\> 是一个操作指令。例如 /get/\<EncodedEntryURI\>, /stat/\<EncodedEntryURI\>, /delete/\<EncodedEntryURI\>, ...
+其中 op=<Operation> 是一个操作指令。例如 `/get/<EncodedEntryURI>`, `/stat/<EncodedEntryURI>`, `/delete/<EncodedEntryURI>`, …
 
-**示例**
+<a name="batch-stat"></a>
+#### 8.1 批量获取文件基本属性信息
 
-批量获取文件属性信息：
+    POST http://rs.qbox.me/batch
+    Content-Type: application/x-www-form-urlencoded
+    RequestBody: op=/stat/<EncodedEntryURI>&op=/stat/<EncodedEntryURI>&...
 
-    POST http://rs.qbox.me:10100/batch?op=/stat/<EncodedEntryURI>&op=/stat/<EncodedEntryURI>&...
+<a name="batch-get"></a>
+#### 8.2 批量获取文件授权后的临时下载链接
 
-批量获取下载链接：
+    POST http://rs.qbox.me/batch
+    Content-Type: application/x-www-form-urlencoded
+    RequestBody: op=/get/<EncodedEntryURI>&op=/get/<EncodedEntryURI>&...
 
-    POST http://rs.qbox.me:10100/batch?op=/get/<EncodedEntryURI>&op=/get/<EncodedEntryURI>&...
+<a name="batch-delete"></a>
+#### 8.3 批量删除文件
 
-批量删除文件：
-
-    POST http://rs.qbox.me:10100/batch?op=/delete/<EncodedEntryURI>&op=/delete/<EncodedEntryURI>&...
+    POST http://rs.qbox.me/batch
+    Content-Type: application/x-www-form-urlencoded
+    RequestBody: op=/delete/<EncodedEntryURI>&op=/delete/<EncodedEntryURI>&...
 
 **响应**
 
@@ -343,29 +798,27 @@ params 用于文件上传成功后执行回调，七牛云存储服务器会向�
     298 Partial OK [
         <Result1>, <Result2>, ...
     ]
+    
     <Result> 是 {
-        code: <HttpCode>,
-        data: <Data> 或 error: <ErrorMessage>
+        code: <HttpCode int>,
+        data: <Data> 或 error: <ErrorMessage string>
     }
 
-当部分 op 执行失败时，返回 298（PartialOK）。
+<a name="refresh-bucket"></a>
+### 9. 清除服务端缓存
 
-<a name="rs-Move"></a>
+      HTTP/1.1
+      POST http://uc.qbox.me/refreshBucket
+      Content-Type: application/x-www-form-urlencoded
+      Request Headers: {
+          Authorization: QBox <AccessToken>
+      }
+      Request Body: {
+          bucket: <BucketName string>
+      }
+      
+      HTTP/1.1 200 OK
+      Content-Type: application/json
+      Cache-Control: no-store
 
-### 10. 移动或重命名操作接口
-
-**请求**
-
-    POST http://rs.qbox.me:10100/move/<EncodedSrcEntryURI>/<EncodedDestEntryURI>
-
-**参数**
-
-\<EncodedSrcEntryURI\>
-: 原 [EncodedEntryURI](/v3/api/words/#EncodedEntryURI)。
-
-\<EncodedDestEntryURI\>
-: 目标 [EncodedEntryURI](/v3/api/words/#EncodedEntryURI)。
-
-**响应**
-
-    HTTP/1.1 200 OK
+您可以在 [七牛云存储开发者自助网站上为指定的存储空间一键清除缓存](https://dev.qiniutek.com/buckets)。
