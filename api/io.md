@@ -56,6 +56,7 @@ title: 云存储接口 | 七牛云存储
 - [清除服务端缓存](#refresh-bucket)
 
 <a name="mkbucket"></a>
+
 ### 1. 创建空间
 
       POST http://rs.qbox.me/mkbucket/<Bucket>
@@ -74,14 +75,17 @@ title: 云存储接口 | 七牛云存储
 如果您不想通过 API 创建空间，也可以直接在七牛云存储开发者网站上直接 [新建空间](https://dev.qiniutek.com/buckets/new)。 
 
 <a name="upload"></a>
+
 ### 2. 上传文件
 
 要上传一个文件，首先需要获得上传授权，七牛云存储通过 `uploadToken` 的方式实现上传授权操作。`uploadToken` 可以根据 `accessKey` 和 `secretKey` 对一组数据进行数字签名生成。在文件上传时，该 `uploadToken` 作为文件上传流中 multipart/form-data 的一部分进行传输，也可以附带在上传请求的 HTTP Headers 中传输。
 
 <a name="upload-token"></a>
+
 #### 2.1 生成上传授权凭证
 
 <a name="upload-token-algorithm"></a>
+
 ##### 2.1.1 算法　
 
 `uploadToken` 算法如下：
@@ -137,6 +141,7 @@ customer | string | 可选 | 给上传的文件添加唯一属主标识，特殊
 - 将公钥（accessKey）、签名后的摘要值（authDigest）、已编码的元数据（authInfoEncoded）用冒号（:）进行字符串拼接，生成上传授权凭证 `uploadToken`。
 
 <a name="upload-token-examples"></a>
+
 ##### 2.1.2 样例
 
 生成 uploadToken 样例代码可参考：
@@ -148,9 +153,11 @@ customer | string | 可选 | 给上传的文件添加唯一属主标识，特殊
 - PHP - <https://github.com/qiniu/php5-sdk/blob/master/qbox/authtoken.php>
 
 <a name="upload-file"></a>
+
 #### 2.2 直传文件
 
 <a name="upload-file-by-html-form"></a>
+
 ##### 2.2.1 API（multipart/form-data）
 
 请求包，`multipart/form-data` 格式：
@@ -220,6 +227,7 @@ customer | string | 可选 | 给上传的文件添加唯一属主标识，特殊
 `params` 用于文件上传成功后执行回调，七牛云存储服务器会向您应用的ClientId关联的业务服务器POST这些指定的参数。一般用于回传 [EntryURI](/v3/api/words/#EntryURI)，这样客户方的业务服务器会知道一个文件上传成功后以某条目名称记录到了七牛云存储的哪个资源表。
 
 <a name="upload-file-by-multipart"></a>
+
 ##### 2.2.2 HTML表单形式直传
 
 如果您觉得这个接口理解起来有难度，不妨以一种更简单的HTML Form结构来理解，以上接口描述等价于如下 HTML Form:
@@ -237,24 +245,29 @@ customer | string | 可选 | 给上传的文件添加唯一属主标识，特殊
 
 
 <a name="callback-after-uploaded"></a>
+
 #### 2.3 回调处理
 
 <a name="callback-logic"></a>
+
 ##### 2.3.1 回调逻辑
 
 七牛云存储允许一个文件直传成功后向指定的远程服务器执行回调。在 [生成上传授权凭证(uploadToken)](#upload-token) 这一过程中，元数据（authInfo）包含的 `callbackUrl` 字段即用于指定远程回调地址。在 [直传文件](#upload-file) 这一过程中，`multipart/form-data` 请求包中的 `params` 字段提供了回调请求的具体数据。如果 `callbackUrl` 和 `params` 都有指定的情况下，那么文件上传成功后，七牛云存储服务端即会将 `params` 字段的值以 HTTP POST 的方式发送到指定的 `callbackUrl`。如果 [生成上传授权凭证(uploadToken)](#upload-token) 这一过程中有指定 `callbackBodyType`，七牛云存储服务端执行远程回调发送 HTTP 请求的 Content-Type 将会是 `callbackBodyType` 提供的值，一般会是 `Content-Type: application/x-www-form-urlencoded`。
 
 <a name="callback-as-proxy"></a>
+
 ##### 2.3.2 作为代理
 
 七牛云存储的回调处理还有代理作用。执行远程回调后，如果客户方的业务服务器返回的 HTTP Response Body 为标准的 [JSON](http://json.org/) 格式，并且 `HTTP Headers["Content-Type"] = 'application/json'`，那么七牛云存储服务端会将其 Response Body 按照 JSON 格式返回给客户方的客户端程序。
 
 <a name="resumable-upload"></a>
+
 ### 3. 断点续上传
 
 七牛云存储提供断点续上传功能。该功能将单个文件分割成数个固定大小的块并发上传，可以在实现断点续传的同时加快上传速度（并发上传）。
 
 <a name="resumable-upload-keywords"></a>
+
 #### 3.1 术语
 
 1. 上传服务器（Up-Server）：提供断点续上传功能的服务器，负责启动新的上传过程、接受上传内容、合并生成最终上传文件。
@@ -280,6 +293,7 @@ customer | string | 可选 | 给上传的文件添加唯一属主标识，特殊
 9. 校验值（CheckSum）：服务器成功保存上传块后返回的、当前分割块的已传部分的校验值，可保存在上传端本地，用于最后合并文件。上传开始后，每个分割块都有自己的校验值。上传端不能修改接收到的校验值。
 
 <a name="resumable-upload-model"></a>
+
 #### 3.2 工作模型
 
                                                         |
@@ -317,6 +331,7 @@ customer | string | 可选 | 给上传的文件添加唯一属主标识，特殊
                                                         |
 
 <a name="resumable-upload-workflow"></a>
+
 #### 3.3 流程
 
 1. 请求断点续上传（Request Upload）：由上传端发起，向业务服务器申请执行断点续上传;  
@@ -335,9 +350,11 @@ customer | string | 可选 | 给上传的文件添加唯一属主标识，特殊
 
 
 <a name="resumable-upload-api"></a>
+
 #### 3.4 API
 
 <a name="resumable-upload-authorization"></a>
+
 ##### 3.4.1 授权
 
 授权信息在 HTTP 头部表现如下：
@@ -353,6 +370,7 @@ customer | string | 可选 | 给上传的文件添加唯一属主标识，特殊
 `<UploadToken>` 的细节可以参考文档：[生成上传授权凭证](#upload-token)
 
 <a name="resumable-upload-mkblk"></a>
+
 ##### 3.4.2 创建分割块（Block）并上传第一个数据块（Chunk）
 
       HTTP/1.1
@@ -373,6 +391,7 @@ customer | string | 可选 | 给上传的文件添加唯一属主标识，特殊
       }
 
 <a name="resumable-upload-bput"></a>
+
 ##### 3.4.3 上传分割块（Block）中的数据块（Chunk）
 
       HTTP/1.1
@@ -393,6 +412,7 @@ customer | string | 可选 | 给上传的文件添加唯一属主标识，特殊
       }
 
 <a name="resumable-upload-mkfile"></a>
+
 ##### 3.4.4 合并文件
 
       HTTP/1.1
@@ -411,6 +431,7 @@ customer | string | 可选 | 给上传的文件添加唯一属主标识，特殊
       }
 
 <a name="resumable-upload-examples"></a>
+
 #### 3.5 样例
 
 样例程序：
@@ -425,6 +446,7 @@ customer | string | 可选 | 给上传的文件添加唯一属主标识，特殊
 - [C/C++ SDK 使用指南——断点续上传](/v3/sdk/c/#rs-put-blocks)
 
 <a name="download"></a>
+
 ### 4. 下载文件
 
 七牛云存储以下几种权限方式的下载文件：
@@ -435,6 +457,7 @@ customer | string | 可选 | 给上传的文件添加唯一属主标识，特殊
 4. 设置黑名单/白名单，仅限/或拒绝特地区域的用户访问下载。
 
 <a name="get"></a>
+
 #### 4.1 动态获取文件授权后的临时下载链接
 
       HTTP/1.1
@@ -470,6 +493,7 @@ customer | string | 可选 | 给上传的文件添加唯一属主标识，特殊
 : 指定 返回的下载URL的生命周期，精度为秒。如果未指定，默认 1 小时（3600）。
 
 <a name="publish"></a>
+
 #### 4.2 直接绑定域名为文件创建公开外链
 
 将一个存储空间 `<Bucket>` 里边的所有 `<Key>` 以静态外链的形式发布到某个指定域名 `<Domain>` 下。
@@ -502,6 +526,7 @@ customer | string | 可选 | 给上传的文件添加唯一属主标识，特殊
 您也可以在 [七牛云存储开发者自助网站上进行域名绑定操作](https://dev.qiniutek.com/buckets)。
 
 <a name="unpublish"></a>
+
 #### 4.3 解除域名绑定取消文件的公开外链
 
       HTTP/1.1
@@ -518,6 +543,7 @@ customer | string | 可选 | 给上传的文件添加唯一属主标识，特殊
 您也可以在 [七牛云存储开发者自助网站上进行域名解绑操作](https://dev.qiniutek.com/buckets)。
 
 <a name="download-by-range-bytes"></a>
+
 #### 4.4 断点续下载
 
 断点续下载协议标准参考：<http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.35>
@@ -535,11 +561,13 @@ customer | string | 可选 | 给上传的文件添加唯一属主标识，特殊
 : 断点续下载中，最后一个字节所在的位置。
 
 <a name="download-if-notfound"></a>
+
 #### 4.5 针对下载出现 404 NotFound 智能化处理
 
 您可以上传一个应对HTTP 404出错处理的文件，当您 [绑定域名创建公开外链](#publish) 后，若公开的外链找不到该文件，即可使用您上传的“自定义404文件”。要这么做，您只须在名为 action 的表单域中将 [EncodedEntryURI](/v3/api/words/#EncodedEntryURI) 元素中的 `<Key>` 设置为固定字符串类型的值 `errno-404` 即可。
 
 <a name="set-protected"></a>
+
 #### 4.6 设置源文件(比如原图)保护
 
 您可以在 [七牛云存储开发者自助网站上为指定的存储空间设置源文件保护](https://dev.qiniutek.com/buckets)。
@@ -558,6 +586,7 @@ customer | string | 可选 | 给上传的文件添加唯一属主标识，特殊
     http://<Domain>/<Key><Separator><StyleName>
 
 <a name="pub-access-mode"></a>
+
 ##### 4.6.1 为指定的存储空间设置保护模式
 
       HTTP/1.1
@@ -580,6 +609,7 @@ customer | string | 可选 | 给上传的文件添加唯一属主标识，特殊
 : 是否开启保护，可选值为数字 0 或者 1 。
 
 <a name="pub-separator"></a>
+
 ##### 4.6.2 设置友好URL访问中的连接符
 
 以下操作在存储空间 `<ProtectedMode>=1` 时有效。
@@ -604,6 +634,7 @@ customer | string | 可选 | 给上传的文件添加唯一属主标识，特殊
 : 分割符，字符串类型类型，比如可以是 感叹号!、地址符（@）、美元符（$）、中划线（-）、下划线（_）、点（.）等。经过 [URLSafeBase64Encode](/v3/api/words/#URLSafeBase64Encode) 编码。
 
 <a name="pub-style"></a>
+
 ##### 4.6.3 设置URL友好的风格样式名
 
 以下操作在存储空间 `<ProtectedMode>=1` 时有效。
@@ -635,6 +666,7 @@ customer | string | 可选 | 给上传的文件添加唯一属主标识，特殊
     [GET] http://<Domain>/<Key><Separator><StyleName> HTTP/1.1 200 OK
 
 <a name="pub-unstyle"></a>
+
 ##### 4.6.4 取消URL友好风格的样式名访问
 
 以下操作在存储空间 `<ProtectedMode>=1` 时有效。
@@ -663,11 +695,13 @@ customer | string | 可选 | 给上传的文件添加唯一属主标识，特殊
     [GET] http://<Domain>/<Key><Separator><StyleName> HTTP/1.1 404 Not Found
 
 <a name="anti-theft-chain"></a>
+
 #### 4.7 防盗链设置
 
 您可以在 [七牛云存储开发者自助网站上为指定的存储空间进行防盗链设置](https://dev.qiniutek.com/buckets)。
 
 <a name="uc-antiLeechMode"></a>
+
 ##### 4.7.1 设置防盗链模式
 
       HTTP/1.1
@@ -686,6 +720,7 @@ customer | string | 可选 | 给上传的文件添加唯一属主标识，特殊
       Cache-Control: no-store
 
 <a name="uc-referAntiLeech"></a>
+
 ##### 4.7.2 更新防盗链记录值
 
       HTTP/1.1
@@ -706,6 +741,7 @@ customer | string | 可选 | 给上传的文件添加唯一属主标识，特殊
       Cache-Control: no-store
 
 <a name="stat"></a>
+
 ### 5. 查看文件基本属性信息
 
       HTTP/1.1
@@ -731,6 +767,7 @@ customer | string | 可选 | 给上传的文件添加唯一属主标识，特殊
 : 指定的具体文件，必填。参考：[EncodedEntryURI](/v3/api/words/#EncodedEntryURI)
 
 <a name="delete"></a>
+
 ### 6. 删除指定文件
 
       HTTP/1.1
@@ -745,6 +782,7 @@ customer | string | 可选 | 给上传的文件添加唯一属主标识，特殊
       Cache-Control: no-store
 
 <a name="drop"></a>
+
 ### 7. 删除所有文件（整个空间/Bucket）
 
       HTTP/1.1
@@ -759,6 +797,7 @@ customer | string | 可选 | 给上传的文件添加唯一属主标识，特殊
       Cache-Control: no-store
 
 <a name="batch"></a>
+
 ### 8. 批量操作
 
 **请求**
@@ -770,6 +809,7 @@ customer | string | 可选 | 给上传的文件添加唯一属主标识，特殊
 其中 op=<Operation> 是一个操作指令。例如 `/get/<EncodedEntryURI>`, `/stat/<EncodedEntryURI>`, `/delete/<EncodedEntryURI>`, …
 
 <a name="batch-stat"></a>
+
 #### 8.1 批量获取文件基本属性信息
 
     POST http://rs.qbox.me/batch
@@ -777,6 +817,7 @@ customer | string | 可选 | 给上传的文件添加唯一属主标识，特殊
     RequestBody: op=/stat/<EncodedEntryURI>&op=/stat/<EncodedEntryURI>&...
 
 <a name="batch-get"></a>
+
 #### 8.2 批量获取文件授权后的临时下载链接
 
     POST http://rs.qbox.me/batch
@@ -784,6 +825,7 @@ customer | string | 可选 | 给上传的文件添加唯一属主标识，特殊
     RequestBody: op=/get/<EncodedEntryURI>&op=/get/<EncodedEntryURI>&...
 
 <a name="batch-delete"></a>
+
 #### 8.3 批量删除文件
 
     POST http://rs.qbox.me/batch
@@ -805,6 +847,7 @@ customer | string | 可选 | 给上传的文件添加唯一属主标识，特殊
     }
 
 <a name="refresh-bucket"></a>
+
 ### 9. 清除服务端缓存
 
       HTTP/1.1
