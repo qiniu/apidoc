@@ -96,7 +96,8 @@ title: 云存储接口 | 七牛云存储
         deadline: <UnixTimestamp int64>,
         callbackUrl: <callbackUrl string>,
         callbackBodyType: <callbackBodyType string>,
-        customer: <EndUserId string>
+        customer: <EndUserId string>,
+        escape: <0|1>
     }
     
     // 步骤2：编码元数据
@@ -119,8 +120,21 @@ deadline | int64 | 必须 | 定义 uploadToken 的失效时间，Unix时间戳�
 callbackUrl | string | 可选 | 定义文件上传完毕后，云存储服务端执行回调的远程URL
 callbackBodyType | string | 可选 | 为执行远程回调指定Content-Type，比如可以是：application/x-www-form-urlencoded
 customer | string | 可选 | 给上传的文件添加唯一属主标识，特殊场景下非常有用，比如根据终端用户标识给图片打水印
+escape | int | 可选 | 可选值 0 或者 1，缺省为 0。值为 1 表示 callback 传递的自定义数据中允许存在转义符号 `$(VarExpression)`，参考 [VarExpression](/v3/api/words/#VarExpression)。
 
-其中，`scope` 字段还可以有更灵活的定义：
+<a name="escape-expression"></a>
+
+当 `escape` 的值为 `1` 时，常见的转义语法如下：
+
+- 若 `callbackBodyType` 为 `application/json` 时，一个典型的自定义回调数据为：
+
+    `{foo: "bar", w: $(imageInfo.width), h: $(imageInfo.height), exif: $(exif)}`
+
+- 若 `callbackBodyType` 为 `application/x-www-form-urlencoded` 时，一个典型的自定义回调数据为：
+
+    `foo=bar&w=$(imageInfo.width)&h=$(imageInfo.height)&exif=$(exif)`
+
+authInfo 中的 `scope` 字段还可以有更灵活的定义：
 
 - 若为空，表示可以上传到任意Bucket（仅限于新增文件）
 - 若为"Bucket"，表示限定只能传到该Bucket（仅限于新增文件）

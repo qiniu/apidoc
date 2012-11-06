@@ -15,6 +15,7 @@ title: 理解常用术语 | 七牛云存储
 - [CustomMeta](#CustomMeta)
 - [EncodedCustomMeta](#EncodedCustomMeta)
 - [FileCRC32Checksum](#FileCRC32Checksum)
+- [VarExpression](#VarExpression)
 
 <a name="Entry"></a>
 
@@ -78,3 +79,14 @@ title: 理解常用术语 | 七牛云存储
 ### FileCRC32Checksum
 
 文件的 crc32 校验值，十进制整数。
+
+### VarExpression
+
+指定上传操作成功后回调执行指定的 API，这里的 API 用 `$(VarExpression)` 表示。参考 [生成上传授权凭证 uploadToken 之 escape 参数详解](#escape-expression) 。
+
+VarExpression 可以是如下形式：
+
+- `imageInfo` - [获取上传图片的基本信息](/v3/api/foimg/#fo-imageInfo)
+- `imageInfo.width` - [获取上传图片的宽度(px)](/v3/api/foimg/#fo-imageInfo)
+- `imageInfo.height` - [获取上传图片的高度(px)](/v3/api/foimg/#fo-imageInfo)
+- `exif` - [获取图片EXIF信息](/v3/api/foimg/#fo-imageExif)
