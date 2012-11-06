@@ -82,7 +82,7 @@ title: 理解常用术语 | 七牛云存储
 
 ### VarExpression
 
-指定上传操作成功后回调执行指定的 API，这里的 API 用 `$(VarExpression)` 表示。参考 [生成上传授权凭证 uploadToken 之 escape 参数详解](#escape-expression) 。
+指定上传操作成功后回调执行指定的 API，这里的 API 用 `$(VarExpression)` 表示。参考 [生成上传授权凭证 uploadToken 之 escape 参数详解](/v3/api/io/#escape-expression) 。
 
 VarExpression 可以是如下形式：
 

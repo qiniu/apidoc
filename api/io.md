@@ -126,11 +126,11 @@ escape | int | 可选 | 可选值 0 或者 1，缺省为 0。值为 1 表示 cal
 
 当 `escape` 的值为 `1` 时，常见的转义语法如下：
 
-- 若 `callbackBodyType` 为 `application/json` 时，一个典型的自定义回调数据为：
+- 若 `callbackBodyType` 为 `application/json` 时，一个典型的自定义回调数据（[CallbackParams](#CallbackParams)）为：
 
     `{foo: "bar", w: $(imageInfo.width), h: $(imageInfo.height), exif: $(exif)}`
 
-- 若 `callbackBodyType` 为 `application/x-www-form-urlencoded` 时，一个典型的自定义回调数据为：
+- 若 `callbackBodyType` 为 `application/x-www-form-urlencoded` 时，一个典型的自定义回调数据（[CallbackParams](#CallbackParams)）为：
 
     `foo=bar&w=$(imageInfo.width)&h=$(imageInfo.height)&exif=$(exif)`
 
@@ -236,9 +236,23 @@ authInfo 中的 `scope` 字段还可以有更灵活的定义：
 
 `file=<FileContent>` 是要上传的具体文件内容，`<FileContent>` 则是要上传文件的二进制内容。
 
+<a name="CallbackParams"></a>
+
 **params**
 
-`params` 用于文件上传成功后执行回调，七牛云存储服务器会向您应用的ClientId关联的业务服务器POST这些指定的参数。一般用于回传 [EntryURI](/v3/api/words/#EntryURI)，这样客户方的业务服务器会知道一个文件上传成功后以某条目名称记录到了七牛云存储的哪个资源表。
+`params` 用于文件上传成功后执行回调，七牛云存储服务器会向客户方的业务服务器 POST 这些指定的参数。一般可用于回传跟上传文件相关的具体信息，这样客户方的业务服务器会知道一个文件上传成功后以某条目名称记录到了七牛云存储的哪个空间（Bucket）里。
+
+比如，若生成 [uploadToken](#upload-token) 中 `callbackBodyType` 为 `application/json` 时，`params` 可以是如下字符串的表达形式：
+
+    {bucket: "<BucketName>", key: "<FileUniqKey>", uid: "<customer>"}
+
+若生成 [uploadToken](#upload-token) 中 `callbackBodyType` 为 `application/x-www-form-urlencoded` 时，`params` 可以是如下字符串的表达形式：
+
+    bucket=<BucketName>&key=<FileUniqKey>&uid=<customer>
+
+以上尖括号包裹的字段（`<...>`）代表具体的变量名称。
+
+七牛云存储允许文件上传成功后执行指定的 API 回调操作，参考 [生成上传授权凭证 uploadToken 之 escape 参数详解](#escape-expression) 。
 
 <a name="upload-file-by-multipart"></a>
 
