@@ -24,7 +24,7 @@ title: 云存储接口 | 七牛云存储
         - [作为代理](#callback-as-proxy)
 - [断点续上传](#resumable-upload)
     - [术语](#resumable-upload-keywords)
-    - [工作模型](#resumable-upload-model)    
+    - [工作模型](#resumable-upload-model)
     - [流程](#resumable-upload-workflow)
     - [API](#resumable-upload-api)
         - [授权](#resumable-upload-authorization)
@@ -64,7 +64,7 @@ title: 云存储接口 | 七牛云存储
       Request Headers: {
           Authorization: QBox <ACCESS_TOKEN>
       }
-      
+
       HTTP/1.1 200 OK
 
 **参数**
@@ -72,7 +72,7 @@ title: 云存储接口 | 七牛云存储
 `<Bucket>`
 : 具体的空间名称，仅限[a-zA-Z0-9_]组合。
 
-如果您不想通过 API 创建空间，也可以直接在七牛云存储开发者网站上直接 [新建空间](https://dev.qiniutek.com/buckets/new)。 
+如果您不想通过 API 创建空间，也可以直接在七牛云存储开发者网站上直接 [新建空间](https://dev.qiniutek.com/buckets/new)。
 
 <a name="upload"></a>
 
@@ -99,17 +99,17 @@ title: 云存储接口 | 七牛云存储
         customer: <EndUserId string>,
         escape: <0|1>
     }
-    
+
     // 步骤2：编码元数据
     authInfoEncoded = urlsafe_base64_encode(json_encode(authInfo))
-    
+
     // 步骤3：将编码后的元数据经过私钥签名，提取摘要值
     authDigest = hmac_sha1(authInfoEncoded, secretKey)
-    
+
     // 步骤4：将公钥、摘要值、已编码的元数据进行字符串拼接，生成上传授权凭证
     uploadToken = accessKey:authDigest:authInfoEncoded
 
-**步骤1** 
+**步骤1**
 
 `authInfo` 各个字段详解：
 
@@ -141,7 +141,7 @@ authInfo 中的 `scope` 字段还可以有更灵活的定义：
 - 若为"Bucket:Key"，表示限定特定的文档，可新增或修改文件
 
 
-**步骤2** 
+**步骤2**
 
 - `authInfo` 数据结构首先必须转成标准的 [JSON](http://json.org/) 格式。
 - 将该JSON标准格式的元数据经过 [urlsafe_base64_encode](/v3/api/words/#URLSafeBase64Encode) 编码。
@@ -178,10 +178,10 @@ authInfo 中的 `scope` 字段还可以有更灵活的定义：
 
     POST http://up.qbox.me/upload
     Content-Type: multipart/form-data; boundary=<Boundary>
- 
+
     <Boundary>
     Content-Disposition: form-data; name="auth"
- 
+
     <UploadToken>
     <Boundary>
     Content-Disposition: form-data; name="action"
@@ -190,11 +190,11 @@ authInfo 中的 `scope` 字段还可以有更灵活的定义：
     <Boundary>
     Content-Disposition: form-data; name="file"; filename="<LocalFileName>"
     Content-Type: <ContentType>
- 
+
     <FileContent>
     <Boundary>
     Content-Disposition: form-data; name="params"
- 
+
     <CustomData>
 
 返回包(JSON)：
@@ -218,9 +218,18 @@ authInfo 中的 `scope` 字段还可以有更灵活的定义：
 
 `action=<PutAction>` 是要执行的上传行为，表示向具体的资源表里新建一个条目。具体规格如下：
 
-    action="/rs-put/<EncodedEntryURI>/mimeType/<EncodedMimeType>/meta/<EncodedCustomMeta>/crc32/<FileCRC32Checksum>"
+    action="/rs-put/<EncodedEntryURI>/mimeType/<EncodedMimeType>/meta/<EncodedCustomMeta>/crc32/<FileCRC32Checksum>/rotate/<Rotate>"
 
-- [EncodedEntryURI](/v3/api/words/#EncodedEntryURI) 定义了具体的资源表和条目，必须项。
+若尖括号包裹的字段（`<...>`）不传入，相应的前缀也不必传入。比如当不传入 `<EncodedCustomMeta>`, `<FileCRC32Checksum>` 和 `<Rotate>` 时：
+
+    action="/rs-put/<EncodedEntryURI>/mimeType/<EncodedMimeType>"
+
+`action` 字段的值至少是 `/rs-put/<EncodedEntryURI>` ，其他字段可选。以下为各个字段的详细解释。
+
+
+- [EncodedEntryURI](/v3/api/words/#EncodedEntryURI) 定义了具体的 Bucket 和 Key，必须项。
+
+注意：同一存储空间（Bucket）下，已存在与当前上传条目名称（[EncodedEntryURI](/v3/api/words/#EncodedEntryURI) 元素中的 [Key](/v3/api/words/#EntryURI)）相同的条目时，若当前上传文件内容与原有文件内容一致，则返回成功响应；若文件内容不一致，则上传失败，并返回失败响应。
 
 - [EncodedMimeType](/v3/api/words/#EncodedMimeType) 表明文件的 MIME 类型，缺省情况下为 `application/octet-stream`，可选项。
 
@@ -228,9 +237,8 @@ authInfo 中的 `scope` 字段还可以有更灵活的定义：
 
 - [FileCRC32Checksum](/v3/api/words/#FileCRC32Checksum) 文件的 crc32 校验值，十进制整数，可选项。若不传此参数则不执行数据校验。
 
-`action` 字段的值至少是 `/rs-put/<EncodedEntryURI>` ，其他可选。如其他参数不传入，`action` 字段的值中就不必出现该参数名称。
+- `Rotate` 上传图片时专用，特别适合移动设备拍照后直传。`<Rotate>` 值为 0 ：表示根据图像EXIF信息自动旋转；值为 1 : 右转90度；值为 2 :右转180度；值为 3 : 右转270度。可结合 [生成上传授权凭证 uploadToken 之 escape 参数详解](#escape-expression) 搭配使用。
 
-注意：同一存储空间（Bucket）下，已存在与当前上传条目名称（[EncodedEntryURI](/v3/api/words/#EncodedEntryURI) 元素中的 [Key](/v3/api/words/#EntryURI)）相同的条目时，若当前上传文件内容与原有文件内容一致，则返回成功响应；若文件内容不一致，则上传失败，并返回失败响应。
 
 **file**
 
@@ -265,7 +273,7 @@ authInfo 中的 `scope` 字段还可以有更灵活的定义：
         <input type="hidden" name="action" value="/rs-put/{URLSafeBase64Encode({bucket}:{key})}" />
         <input type="hidden" name="params" value="bucket={bucketName}&key={fileUniqKey}&k1=v1&k2=v2..." />
         <input type="hidden" name="return_url" value="http://DOMAIN/PATH?QUERY_STRING" />
-        <input name="file" type="file" />        
+        <input name="file" type="file" />
         <input type="submit" value="Upload File" />
     </form>
 
@@ -304,10 +312,10 @@ authInfo 中的 `scope` 字段还可以有更灵活的定义：
 
 3. 上传授权凭证（UpToken）：由业务服务器使用AccessKey和SecretKey，对操作策略进行数字签名防伪而生成的上传凭证。参考：[生成上传授权凭证](#upload-token)
 
-4. 操作策略（Policy）：由业务服务器填写、由上传服务器执行的操作信息。参考：[生成上传授权凭证](#upload-token)  
+4. 操作策略（Policy）：由业务服务器填写、由上传服务器执行的操作信息。参考：[生成上传授权凭证](#upload-token)
     4.1. 操作域（Scope）：1）空，表示可以上传到任意Bucket（仅限于新增文件）；2) "Bucket"，表示限定只能传到该Bucket（仅限于新增文件）；3) "Bucket:Key"，表示限定特定的文档，可新增或修改文件;
-    4.2. 超时时限（DeadLine）：上传授权凭证的有效时间，单位是秒;  
-    4.3. 回调URL（CallbackURL）：如果指定，在合并文件后，由上传服务器调用此URL，以通知业务服务器做相应处理;  
+    4.2. 超时时限（DeadLine）：上传授权凭证的有效时间，单位是秒;
+    4.3. 回调URL（CallbackURL）：如果指定，在合并文件后，由上传服务器调用此URL，以通知业务服务器做相应处理;
     4.4. 返回URL（ReturnURL）：如果指定，在合并文件后，由上传服务器重定向到此URL，以通知客户端继续表单处理流程。
 
 5. 上传端（Up-Client）：七牛云存储的客户的业务终端，负责提出、实施上传。
@@ -362,17 +370,17 @@ authInfo 中的 `scope` 字段还可以有更灵活的定义：
 
 #### 3.3 流程
 
-1. 请求断点续上传（Request Upload）：由上传端发起，向业务服务器申请执行断点续上传;  
+1. 请求断点续上传（Request Upload）：由上传端发起，向业务服务器申请执行断点续上传;
 
-2. 生成操作策略/上传凭证（Make Policy/UpToken）：业务服务器对上传端进行鉴权/签名上传凭证/授权;  
+2. 生成操作策略/上传凭证（Make Policy/UpToken）：业务服务器对上传端进行鉴权/签名上传凭证/授权;
 
-3. 分割文件（Split File）：上传端获得授权后，以指定块大小（一般为4MB）为单位，将待传文件分割为数个分割块;  
+3. 分割文件（Split File）：上传端获得授权后，以指定块大小（一般为4MB）为单位，将待传文件分割为数个分割块;
 
-4. 上传分割块（Upload Blocks）：上传端将单个分割块至上传服务器（可以并发上传不同的分割块，加快上传速度）。每个分割块的上传过程必须顺序完成（串行上传每个上传块）。上传服务器会针对接受到的上传块，返回对应分割块的已上传部分的上下文信息和校验码;  
+4. 上传分割块（Upload Blocks）：上传端将单个分割块至上传服务器（可以并发上传不同的分割块，加快上传速度）。每个分割块的上传过程必须顺序完成（串行上传每个上传块）。上传服务器会针对接受到的上传块，返回对应分割块的已上传部分的上下文信息和校验码;
 
-5. 合并文件（Make File）：所有分割块均成功上传完毕后，由上传端通知上传服务器将其合并成原上传对象文件;  
+5. 合并文件（Make File）：所有分割块均成功上传完毕后，由上传端通知上传服务器将其合并成原上传对象文件;
 
-6. 若指定CallbackURL，上传服务器在合并文件后会调用此URL，通知业务服务器做相应处理; 否则返回响应结果。  
+6. 若指定CallbackURL，上传服务器在合并文件后会调用此URL，通知业务服务器做相应处理; 否则返回响应结果。
 
 注：在第4步的任何节点均可终止（Abort）上传分割块，或在断点处根据上下文信息恢复上传分割块。
 
@@ -408,7 +416,7 @@ authInfo 中的 `scope` 字段还可以有更灵活的定义：
           Authorization: UpToken <UploadToken>
       }
       Request Body: <First-Chunk-Binary>
-      
+
       HTTP/1.1 200 OK
       Content-Type: application/json
       Cache-Control: no-store
@@ -429,7 +437,7 @@ authInfo 中的 `scope` 字段还可以有更灵活的定义：
           Authorization: UpToken <UploadToken>
       }
       Request Body: <Next-Chunk-Binary>
-      
+
       HTTP/1.1 200 OK
       Content-Type: application/json
       Cache-Control: no-store
@@ -444,19 +452,50 @@ authInfo 中的 `scope` 字段还可以有更灵活的定义：
 ##### 3.4.4 合并文件
 
       HTTP/1.1
-      POST http://up.qbox.me/rs-mkfile/<EncodedEntryURI>/fsize/<Fsize>/mimeType/<EncodedMimeType>/meta/<EncodedCustomMeta>/customer/<CustomerId>/params/<EncodedCallbackParams>
+      POST http://up.qbox.me/rs-mkfile/<EncodedEntryURI>/fsize/<Fsize> \
+                                      /mimeType/<EncodedMimeType> \
+                                      /meta/<EncodedCustomMeta> \
+                                      /customer/<CustomerId> \
+                                      /params/<EncodedCallbackParams> \
+                                      /rotate/<Rotate>
       Content-Type: application/octet-stream
       Request Headers: {
           Authorization: UpToken <UploadToken>
       }
       Request Body: <Checksums-Sha1-Array>
-      
+
       HTTP/1.1 200 OK
       Content-Type: application/json
       Cache-Control: no-store
       Response Body: {
           hash: <FileEtag string>
       }
+
+其中反斜杠（\）作为换行连接符。
+
+若尖括号包裹的字段（`<...>`）不传入，相应的前缀也不必传入。比如当不传入 `<EncodedCustomMeta>`, `<CustomerId>` 和 `<Rotate>` 时，POST 的 URL 则为：
+
+    http://up.qbox.me/rs-mkfile/<EncodedEntryURI>/fsize/<Fsize>/mimeType/<EncodedMimeType>/params/<EncodedCallbackParams>
+
+
+**URL参数详解**
+
+- [EncodedEntryURI](/v3/api/words/#EncodedEntryURI) 定义了具体的 Bucket 和 Key，必须项。
+
+注意：同一存储空间（Bucket）下，已存在与当前上传条目名称（[EncodedEntryURI](/v3/api/words/#EncodedEntryURI) 元素中的 [Key](/v3/api/words/#EntryURI)）相同的条目时，若当前上传文件内容与原有文件内容一致，则返回成功响应；若文件内容不一致，则上传失败，并返回失败响应。
+
+- `Fsize` 文件大小，单位 Byte，必须项。
+
+- [EncodedMimeType](/v3/api/words/#EncodedMimeType) 表明文件的 MIME 类型，缺省情况下为 `application/octet-stream`，可选项。
+
+- [EncodedCustomMeta](/v3/api/words/#EncodedCustomMeta) 文件备注信息，可选项，一般不传入。
+
+- `CustomerId` 给上传的文件添加唯一属主标识，特殊场景下非常有用，比如根据终端用户标识给图片打水印时可以传入终端用户ID。该参数为可选项。
+
+- `EncodedCallbackParams` 指定文件上传成功后七牛云存储向客户方的业务服务器执行回调发送的数据，详细解释可以参考 [CallbackParams](#CallbackParams)。该参数的值需经过 [URLSafeBase64Encode](/v3/api/words/#URLSafeBase64Encode) 编码。该参数为可选项。
+
+- `Rotate` 上传图片时专用，特别适合移动设备拍照后直传。`<Rotate>` 值为 0 ：表示根据图像EXIF信息自动旋转；值为 1 : 右转90度；值为 2 :右转180度；值为 3 : 右转270度。可结合 [生成上传授权凭证 uploadToken 之 escape 参数详解](#escape-expression) 搭配使用。该参数为可选项。
+
 
 <a name="resumable-upload-examples"></a>
 
@@ -494,7 +533,7 @@ authInfo 中的 `scope` 字段还可以有更灵活的定义：
       Request Headers: {
           Authorization: QBox <AccessToken>
       }
-      
+
       HTTP/1.1 200 OK
       Content-Type: application/json
       Cache-Control: no-store
@@ -534,7 +573,7 @@ authInfo 中的 `scope` 字段还可以有更灵活的定义：
       Request Headers: {
           Authorization: QBox <AccessToken>
       }
-      
+
       HTTP/1.1 200 OK
       Content-Type: application/json
       Cache-Control: no-store
@@ -563,7 +602,7 @@ authInfo 中的 `scope` 字段还可以有更灵活的定义：
       Request Headers: {
           Authorization: QBox <AccessToken>
       }
-      
+
       HTTP/1.1 200 OK
       Content-Type: application/json
       Cache-Control: no-store
@@ -623,7 +662,7 @@ authInfo 中的 `scope` 字段还可以有更灵活的定义：
       Request Headers: {
           Authorization: QBox <AccessToken>
       }
-      
+
       HTTP/1.1 200 OK
       Content-Type: application/json
       Cache-Control: no-store
@@ -648,7 +687,7 @@ authInfo 中的 `scope` 字段还可以有更灵活的定义：
       Request Headers: {
           Authorization: QBox <AccessToken>
       }
-      
+
       HTTP/1.1 200 OK
       Content-Type: application/json
       Cache-Control: no-store
@@ -673,7 +712,7 @@ authInfo 中的 `scope` 字段还可以有更灵活的定义：
       Request Headers: {
           Authorization: QBox <AccessToken>
       }
-      
+
       HTTP/1.1 200 OK
       Content-Type: application/json
       Cache-Control: no-store
@@ -705,7 +744,7 @@ authInfo 中的 `scope` 字段还可以有更灵活的定义：
       Request Headers: {
           Authorization: QBox <AccessToken>
       }
-      
+
       HTTP/1.1 200 OK
       Content-Type: application/json
       Cache-Control: no-store
@@ -742,7 +781,7 @@ authInfo 中的 `scope` 字段还可以有更灵活的定义：
           bucket: <BucketName string>,
           mode : <Mode int> // 0:n/a; 1:white list; 2:black list
       }
-      
+
       HTTP/1.1 200 OK
       Content-Type: application/json
       Cache-Control: no-store
@@ -763,7 +802,7 @@ authInfo 中的 `scope` 字段还可以有更灵活的定义：
           action: <Action string> // add | del
           pattern: <Pattern string> // *.example.com | 12.34.56.*
       }
-      
+
       HTTP/1.1 200 OK
       Content-Type: application/json
       Cache-Control: no-store
@@ -778,7 +817,7 @@ authInfo 中的 `scope` 字段还可以有更灵活的定义：
       Request Headers: {
           Authorization: QBox <AccessToken>
       }
-      
+
       HTTP/1.1 200 OK
       Content-Type: application/json
       Cache-Control: no-store
@@ -804,7 +843,7 @@ authInfo 中的 `scope` 字段还可以有更灵活的定义：
       Request Headers: {
           Authorization: QBox <AccessToken>
       }
-      
+
       HTTP/1.1 200 OK
       Content-Type: application/json
       Cache-Control: no-store
@@ -819,7 +858,7 @@ authInfo 中的 `scope` 字段还可以有更灵活的定义：
       Request Headers: {
           Authorization: QBox <AccessToken>
       }
-      
+
       HTTP/1.1 200 OK
       Content-Type: application/json
       Cache-Control: no-store
@@ -868,7 +907,7 @@ authInfo 中的 `scope` 字段还可以有更灵活的定义：
     298 Partial OK [
         <Result1>, <Result2>, ...
     ]
-    
+
     <Result> 是 {
         code: <HttpCode int>,
         data: <Data> 或 error: <ErrorMessage string>
@@ -887,7 +926,7 @@ authInfo 中的 `scope` 字段还可以有更灵活的定义：
       Request Body: {
           bucket: <BucketName string>
       }
-      
+
       HTTP/1.1 200 OK
       Content-Type: application/json
       Cache-Control: no-store
