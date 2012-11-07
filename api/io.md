@@ -214,11 +214,19 @@ authInfo 中的 `scope` 字段还可以有更灵活的定义：
 
 `auth` 字段的值即 [上传授权凭证(uploadToken)](#upload-token) 的值：`accessKey:authDigest:authInfoEncoded`。
 
+<a name="upload-action"></a>
+
 **action**
 
 `action=<PutAction>` 是要执行的上传行为，表示向具体的资源表里新建一个条目。具体规格如下：
 
-    action="/rs-put/<EncodedEntryURI>/mimeType/<EncodedMimeType>/meta/<EncodedCustomMeta>/crc32/<FileCRC32Checksum>/rotate/<Rotate>"
+    action="/rs-put/<EncodedEntryURI> \
+            /mimeType/<EncodedMimeType> \
+            /meta/<EncodedCustomMeta> \
+            /crc32/<FileCRC32Checksum> \
+            /rotate/<Rotate>"
+
+反斜杠（\）因排版换行需要，实际情况下请忽略。
 
 若尖括号包裹的字段（`<...>`）不传入，相应的前缀也不必传入。比如当不传入 `<EncodedCustomMeta>`, `<FileCRC32Checksum>` 和 `<Rotate>` 时：
 
@@ -471,12 +479,16 @@ authInfo 中的 `scope` 字段还可以有更灵活的定义：
           hash: <FileEtag string>
       }
 
-其中反斜杠（\）作为换行连接符。
+其中反斜杠（\）因排版换行需要，实际情况请忽略。
 
 若尖括号包裹的字段（`<...>`）不传入，相应的前缀也不必传入。比如当不传入 `<EncodedCustomMeta>`, `<CustomerId>` 和 `<Rotate>` 时，POST 的 URL 则为：
 
-    http://up.qbox.me/rs-mkfile/<EncodedEntryURI>/fsize/<Fsize>/mimeType/<EncodedMimeType>/params/<EncodedCallbackParams>
+    http://up.qbox.me/rs-mkfile/<EncodedEntryURI> \
+                               /fsize/<Fsize> \
+                               /mimeType/<EncodedMimeType> \
+                               /params/<EncodedCallbackParams>
 
+其中反斜杠（\）因排版换行需要，实际情况请忽略。
 
 **URL参数详解**
 
