@@ -128,11 +128,11 @@ escape | int | 可选 | 可选值 0 或者 1，缺省为 0。值为 1 表示 cal
 
 - 若 `callbackBodyType` 为 `application/json` 时，一个典型的自定义回调数据（[CallbackParams](#CallbackParams)）为：
 
-    `{foo: "bar", w: $(imageInfo.width), h: $(imageInfo.height), exif: $(exif)}`
+    `{foo: "bar", size: $(fsize), etag: $(etag), w: $(imageInfo.width), h: $(imageInfo.height), exif: $(exif)}`
 
 - 若 `callbackBodyType` 为 `application/x-www-form-urlencoded` 时，一个典型的自定义回调数据（[CallbackParams](#CallbackParams)）为：
 
-    `foo=bar&w=$(imageInfo.width)&h=$(imageInfo.height)&exif=$(exif)`
+    `foo=bar&size=$(fsize)&etag=$(etag)&w=$(imageInfo.width)&h=$(imageInfo.height)&exif=$(exif)`
 
 authInfo 中的 `scope` 字段还可以有更灵活的定义：
 
