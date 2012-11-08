@@ -81,6 +81,7 @@ title: API | 七牛云存储
 - [CustomMeta](/v3/api/words/#CustomMeta)
 - [EncodedCustomMeta](/v3/api/words/#EncodedCustomMeta)
 - [FileCRC32Checksum](/v3/api/words/#FileCRC32Checksum)
+- [VarExpression](/v3/api/words/#VarExpression)
 
 [**错误码参照表**](/v3/api/code/)
 
