@@ -84,13 +84,37 @@ title: 理解常用术语 | 七牛云存储
 
 ### VarExpression
 
-指定上传操作成功后回调执行指定的 API，这里的 API 用 `$(VarExpression)` 表示。参考 [生成上传授权凭证 uploadToken 之 escape 参数详解](/v3/api/io/#escape-expression) 。
+指定上传操作成功后回调执行指定的 API，要回调执行的 API 用 `$(VarExpression)` 表示。参考 [生成上传授权凭证 uploadToken 之 escape 参数详解](/v3/api/io/#escape-expression) 。
 
-VarExpression 可以是如下形式：
+VarExpression 可以是如下几个具体的 API：
 
-- `imageInfo` - [获取上传图片的基本信息](/v3/api/foimg/#fo-imageInfo)
-- `imageInfo.width` - [获取上传图片的宽度(px)](/v3/api/foimg/#fo-imageInfo)
-- `imageInfo.height` - [获取上传图片的高度(px)](/v3/api/foimg/#fo-imageInfo)
-- `exif` - [获取图片EXIF信息](/v3/api/foimg/#fo-imageExif)
-- `fsize` - 获取文件的大小，单位 Byte ，参考 [获取文件基本属性信息接口](/v3/api/io/#stat)
-- `etag` - 获取文件的 hash 值，参考 [获取文件基本属性信息接口](/v3/api/io/#stat)
+- `imageInfo` - [获取上传图片的基本信息](/v3/api/foimg/#fo-imageInfo)，支持访问 JSON 数据中的子字段
+- `exif` - [获取图片EXIF信息](/v3/api/foimg/#fo-imageExif)，支持访问 JSON 数据中的子字段
+- `fsize` - 获取文件大小，单位 Byte，没有子字段
+- `etag` - 获取文件 etag 值，没有子字段
+
+VarExpression 支持同 JSON 数据一样的 `<Object>.<Property>` 访问形式，比如：
+
+- {API名称}
+- {API名称}.{子字段}
+- {API名称}.{子字段}.{下一级子字段}
+
+其中花括号包裹的部分（“{...}”）实际情况下需要用具体的 API 及其字段替代。　
+
+`$(VarExpression)` 示例：
+
+- `$(fsize)` - 获取当前上传文件的大小
+- `$(etag)` - 获取当前上传文件的 etag  g
+
+- `$(imageInfo)` -  获取当前上传图片的基本属性信息
+- `$(imageInfo.width)` - 获取当前上传图片的原始高度
+- `$(imageInfo.height)` - 获取当前上传图片的原始高度
+- `$(imageInfo.format)` -  获取当前上传图片的格式
+
+imageInfo 接口返回的 JSON 数据可参考：<http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageInfo>
+
+- `$(exif)` - 获取当前上传图片的 EXIF 信息
+- `$(exif.ApertureValue)` - 获取当前上传图片所拍照时的光圈信息
+- `$(exif.ApertureValue.val)` - 获取当前上传图片拍照时的具体光圈值
+
+exif 接口返回的 JSON 数据可参考：<http://qiniuphotos.dn.qbox.me/gogopher.jpg?exif>
