@@ -170,7 +170,7 @@ authInfo 中的 `scope` 字段还可以有更灵活的定义：
 
 #### 2.2 直传文件
 
-<a name="upload-file-by-html-form"></a>
+<a name="upload-file-by-multipart"></a>
 
 ##### 2.2.1 API（multipart/form-data）
 
@@ -270,7 +270,7 @@ authInfo 中的 `scope` 字段还可以有更灵活的定义：
 
 七牛云存储允许文件上传成功后执行指定的 API 回调操作，参考 [生成上传授权凭证 uploadToken 之 escape 参数详解](#escape-expression) 。
 
-<a name="upload-file-by-multipart"></a>
+<a name="upload-file-by-html-form"></a>
 
 ##### 2.2.2 HTML表单形式直传
 
