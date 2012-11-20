@@ -70,7 +70,7 @@
 1. [七牛云存储是否提供自定义缩略图处理？如何提供使用？](#custom-thumbnail)
 2. [如何自定义缩略图规格？](#thumbinal-style)
 3. [如何自定义友好URL风格？](#friendly-style)
-4. [如何给图片打水印？](#watermark)
+4. [是否提供打水印的功能？](#watermark)
 5. [如何设置原图保护？](#origin-image-protection)
 
 ### [视频/音频处理](#video-audio)
@@ -142,17 +142,20 @@
 	
 4. 如何获取发票？<a name="invoice"></a>
 
+	如需开具发票，请[联系我们的工作人员](#http://qiniutek.com/about/contact/)。
+	
+
 ## 三、使用篇
 
 ### 文件上传 <a name="upload-file"></a>
 
 1. 七牛云存储可以存储哪些数据？<a name="data-stores-in-qiniu"></a>
 
-	七牛云存储主要存储以文件的形式存在的非结构化数据，如视频和音频文件、图片、PDF和Word文档等。
+	七牛云存储主要存储以文件形式存在的非结构化数据，如视频和音频文件、图片、PDF和Word文档等。
 
 2. 是否限制单个文件大小？<a name="file-size"></a>
 
-	
+	不限制。
 
 3. 如何上传文件到七牛云存储？<a name="how-to-upload"></a>
 
@@ -310,11 +313,16 @@
 	
 3. 七牛云存储针对静态资源资源访问是否提供 GZip 压缩输出加速访问？<a name="gzip-your-website-static-resources"></a>
 
+	七牛云存储默认为客户存储的静态资源提供 GZip 压缩输出，以便您的客户加速访问。
+
 
 4. 如何为静态网站自定义 404 Not Found 页面？<a name="static-website-404-notfound"></a>
+	
+	为您的静态网站创建公开外链后，您只需上传一个 Key 值为`errno-404`，Value值为自定义的 404 Not Found 内容即可。
 
+5. 如何取消静态网站发布？<a name="cancel-static-website"></a>
 
-5. 如何取消静态网站访问？<a name="cancel-static-website"></a>
+	[取消公开外链](#file:///Users/helishi/Project/Go/qbox/apidoc/FAQ.md#publish-with-custom-domain)，即可取消静态网站的发布。
 
 ### 图像处理 <a name="image-process"></a>
 
@@ -342,8 +350,11 @@
 	
 	友好风格的样式名则必须通过[API](#http://docs.qiniutek.com/v3/api/io/#pub-style)来实现或者[取消](#http://docs.qiniutek.com/v3/api/io/#pub-unstyle)。
 	
-4. 如何给图片打水印？<a name="watermark"></a>
+4. 是否提供打水印的功能？<a name="watermark"></a>
 
+	提供。
+	
+	七牛云存储提供的打水印功能比较灵活，客户可以在图片上打上自定义的默认水印（如公司logo等），也可以为您的用户上传的图片打上针对上传图片用户的个性化水印。详情请参考七牛云存储API文档中的[图像处理接口](#http://docs.qiniutek.com/v3/api/foimg/)
 
 5. 如何设置原图（源文件）保护？<a name="origin-image-protection"></a>
 
@@ -357,9 +368,11 @@
 
 1. 七牛云存储是否支持为上传的视频/音频源文件提供压缩转码处理？<a name="video-audio-compress-transcoding"></a>
 
-	强烈支持。
+	支持。
 	
 2. 如何使用七牛云存储的视频/音频处理服务？<a name="qiniu-cloud-storage-video-audio-service"></a>
+
+	七牛云存储的视频/音频处理服务暂时没有对外开放，如需使用请[联系我们](#http://qiniutek.com/about/contact/)。	
 
 
 ## 四、工具篇 
@@ -370,9 +383,27 @@
 	
 2. 有无提供命令行工具辅助开发调试？<a name="command-line-debug-helper-tools"></a>
 
+	七牛云存储为开发者提供了[qboxrsctl 命令行辅助工具](#http://docs.qiniutek.com/v3/tools/qboxrsctl/)。使用该工具，您可以在命令行登入七牛云存储云端，操作您的 Bucket，这些操作所覆盖的功能范围比[七牛云存储开发者中心](#https://dev.qiniutek.com)所覆盖的功能范围更广。
+
 ## 五、开发篇
 
 1. 七牛云存储服务集群如何架构？<a name="qiniu-architecture"></a>
+
+	七牛云存储在全球设有多个节点，您的用户上传文件时，七牛云存储会会他自动选择就近的存储服务器进行存储。用户上传的所有文件，都会在多个IDC机房进行多副本的备份，以保证数据的安全。详情请参考下图架构图。
+	
+	![七牛云存储应用架构图](images/qiniu-archetect.png)
+
 2. Web 网页如何向七牛云存储直传文件？<a name="upload-file-to-qiniu-from-web"></a>
+
+	您可以让您的用户通过表单的形式向七牛云存储服务器直传文件，而无需通过您的服务器中转。为此，您的业务服务器需要做两件事情：一是向您的用户[颁发上传授权](#http://docs.qiniutek.com/v3/api/io/#upload-token)，二是为您需要向七牛的云存储服务器直传文件的客户[提供一个隐藏的表单](#http://docs.qiniutek.com/v3/api/io/#upload-file-by-html-form)，其中包含一些必要的参数会以隐藏的形式发送给七牛云存储服务器。
+	
+	这样，您的客户就可以直接向七牛云存储服务器上传文件了。
+	
 3. iOS / Android 移动端如何向七牛云存储直传文件？<a name="upload-file-to-qiniu-from-iOS-Android"></a>
+
+	如果您的用户有使用移动端 App 上传文件（比如照片或视频）的需求，可以把您服务器得到的此 upload_token 返回给手持设备端的 App，然后您的移动 App 可以使用[七牛云存储 Objective-SDK （iOS）](#https://github.com/qiniu/objc-sdk)或[七牛云存储 Android-SDK](#https://github.com/qiniu/android-sdk)的相关上传函数或参照[七牛云存储API之文件上传](#http://docs.qiniutek.com/v3/api/io/#upload)直传文件。
+
 4. PC / 服务端程序如何向七牛云存储直传文件？<a name="upload-file-to-qiniu-from-PC-Server"></a>
+
+	要上传一个文件，首先需要获得上传授权，七牛云存储通过 `uploadToken` 的方式实现上传授权操作。`uploadToken` 可以根据 `accessKey` 和 `secretKey` 对一组数据进行数字签名生成。在 PC或者服务器端上传文件，也跟通过 Web 网页端 或者 iOS / Android 移动端向七牛云存储直传文件一样，只需将该 `uploadToken` 作为文件上传流中 `multipart/form-data` 的一部分进行传输，也可以附带在上传请求的 `HTTP Headers` 中传输，即可向七牛云存储直传文件。详情请参考[七牛云存储上传文件API文档](#http://docs.qiniutek.com/v3/api/io/#upload)
+	
