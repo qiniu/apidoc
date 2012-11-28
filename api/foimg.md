@@ -106,39 +106,39 @@ title: 图像处理接口 | 七牛云存储
 
 示例1：针对原图进行缩略，并从缩略图的中央部位裁剪为 200x200 的缩略图：
 
-    http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageView/1/w/200/h/200
+    http://qiniuphotos.qiniudn.com/gogopher.jpg?imageView/1/w/200/h/200
 
-[![200x200](http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageView/1/w/200/h/200)](http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageView/1/w/200/h/200)
+[![200x200](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageView/1/w/200/h/200)](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageView/1/w/200/h/200)
 
 示例2：针对原图进行缩略，并从缩略图的中央部位裁剪为 200x200，图像质量为 1，gif 格式的缩略图：
 
-    http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageView/1/w/200/h/200/q/1/format/gif
+    http://qiniuphotos.qiniudn.com/gogopher.jpg?imageView/1/w/200/h/200/q/1/format/gif
 
-[![200x200，图像质量:1，格式:gif](http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageView/1/w/200/h/200/q/1/format/gif)](http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageView/1/w/200/h/200/q/1/format/gif)
+[![200x200，图像质量:1，格式:gif](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageView/1/w/200/h/200/q/1/format/gif)](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageView/1/w/200/h/200/q/1/format/gif)
 
 示例3：针对原图进行缩略，并从缩略图的中央部位裁剪为 200x200，图像质量为 85，格式为 png，锐度指数为 10 的缩略图：
 
-    http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageView/1/w/200/h/200/q/85/format/png/sharpen/10
+    http://qiniuphotos.qiniudn.com/gogopher.jpg?imageView/1/w/200/h/200/q/85/format/png/sharpen/10
 
-[![200x200，图像质量:85，格式:png，锐度:10](http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageView/1/w/200/h/200/q/85/format/png/sharpen/10)](http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageView/1/w/200/h/200/q/85/format/png/sharpen/10)
+[![200x200，图像质量:85，格式:png，锐度:10](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageView/1/w/200/h/200/q/85/format/png/sharpen/10)](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageView/1/w/200/h/200/q/85/format/png/sharpen/10)
 
 示例4：针对原图进行缩略，并限定目标缩略图的长边为 200 px，短边自适应，缩略图宽和高都不会超出 200px：
 
-    http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageView/2/w/200/h/200
+    http://qiniuphotos.qiniudn.com/gogopher.jpg?imageView/2/w/200/h/200
 
-[![限定长边为 200px，短边自适应，宽和高都不会超出 200px](http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageView/2/w/200/h/200)](http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageView/2/w/200/h/200)
+[![限定长边为 200px，短边自适应，宽和高都不会超出 200px](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageView/2/w/200/h/200)](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageView/2/w/200/h/200)
 
 示例5：针对原图进行缩略，并限定目标缩略图的宽度为 200px，高度等比缩略自适应：
 
-    http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageView/2/w/200
+    http://qiniuphotos.qiniudn.com/gogopher.jpg?imageView/2/w/200
 
-[![限定宽度为 200px, 高度等比缩略自适应](http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageView/2/w/200)](http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageView/2/w/200)
+[![限定宽度为 200px, 高度等比缩略自适应](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageView/2/w/200)](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageView/2/w/200)
 
 示例6：针对原图进行缩略，并限定目标缩略图的高度为 200px，宽度等比缩略自适应：
 
-    http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageView/2/h/200
+    http://qiniuphotos.qiniudn.com/gogopher.jpg?imageView/2/h/200
 
-[![限定高度为 200px, 宽度等比缩略自适应](http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageView/2/h/200)](http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageView/2/h/200)
+[![限定高度为 200px, 宽度等比缩略自适应](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageView/2/h/200)](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageView/2/h/200)
 
 
 <a name="fo-imageMogr"></a>
@@ -186,16 +186,16 @@ title: 图像处理接口 | 七牛云存储
 
   size | 规格说明 | 样例
 -------| ------- | ------------------------------------------------------
-  scale% | 基于原图大小，按照指定的百分比进行缩放。 | [50%](http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageMogr/thumbnail/!50p)
-  scale-x%xscale-y% | 以百分比的形式指定缩略图的宽或高，另一边自适应等比缩放，只能使用一个 % 限定。 | [50%x](http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageMogr/thumbnail/!50p) [x50%](http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageMogr/thumbnail/!x50p)
-  width | 限定缩略图宽度，高度等比自适应。 | [200](http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageMogr/thumbnail/200)
-  xheight | 限定缩略图高度，宽度等比自适应。 | [x100](http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageMogr/thumbnail/x100)
-  widthxheight | 限定长边，短边自适应，将缩略图的大小限定在指定的宽高矩形内。若指定的宽度大于指定的高度，以指定的高度为基准，宽度自适应等比缩放；若指定的宽度小于指定的高度，以指定的宽度为基准，高度自适应等比缩放。 | [100x200](http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageMogr/thumbnail/100x200) [200x100](http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageMogr/thumbnail/200x100)
-  widthxheight^ | 限定短边，长边自适应，目标缩略图大小会超出指定的宽高矩形。若指定的宽度大于指定的高度，以指定的宽度为基准，高度自适应等比缩放；若指定的宽度小于指定的高度，以指定的高度为基准，宽度自适应等比缩放。 | [100x200^](http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageMogr/thumbnail/100x200^) [200x100^](http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageMogr/thumbnail/200x100^)
-  widthxheight! | 限定缩略图宽和高。缩略图按照指定的宽和高强行缩略，忽略原图宽和高的比例，可能会变形。 | [100x200!](http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageMogr/thumbnail/100x200!) [200x100!](http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageMogr/thumbnail/200x100!)
-  widthxheight> | 当原图尺寸超出给定的宽度或高度时，按照给定的 widthxheight 规格进行缩略。 | [100x200>](http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageMogr/thumbnail/100x200%3E) [1000x2000>](http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageMogr/thumbnail/1000x2000%3E)
-  widthxheight< | 当原图尺寸低于给定的宽度和高度时，按照给定的 widthxheight 规格进行拉伸。 | [100x200<](http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageMogr/thumbnail/200x100<) [1000x2000<](http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageMogr/thumbnail/2000x1000<)
-  area@ | 缩略图按原始图片高宽比例等比缩放，但缩放后的宽乘高的总分辨率不超过给定的总像素。 | [20000@](http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageMogr/thumbnail/20000@)
+  scale% | 基于原图大小，按照指定的百分比进行缩放。 | [50%](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageMogr/thumbnail/!50p)
+  scale-x%xscale-y% | 以百分比的形式指定缩略图的宽或高，另一边自适应等比缩放，只能使用一个 % 限定。 | [50%x](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageMogr/thumbnail/!50p) [x50%](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageMogr/thumbnail/!x50p)
+  width | 限定缩略图宽度，高度等比自适应。 | [200](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageMogr/thumbnail/200)
+  xheight | 限定缩略图高度，宽度等比自适应。 | [x100](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageMogr/thumbnail/x100)
+  widthxheight | 限定长边，短边自适应，将缩略图的大小限定在指定的宽高矩形内。若指定的宽度大于指定的高度，以指定的高度为基准，宽度自适应等比缩放；若指定的宽度小于指定的高度，以指定的宽度为基准，高度自适应等比缩放。 | [100x200](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageMogr/thumbnail/100x200) [200x100](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageMogr/thumbnail/200x100)
+  widthxheight^ | 限定短边，长边自适应，目标缩略图大小会超出指定的宽高矩形。若指定的宽度大于指定的高度，以指定的宽度为基准，高度自适应等比缩放；若指定的宽度小于指定的高度，以指定的高度为基准，宽度自适应等比缩放。 | [100x200^](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageMogr/thumbnail/100x200^) [200x100^](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageMogr/thumbnail/200x100^)
+  widthxheight! | 限定缩略图宽和高。缩略图按照指定的宽和高强行缩略，忽略原图宽和高的比例，可能会变形。 | [100x200!](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageMogr/thumbnail/100x200!) [200x100!](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageMogr/thumbnail/200x100!)
+  widthxheight> | 当原图尺寸超出给定的宽度或高度时，按照给定的 widthxheight 规格进行缩略。 | [100x200>](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageMogr/thumbnail/100x200%3E) [1000x2000>](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageMogr/thumbnail/1000x2000%3E)
+  widthxheight< | 当原图尺寸低于给定的宽度和高度时，按照给定的 widthxheight 规格进行拉伸。 | [100x200<](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageMogr/thumbnail/200x100<) [1000x2000<](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageMogr/thumbnail/2000x1000<)
+  area@ | 缩略图按原始图片高宽比例等比缩放，但缩放后的宽乘高的总分辨率不超过给定的总像素。 | [20000@](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageMogr/thumbnail/20000@)
 
 指定图片缩略或裁剪前相对于原图的起始坐标：
 

@@ -111,10 +111,10 @@ VarExpression 支持同 JSON 数据一样的 `<Object>.<Property>` 访问形式�
 - `$(imageInfo.height)` - 获取当前上传图片的原始高度
 - `$(imageInfo.format)` -  获取当前上传图片的格式
 
-imageInfo 接口返回的 JSON 数据可参考：<http://qiniuphotos.dn.qbox.me/gogopher.jpg?imageInfo>
+imageInfo 接口返回的 JSON 数据可参考：<http://qiniuphotos.qiniudn.com/gogopher.jpg?imageInfo>
 
 - `$(exif)` - 获取当前上传图片的 EXIF 信息
 - `$(exif.ApertureValue)` - 获取当前上传图片所拍照时的光圈信息
 - `$(exif.ApertureValue.val)` - 获取当前上传图片拍照时的具体光圈值
 
-exif 接口返回的 JSON 数据可参考：<http://qiniuphotos.dn.qbox.me/gogopher.jpg?exif>
+exif 接口返回的 JSON 数据可参考：<http://qiniuphotos.qiniudn.com/gogopher.jpg?exif>
