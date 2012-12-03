@@ -431,7 +431,8 @@ authInfo 中的 `scope` 字段还可以有更灵活的定义：
       Response Body: {
           ctx: <BlockCtx string>,
           checksum: <BlockChecksum string>,
-          crc32: <ChunkCrc32 int>
+          crc32: <ChunkCrc32 int>,
+          host: <SelectedUpHost string> // 后续的 bput, rs-mkfile 等请求要求发到此 host
       }
 
 <a name="resumable-upload-bput"></a>
@@ -470,7 +471,7 @@ authInfo 中的 `scope` 字段还可以有更灵活的定义：
       Request Headers: {
           Authorization: UpToken <UploadToken>
       }
-      Request Body: <Checksums-Sha1-Array>
+      Request Body: <Ctx-Array> // 以 “,” 分隔的 ctx string 列表
 
       HTTP/1.1 200 OK
       Content-Type: application/json
