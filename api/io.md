@@ -440,7 +440,7 @@ authInfo 中的 `scope` 字段还可以有更灵活的定义：
 ##### 3.4.3 上传分割块（Block）中的数据块（Chunk）
 
       HTTP/1.1
-      POST http://up.qbox.me/bput/<BlockCtx>/<Offset>
+      POST <SelectedUpHost>/bput/<BlockCtx>/<Offset>
       Content-Type: application/octet-stream
       Request Headers: {
           Authorization: UpToken <UploadToken>
@@ -453,7 +453,8 @@ authInfo 中的 `scope` 字段还可以有更灵活的定义：
       Response Body: {
           ctx: <BlockCtx string>,
           checksum: <BlockChecksum string>,
-          crc32: <ChunkCrc32 int>
+          crc32: <ChunkCrc32 int>,
+          host: <SelectedUpHost string>
       }
 
 <a name="resumable-upload-mkfile"></a>
@@ -461,7 +462,7 @@ authInfo 中的 `scope` 字段还可以有更灵活的定义：
 ##### 3.4.4 合并文件
 
       HTTP/1.1
-      POST http://up.qbox.me/rs-mkfile/<EncodedEntryURI>/fsize/<Fsize> \
+      POST <SelectedUpHost>/rs-mkfile/<EncodedEntryURI>/fsize/<Fsize> \
                                       /mimeType/<EncodedMimeType> \
                                       /meta/<EncodedCustomMeta> \
                                       /customer/<CustomerId> \
