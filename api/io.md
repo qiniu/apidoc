@@ -468,11 +468,11 @@ authInfo 中的 `scope` 字段还可以有更灵活的定义：
                                       /customer/<CustomerId> \
                                       /params/<EncodedCallbackParams> \
                                       /rotate/<Rotate>
-      Content-Type: application/octet-stream
+      Content-Type: text/plain
       Request Headers: {
           Authorization: UpToken <UploadToken>
       }
-      Request Body: <Ctx-Array> // 以 “,” 分隔的 ctx string 列表
+      Request Body: <Ctx-Array> // 以 “,” 分隔的 ctx string 列表，注意 Content-Type: text/plain
 
       HTTP/1.1 200 OK
       Content-Type: application/json
