@@ -532,46 +532,78 @@ authInfo 中的 `scope` 字段还可以有更灵活的定义：
 
 七牛云存储以下几种权限方式的下载文件：
 
-1. 调用 API 动态获取临时授权的匿名下载链接，文件可公开匿名下载，但链接有生命周期，可自定义该有效期。
+1. 生成带下载授权凭证的URL，文件可公开临时匿名下载，但链接有生命周期，可自定义该有效期。
 2. 绑定域名，以公开外链的方式下载。
 3. 限制直接访问源文件，只限访问预处理后的目标文件。比如限制访问原图，只可访问打水印后的缩略图。
 4. 设置黑名单/白名单，仅限/或拒绝特地区域的用户访问下载。
 
 <a name="get"></a>
 
-#### 4.1 动态获取文件授权后的临时下载链接
+#### 4.1 生成带下载授权凭证的URL
 
-      HTTP/1.1
-      POST http://rs.qbox.me/get/<EncodedEntryURI>/base/<BaseHash>/attName/<AttName>/expires/<Seconds>
-      Content-Type: application/x-www-form-urlencoded
-      Request Headers: {
-          Authorization: QBox <AccessToken>
-      }
+生成带下载授权凭证的URL即表示为私有资源下载。私有(private)是bucket的一个属性，一个私有bucket中的资源为私有资源。私有资源不可匿名下载。
 
-      HTTP/1.1 200 OK
-      Content-Type: application/json
-      Cache-Control: no-store
-      Response Body: {
-          url: <DownloadURL string>,
-          hash: <FileETag string>,
-          fsize: <FileSize int>,
-          mimeType: <MimeType string>,
-          expires:<ExpiresInSeconds int64>
-      }
+新创建的bucket默认为私有，也可以将某个bucket设为公有，公有bucket中的资源为公有资源，公有资源可以匿名下载。
 
-**请求参数**
+可以使用以下命令将<bucket>设为私有：
 
-`<EncodedEntryURI>`
-: 指定要下载的具体文件，必填。参考：[EncodedEntryURI](/v3/api/words/#EncodedEntryURI)
+    qboxrsctl private <bucket> 1
 
-`/base/<BaseHash>`
-: 指定文件内容的基版本，可选。如果指定了base，那么当服务器端文件已经发生变化时，返回失败。
+可以使用以下命令将<bucket>设为公开：
 
-`/attName/<AttName>`
-: 指定下载时要保存的名称，可选。如果未指定，直接是文件名。
+    qboxrsctl private <bucket> 0
 
-`/expires/<Seconds>`
-: 指定 返回的下载URL的生命周期，精度为秒。如果未指定，默认 1 小时（3600）。
+**私有资源的下载方式**
+
+私有资源无法匿名下载。下载私有资源需要带有下载授权，下载授权以download token的方式表达。
+
+假设某bucket为私有，则
+
+- `http://<bucket>.qiniudn.com/x.jpg` 无法下载。
+- `http://<bucket>.qiniudn.com/x.jpg?token=<token>`，在 `<token>` 合法的条件下，可以正常下载。
+
+**下载授权凭证（downloadToken）的构成**
+
+downloadToken 由三部分组成：
+
+    downloadToken = "<access_key>:<checksum>:<scope>"
+
+注意：尖括号“<>”表示要替换的内容，不可在实际字符串中出现。
+
+checksum 的构成为：
+
+    checksum = "urlsafe_base64_encode(<hmac>)"
+    hmac = "sha1_hmac(<secret_key>, <scope>)"
+
+scope的构成为：
+
+    scope = "urlsafe_base64_encode(<json_scope>)"
+
+`urlsafe_base64_encode()` 函数的规格参考：[URLSafeBase64Encode](/v3/api/words/#URLSafeBase64Encode)
+
+json_scope 是一个 JSON 标准格式的字符串：
+
+    {"E": <deadline>, "S": <pattern>}
+
+`deadline` 为一个时间点，数值是1970年1月1日0点到此时间点的秒数，这个时间点之后，资源无法下载。
+
+`pattern` 为URL匹配模式，下载URL匹配该模式不成功的话，资源无法下载。
+
+注意：`pattern` 匹配完整的URL，而不是URL的子串。
+
+pattern 详解：
+
+模式 | 说明 | 示例
+-----|-----|------
+`*` | 匹配所有不含"/"字符的子串 | `http://dl.example.com/*-small.jpg`
+`?` | 匹配所有非"/"的字符 | `http://dl.example.com/a?.jpg`
+`abc` | 匹配字符串 "abc", ('*', '?', '\\', '[' 除外) | `http://dl.example.com/abc.jpg`
+`abc\\?d` | 匹配字符串 "`abc?d`", 双斜杠表示转义，可以包含特殊字符 | `http://dl.example.com/\\abc?d=xxx`
+`[abc]` | 匹配字符 a, b 或者 c | `http://dl.example.com/[abc].jpg`
+`[^abc]` | 匹配除 a, b 或者 c 以外的字符 | `http://dl.example.com/[^abc].jpg`
+`[a-z]` | 匹配 a-z 范围以内的任意字符 | `http://dl.example.com/[a-zA-Z0-9].jpg`
+`[^a-z]` | 匹配 a-z 范围以外的任意字符 | `http://dl.example.com/[^a-z].jpg`
+`[abc\\?d]` | 匹配字符 a, b, c, `?` 或者 d | `http://dl.example.com/[\\abc?d]`
 
 <a name="publish"></a>
 
