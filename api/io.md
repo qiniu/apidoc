@@ -598,12 +598,12 @@ pattern 详解：
 `*` | 匹配所有不含"/"字符的子串 | `http://dl.example.com/*-small.jpg`
 `?` | 匹配所有非"/"的字符 | `http://dl.example.com/a?.jpg`
 `abc` | 匹配字符串 "abc", ('*', '?', '\\', '[' 除外) | `http://dl.example.com/abc.jpg`
-`abc\\?d` | 匹配字符串 "`abc?d`", 双斜杠表示转义，可以包含特殊字符 | `http://dl.example.com/\\abc?d=xxx`
+`abc\\?d` | 匹配字符串 "`abc?d`", 双斜杠表示转义，可以包含特殊字符 | `http://dl.example.com/abc\\?d=xxx`
 `[abc]` | 匹配字符 a, b 或者 c | `http://dl.example.com/[abc].jpg`
 `[^abc]` | 匹配除 a, b 或者 c 以外的字符 | `http://dl.example.com/[^abc].jpg`
 `[a-z]` | 匹配 a-z 范围以内的任意字符 | `http://dl.example.com/[a-zA-Z0-9].jpg`
 `[^a-z]` | 匹配 a-z 范围以外的任意字符 | `http://dl.example.com/[^a-z].jpg`
-`[abc\\?d]` | 匹配字符 a, b, c, `?` 或者 d | `http://dl.example.com/[\\abc?d]`
+`[abc\\?d]` | 匹配字符 a, b, c, `?` 或者 d | `http://dl.example.com/[abc\\?d]`
 
 <a name="publish"></a>
 
