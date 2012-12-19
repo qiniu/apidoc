@@ -568,18 +568,19 @@ downloadToken 由三部分组成：
 
 注意：尖括号“<>”表示要替换的内容，不可在实际字符串中出现。
 
-checksum 的构成为：
+`checksum`` 的构成为：
 
     checksum = "urlsafe_base64_encode(<hmac>)"
-    hmac = "sha1_hmac(<secret_key>, <scope>)"
 
-scope的构成为：
+    hmac = "sha1_hmac(<scope>, <secret_key>)"
+
+`scope` 的构成为：
 
     scope = "urlsafe_base64_encode(<json_scope>)"
 
 `urlsafe_base64_encode()` 函数的规格参考：[URLSafeBase64Encode](/v3/api/words/#URLSafeBase64Encode)
 
-json_scope 是一个 JSON 标准格式的字符串：
+`json_scope` 是一个 JSON 标准格式的字符串：
 
     {"E": <deadline>, "S": <pattern>}
 
