@@ -590,6 +590,8 @@ downloadToken 由三部分组成：
 
 注意：`pattern` 匹配完整的URL，而不是URL的子串。
 
+<a name="download-token-pattern"></a>
+
 pattern 详解：
 
 模式 | 说明 | 示例
