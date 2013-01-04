@@ -33,9 +33,8 @@ title: 云存储接口 | 七牛云存储
         - [合并文件](#resumable-upload-mkfile)
     - [样例](#resumable-upload-examples)
 - [下载文件](#download)
-    - [动态获取文件授权后的临时下载链接](#get)
-    - [断点续下载](#download-by-range-bytes)
-    - [针对下载出现 404 NotFound 智能化处理](#download-if-notfound)
+    - [公有资源下载](#public-download) 
+    - [私有资源下载](#private-download)
     - [设置源文件(比如原图)保护](#set-protected)
         - [为指定的存储空间设置保护模式](#pub-access-mode)
         - [设置友好URL访问中的连接符](#pub-separator)
@@ -44,14 +43,20 @@ title: 云存储接口 | 七牛云存储
     - [防盗链设置](#anti-theft-chain)
         - [设置防盗链模式](#uc-antiLeechMode)
         - [更新防盗链记录值](#uc-referAntiLeech)
+    - [自定义 404 NotFound](#download-if-notfound)
+    - [断点续下载](#download-by-range-bytes)
 - [查看文件基本属性信息](#stat)
+- [复制文件](#copy)
+- [移动文件](#move)
 - [删除指定文件](#delete)
 - [删除所有文件（整个空间/Bucket）](#drop)
 - [批量操作](#batch)
     - [批量获取文件基本属性信息](#batch-stat)
-    - [批量获取文件授权后的临时下载链接](#batch-get)
+    - [批量复制文件](#batch-copy)
+    - [批量移动文件](#batch-move)
     - [批量删除文件](#batch-delete)
-- [清除服务端缓存](#refresh-bucket)
+- [清除指定空间缓存](#refresh-bucket)
+- [列出所有空间（Buckets）](#list-all-buckets)
 
 <a name="mkbucket"></a>
 
@@ -528,18 +533,28 @@ authInfo 中的 `scope` 字段还可以有更灵活的定义：
 
 ### 4. 下载文件
 
-七牛云存储以下几种权限方式的下载文件：
+七牛云存储提供以下几种方式下载文件：
 
-- 生成带下载授权凭证的URL，文件可公开临时匿名下载，但链接有生命周期，可自定义该有效期。
-- 绑定域名，以公开外链的方式下载。您可以在 [七牛云存储开发者自助网站上进行域名绑定](https://dev.qiniutek.com/buckets)。
-- 限制直接访问源文件，只限访问预处理后的目标文件。比如限制访问原图，只可访问打水印后的缩略图。
-- 设置黑名单/白名单，仅限/或拒绝特地区域的用户访问下载。
+- 公有资源下载。绑定域名，以公开外链的方式提供下载。
+- 私有资源下载。生成带下载授权凭证的URL，文件可公开临时匿名下载，但链接有生命周期，可自定义该有效期。
+- 源文件保护。限制直接访问源文件，只限访问预处理后的目标文件。比如限制访问原图，只可访问打水印后的缩略图。
+- 防盗链。设置黑名单/白名单，仅限/或拒绝特定的主机可提供访问或下载。
 
-<a name="get"></a>
+<a name="public-download"></a>
 
-#### 4.1 生成带下载授权凭证的URL
+#### 4.1 公有资源下载
 
-生成带下载授权凭证的URL即表示为私有资源下载。私有(private)是bucket的一个属性，一个私有bucket中的资源为私有资源。私有资源不可匿名下载。
+公有资源下载/访问格式如下：
+
+    http://<绑定域名>/<key>
+
+可以在 [七牛云存储开发者自助网站](https://dev.qiniutek.com/buckets) 进行域名绑定操作。
+
+<a name="private-download"></a>
+
+#### 4.2 私有资源下载
+
+私有资源下载即表示生成带下载授权凭证的URL。私有(private)是bucket的一个属性，一个私有bucket中的资源为私有资源。私有资源不可匿名下载。
 
 新创建的bucket默认为私有，也可以将某个bucket设为公有，公有bucket中的资源为公有资源，公有资源可以匿名下载。
 
@@ -607,33 +622,9 @@ pattern 详解：
 `[abc\\?d]` | 匹配字符 a, b, c, `?` 或者 d | `http://dl.example.com/[abc\\?d]`
 
 
-<a name="download-by-range-bytes"></a>
-
-#### 4.2 断点续下载
-
-断点续下载协议标准参考：<http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.35>
-
-七牛云存储按以上标准支持断点续下载，只需在 HTTP 请求下载链接的头部附带 `Range` 字段即可。
-
-    Range: bytes=<first-byte-pos>-<last-byte-pos>
-
-**参数**
-
-`<first-byte-pos>`
-: 起始位置，从数字零（0）开始计算。
-
-`<last-byte-pos>`
-: 断点续下载中，最后一个字节所在的位置。
-
-<a name="download-if-notfound"></a>
-
-#### 4.3 针对下载出现 404 NotFound 智能化处理
-
-您可以上传一个应对HTTP 404出错处理的文件，当您 [绑定域名创建公开外链](#publish) 后，若公开的外链找不到该文件，即可使用您上传的“自定义404文件”。要这么做，您只须在名为 action 的表单域中将 [EncodedEntryURI](/v3/api/words/#EncodedEntryURI) 元素中的 `<Key>` 设置为固定字符串类型的值 `errno-404` 即可。
-
 <a name="set-protected"></a>
 
-#### 4.4 设置源文件(比如原图)保护
+#### 4.3 设置源文件(比如原图)保护
 
 您可以在 [七牛云存储开发者自助网站上为指定的存储空间设置源文件保护](https://dev.qiniutek.com/buckets)。
 
@@ -652,7 +643,7 @@ pattern 详解：
 
 <a name="pub-access-mode"></a>
 
-##### 4.4.1 为指定的存储空间设置保护模式
+##### 4.3.1 为指定的存储空间设置保护模式
 
       HTTP/1.1
       POST http://pu.qbox.me:10200/accessMode/<Bucket>/mode/<ProtectedMode>
@@ -675,7 +666,7 @@ pattern 详解：
 
 <a name="pub-separator"></a>
 
-##### 4.4.2 设置友好URL访问中的连接符
+##### 4.3.2 设置友好URL访问中的连接符
 
 以下操作在存储空间 `<ProtectedMode>=1` 时有效。
 
@@ -700,7 +691,7 @@ pattern 详解：
 
 <a name="pub-style"></a>
 
-##### 4.4.3 设置URL友好的风格样式名
+##### 4.3.3 设置URL友好的风格样式名
 
 以下操作在存储空间 `<ProtectedMode>=1` 时有效。
 
@@ -732,7 +723,7 @@ pattern 详解：
 
 <a name="pub-unstyle"></a>
 
-##### 4.4.4 取消URL友好风格的样式名访问
+##### 4.3.4 取消URL友好风格的样式名访问
 
 以下操作在存储空间 `<ProtectedMode>=1` 时有效。
 
@@ -757,17 +748,19 @@ pattern 详解：
 
 若请求成功，文件以如下链接形式进行访问将会出现404：
 
-    [GET] http://<Domain>/<Key><Separator><StyleName> HTTP/1.1 404 Not Found
+    [GET] http://<Domain>/<Key><Separator><StyleName> 
+    
+    HTTP/1.1 404 Not Found
 
 <a name="anti-theft-chain"></a>
 
-#### 4.5 防盗链设置
+#### 4.4 防盗链设置
 
 您可以在 [七牛云存储开发者自助网站上为指定的存储空间进行防盗链设置](https://dev.qiniutek.com/buckets)。
 
 <a name="uc-antiLeechMode"></a>
 
-##### 4.5.1 设置防盗链模式
+##### 4.4.1 设置防盗链模式
 
       HTTP/1.1
       POST http://uc.qbox.me/antiLeechMode
@@ -786,7 +779,7 @@ pattern 详解：
 
 <a name="uc-referAntiLeech"></a>
 
-##### 4.5.2 更新防盗链记录值
+##### 4.4.2 更新防盗链记录值
 
       HTTP/1.1
       POST http://uc.qbox.me/referAntiLeech
@@ -804,6 +797,34 @@ pattern 详解：
       HTTP/1.1 200 OK
       Content-Type: application/json
       Cache-Control: no-store
+
+
+
+<a name="download-if-notfound"></a>
+
+#### 4.5 自定义 404 NotFound
+
+可以上传一个应对HTTP 404出错处理的文件，当设置 [公有资源下载](#public-download) 后，若公开的下载链接找不到该文件，即可使用上传的“自定义404文件”。要这么做，您只须在名为 action 的表单域中将 [EncodedEntryURI](/v3/api/words/#EncodedEntryURI) 元素中的 `<Key>` 设置为固定字符串类型的值 `errno-404` 即可。
+
+
+<a name="download-by-range-bytes"></a>
+
+#### 4.6 断点续下载
+
+断点续下载协议标准参考：<http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.35>
+
+七牛云存储按以上标准支持断点续下载，只需在 HTTP 请求下载链接的头部附带 `Range` 字段即可。
+
+    Range: bytes=<first-byte-pos>-<last-byte-pos>
+
+**参数**
+
+`<first-byte-pos>`
+: 起始位置，从数字零（0）开始计算。
+
+`<last-byte-pos>`
+: 断点续下载中，最后一个字节所在的位置。
+
 
 <a name="stat"></a>
 
@@ -831,9 +852,57 @@ pattern 详解：
 `<EncodedEntryURI>`
 : 指定的具体文件，必填。参考：[EncodedEntryURI](/v3/api/words/#EncodedEntryURI)
 
+
+<a name="copy"></a>
+
+### 6. 复制文件
+
+      HTTP/1.1
+      POST http://rs.qbox.me/copy/<EncodedEntryURISrc>/<EncodedEntryURIDest>
+      Content-Type: application/x-www-form-urlencoded
+      Request Headers: {
+          Authorization: QBox <AccessToken>
+      }
+
+      HTTP/1.1 200 OK
+      Content-Type: application/json
+      Cache-Control: no-store
+
+**请求参数**
+
+`<EncodedEntryURISrc>`
+: 指定的具体的源文件，必填，`urlsafe_base64_encode(bucket:key)` 形式。参考：[EncodedEntryURI](/v3/api/words/#EncodedEntryURI)
+
+`<EncodedEntryURIDest>`
+: 指定的具体的目标文件，必填，`urlsafe_base64_encode(bucket:key)` 形式。参考：[EncodedEntryURI](/v3/api/words/#EncodedEntryURI)
+
+<a name="move"></a>
+
+### 7. 移动文件
+
+      HTTP/1.1
+      POST http://rs.qbox.me/move/<EncodedEntryURISrc>/<EncodedEntryURIDest>
+      Content-Type: application/x-www-form-urlencoded
+      Request Headers: {
+          Authorization: QBox <AccessToken>
+      }
+
+      HTTP/1.1 200 OK
+      Content-Type: application/json
+      Cache-Control: no-store
+
+**请求参数**
+
+`<EncodedEntryURISrc>`
+: 指定的具体的源文件，必填，`urlsafe_base64_encode(bucket:key)` 形式。参考：[EncodedEntryURI](/v3/api/words/#EncodedEntryURI)
+
+`<EncodedEntryURIDest>`
+: 指定的具体的目标文件，必填，`urlsafe_base64_encode(bucket:key)` 形式。参考：[EncodedEntryURI](/v3/api/words/#EncodedEntryURI)
+
+
 <a name="delete"></a>
 
-### 6. 删除指定文件
+### 8. 删除指定文件
 
       HTTP/1.1
       POST http://rs.qbox.me/delete/<EncodedEntryURI>
@@ -848,7 +917,7 @@ pattern 详解：
 
 <a name="drop"></a>
 
-### 7. 删除所有文件（整个空间/Bucket）
+### 9. 删除所有文件（整个空间/Bucket）
 
       HTTP/1.1
       POST http://rs.qbox.me/drop/<Bucket>
@@ -863,7 +932,7 @@ pattern 详解：
 
 <a name="batch"></a>
 
-### 8. 批量操作
+### 10. 批量操作
 
 **请求**
 
@@ -875,23 +944,31 @@ pattern 详解：
 
 <a name="batch-stat"></a>
 
-#### 8.1 批量获取文件基本属性信息
+#### 10.1 批量获取文件基本属性信息
 
     POST http://rs.qbox.me/batch
     Content-Type: application/x-www-form-urlencoded
     RequestBody: op=/stat/<EncodedEntryURI>&op=/stat/<EncodedEntryURI>&...
 
-<a name="batch-get"></a>
+<a name="batch-copy"></a>
 
-#### 8.2 批量获取文件授权后的临时下载链接
+#### 10.2 批量复制文件
 
     POST http://rs.qbox.me/batch
     Content-Type: application/x-www-form-urlencoded
-    RequestBody: op=/get/<EncodedEntryURI>&op=/get/<EncodedEntryURI>&...
+    RequestBody: op=/copy/<EncodedEntryURISrc>/<EncodedEntryURIDest>&op=/copy/<EncodedEntryURISrc>/<EncodedEntryURIDest>&...
+
+<a name="batch-move"></a>
+
+#### 10.3 批量移动文件
+
+    POST http://rs.qbox.me/batch
+    Content-Type: application/x-www-form-urlencoded
+    RequestBody: op=/move/<EncodedEntryURISrc>/<EncodedEntryURIDest>&op=/move/<EncodedEntryURISrc>/<EncodedEntryURIDest>&...
 
 <a name="batch-delete"></a>
 
-#### 8.3 批量删除文件
+#### 10.4 批量删除文件
 
     POST http://rs.qbox.me/batch
     Content-Type: application/x-www-form-urlencoded
@@ -911,9 +988,10 @@ pattern 详解：
         data: <Data> 或 error: <ErrorMessage string>
     }
 
+
 <a name="refresh-bucket"></a>
 
-### 9. 清除服务端缓存
+### 11. 清除指定空间缓存
 
       HTTP/1.1
       POST http://uc.qbox.me/refreshBucket
@@ -929,4 +1007,24 @@ pattern 详解：
       Content-Type: application/json
       Cache-Control: no-store
 
-您可以在 [七牛云存储开发者自助网站上为指定的存储空间一键清除缓存](https://dev.qiniutek.com/buckets)。
+您可以在 [七牛云存储开发者自助网站](https://dev.qiniutek.com/buckets) 为指定的存储空间一键清除缓存。
+
+
+<a name="list-all-buckets"></a>
+
+### 12. 列出所有空间（Buckets）
+
+      POST http://rs.qbox.me/buckets
+      Content-Type: application/x-www-form-urlencoded
+      Request Headers: {
+          Authorization: QBox <ACCESS_TOKEN>
+      }
+
+      HTTP/1.1 200 OK 
+      Content-Type: application/json
+      Cache-Control: no-store
+      
+      Response Body: [
+          <Bucket1>, <Bucket2>, …, <BucketN>
+      ]
+
