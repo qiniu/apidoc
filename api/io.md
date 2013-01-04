@@ -34,8 +34,6 @@ title: 云存储接口 | 七牛云存储
     - [样例](#resumable-upload-examples)
 - [下载文件](#download)
     - [动态获取文件授权后的临时下载链接](#get)
-    - [直接绑定域名为文件创建公开外链](#publish)
-    - [解除域名绑定取消文件的公开外链](#unpublish)
     - [断点续下载](#download-by-range-bytes)
     - [针对下载出现 404 NotFound 智能化处理](#download-if-notfound)
     - [设置源文件(比如原图)保护](#set-protected)
@@ -532,10 +530,10 @@ authInfo 中的 `scope` 字段还可以有更灵活的定义：
 
 七牛云存储以下几种权限方式的下载文件：
 
-1. 生成带下载授权凭证的URL，文件可公开临时匿名下载，但链接有生命周期，可自定义该有效期。
-2. 绑定域名，以公开外链的方式下载。
-3. 限制直接访问源文件，只限访问预处理后的目标文件。比如限制访问原图，只可访问打水印后的缩略图。
-4. 设置黑名单/白名单，仅限/或拒绝特地区域的用户访问下载。
+- 生成带下载授权凭证的URL，文件可公开临时匿名下载，但链接有生命周期，可自定义该有效期。
+- 绑定域名，以公开外链的方式下载。您可以在 [七牛云存储开发者自助网站上进行域名绑定](https://dev.qiniutek.com/buckets)。
+- 限制直接访问源文件，只限访问预处理后的目标文件。比如限制访问原图，只可访问打水印后的缩略图。
+- 设置黑名单/白名单，仅限/或拒绝特地区域的用户访问下载。
 
 <a name="get"></a>
 
@@ -570,18 +568,19 @@ downloadToken 由三部分组成：
 
 注意：尖括号“<>”表示要替换的内容，不可在实际字符串中出现。
 
-checksum 的构成为：
+`checksum`` 的构成为：
 
     checksum = "urlsafe_base64_encode(<hmac>)"
-    hmac = "sha1_hmac(<secret_key>, <scope>)"
 
-scope的构成为：
+    hmac = "sha1_hmac(<scope>, <secret_key>)"
+
+`scope` 的构成为：
 
     scope = "urlsafe_base64_encode(<json_scope>)"
 
 `urlsafe_base64_encode()` 函数的规格参考：[URLSafeBase64Encode](/v3/api/words/#URLSafeBase64Encode)
 
-json_scope 是一个 JSON 标准格式的字符串：
+`json_scope` 是一个 JSON 标准格式的字符串：
 
     {"E": <deadline>, "S": <pattern>}
 
@@ -590,6 +589,8 @@ json_scope 是一个 JSON 标准格式的字符串：
 `pattern` 为URL匹配模式，下载URL匹配该模式不成功的话，资源无法下载。
 
 注意：`pattern` 匹配完整的URL，而不是URL的子串。
+
+<a name="download-token-pattern"></a>
 
 pattern 详解：
 
@@ -605,59 +606,10 @@ pattern 详解：
 `[^a-z]` | 匹配 a-z 范围以外的任意字符 | `http://dl.example.com/[^a-z].jpg`
 `[abc\\?d]` | 匹配字符 a, b, c, `?` 或者 d | `http://dl.example.com/[abc\\?d]`
 
-<a name="publish"></a>
-
-#### 4.2 直接绑定域名为文件创建公开外链
-
-将一个存储空间 `<Bucket>` 里边的所有 `<Key>` 以静态外链的形式发布到某个指定域名 `<Domain>` 下。
-
-生成的外链地址为：`http://<Domain>/<key>` （注意 <key> 首字符是不用带斜杠的）
-
-      HTTP/1.1
-      POST http://rs.qbox.me/publish/<EncodedDomain>/from/<Bucket>
-      Content-Type: application/x-www-form-urlencoded
-      Request Headers: {
-          Authorization: QBox <AccessToken>
-      }
-
-      HTTP/1.1 200 OK
-      Content-Type: application/json
-      Cache-Control: no-store
-
-**请求参数**
-
-`<EncodedDomain>`
-: 需要绑定的目标域名，例如：cdn.example.com，需经过 [URLSafeBase64Encode](/v3/api/words/#EncodedEntryURI)。
-
-`<Bucket>`
-: 空间名称
-
-`<Domain>` 可以是真实域名，真实的 `<Domain>` 需要在 DNS 管理里边 CNAME 到 iovip.qbox.me 。
-
-由于众所周知的原因，使用 publish 接口绑定的域名若是您自己（或您公司）的域名，必须是已经备案过的。您需要将该域名备案信息发送到我们的邮箱 <support@qiniutek.com>，我们的工作人员会完成后续处理。
-
-您也可以在 [七牛云存储开发者自助网站上进行域名绑定操作](https://dev.qiniutek.com/buckets)。
-
-<a name="unpublish"></a>
-
-#### 4.3 解除域名绑定取消文件的公开外链
-
-      HTTP/1.1
-      POST http://rs.qbox.me/unpublish/<EncodedDomain>
-      Content-Type: application/x-www-form-urlencoded
-      Request Headers: {
-          Authorization: QBox <AccessToken>
-      }
-
-      HTTP/1.1 200 OK
-      Content-Type: application/json
-      Cache-Control: no-store
-
-您也可以在 [七牛云存储开发者自助网站上进行域名解绑操作](https://dev.qiniutek.com/buckets)。
 
 <a name="download-by-range-bytes"></a>
 
-#### 4.4 断点续下载
+#### 4.2 断点续下载
 
 断点续下载协议标准参考：<http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.35>
 
@@ -675,13 +627,13 @@ pattern 详解：
 
 <a name="download-if-notfound"></a>
 
-#### 4.5 针对下载出现 404 NotFound 智能化处理
+#### 4.3 针对下载出现 404 NotFound 智能化处理
 
 您可以上传一个应对HTTP 404出错处理的文件，当您 [绑定域名创建公开外链](#publish) 后，若公开的外链找不到该文件，即可使用您上传的“自定义404文件”。要这么做，您只须在名为 action 的表单域中将 [EncodedEntryURI](/v3/api/words/#EncodedEntryURI) 元素中的 `<Key>` 设置为固定字符串类型的值 `errno-404` 即可。
 
 <a name="set-protected"></a>
 
-#### 4.6 设置源文件(比如原图)保护
+#### 4.4 设置源文件(比如原图)保护
 
 您可以在 [七牛云存储开发者自助网站上为指定的存储空间设置源文件保护](https://dev.qiniutek.com/buckets)。
 
@@ -700,7 +652,7 @@ pattern 详解：
 
 <a name="pub-access-mode"></a>
 
-##### 4.6.1 为指定的存储空间设置保护模式
+##### 4.4.1 为指定的存储空间设置保护模式
 
       HTTP/1.1
       POST http://pu.qbox.me:10200/accessMode/<Bucket>/mode/<ProtectedMode>
@@ -723,7 +675,7 @@ pattern 详解：
 
 <a name="pub-separator"></a>
 
-##### 4.6.2 设置友好URL访问中的连接符
+##### 4.4.2 设置友好URL访问中的连接符
 
 以下操作在存储空间 `<ProtectedMode>=1` 时有效。
 
@@ -748,7 +700,7 @@ pattern 详解：
 
 <a name="pub-style"></a>
 
-##### 4.6.3 设置URL友好的风格样式名
+##### 4.4.3 设置URL友好的风格样式名
 
 以下操作在存储空间 `<ProtectedMode>=1` 时有效。
 
@@ -780,7 +732,7 @@ pattern 详解：
 
 <a name="pub-unstyle"></a>
 
-##### 4.6.4 取消URL友好风格的样式名访问
+##### 4.4.4 取消URL友好风格的样式名访问
 
 以下操作在存储空间 `<ProtectedMode>=1` 时有效。
 
@@ -809,13 +761,13 @@ pattern 详解：
 
 <a name="anti-theft-chain"></a>
 
-#### 4.7 防盗链设置
+#### 4.5 防盗链设置
 
 您可以在 [七牛云存储开发者自助网站上为指定的存储空间进行防盗链设置](https://dev.qiniutek.com/buckets)。
 
 <a name="uc-antiLeechMode"></a>
 
-##### 4.7.1 设置防盗链模式
+##### 4.5.1 设置防盗链模式
 
       HTTP/1.1
       POST http://uc.qbox.me/antiLeechMode
@@ -834,7 +786,7 @@ pattern 详解：
 
 <a name="uc-referAntiLeech"></a>
 
-##### 4.7.2 更新防盗链记录值
+##### 4.5.2 更新防盗链记录值
 
       HTTP/1.1
       POST http://uc.qbox.me/referAntiLeech
