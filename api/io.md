@@ -100,7 +100,8 @@ title: 云存储接口 | 七牛云存储
         callbackUrl: <callbackUrl string>,
         callbackBodyType: <callbackBodyType string>,
         customer: <EndUserId string>,
-        escape: <0|1>
+        escape: <0|1>,
+        asyncOps: <asyncOps string>
     }
 
     // 步骤2：编码元数据
@@ -124,8 +125,11 @@ callbackUrl | string | 可选 | 定义文件上传完毕后，云存储服务端
 callbackBodyType | string | 可选 | 为执行远程回调指定Content-Type，比如可以是：application/x-www-form-urlencoded
 customer | string | 可选 | 给上传的文件添加唯一属主标识，特殊场景下非常有用，比如根据终端用户标识给图片打水印
 escape | int | 可选 | 可选值 0 或者 1，缺省为 0。值为 1 表示 callback 传递的自定义数据中允许存在转义符号 `$(VarExpression)`，参考 [VarExpression](/v3/api/words/#VarExpression)。
+asyncOps | string | 可选 | 指定文件（图片/音频/视频）上传成功后异步地执行指定的预转操作。每个预转指令是一个API规格字符串，多个预转指令可以使用分号“;”隔开。
 
 <a name="escape-expression"></a>
+
+**escape**
 
 当 `escape` 的值为 `1` 时，常见的转义语法如下：
 
@@ -137,7 +141,38 @@ escape | int | 可选 | 可选值 0 或者 1，缺省为 0。值为 1 表示 cal
 
     `foo=bar&size=$(fsize)&etag=$(etag)&w=$(imageInfo.width)&h=$(imageInfo.height)&exif=$(exif)`
 
-authInfo 中的 `scope` 字段还可以有更灵活的定义：
+<a name="uploadToken-asyncOps"></a>
+
+**asyncOps**
+
+`asyncOps` 预转示例参见如下说明。
+
+==上传==
+
+1. 假定 `asyncOps = "avthumb/mp3/ar/44100/ab/32k;avthumb/mp3/aq/6/ar/16000"`
+2. 以此生成带有预转功能的上传授权凭证（UploadToken）
+3. 向七牛云存储上传一个 aac 格式的音频文件
+4. 传成功后，服务器会对这个 aac 音频文件异步地做如下两个预转操作
+    - `avthumb/mp3/ar/44100/ab/32k`
+    - `avthumb/mp3/aq/6/ar/16000`
+
+==下载==
+
+依然可以通过 `http://<绑定域名>/<key>` 的形式下载：
+
+- `http://<bucket>.qiniudn.com/<key>?avthunm/mp3/ar/44100/ab/32k`
+- `http://<bucket>.qiniudn.com/<key>?avthumb/mp3/aq/6/ar/16000`
+
+如果之前上传已经成功做完预转，那么此次下载就不需要转换，将会直接下载预转后的结果文件。
+
+图片、视频预转类似，开发者需要熟悉七牛云存储 [图像处理接口](/v3/api/foimg/) 和 [音视频处理接口](/v3/api/avfmt/) 。
+
+注意：预转后的下载链接不一定是问号传参形式，如果预转指令有定义别名，同样可以使用别名的友好URL风格形式访问。
+
+
+**authInfo**
+
+`authInfo` 中的 `scope` 字段还可以有更灵活的定义：
 
 - 若为空，表示可以上传到任意Bucket（仅限于新增文件）
 - 若为"Bucket"，表示限定只能传到该Bucket（仅限于新增文件）
