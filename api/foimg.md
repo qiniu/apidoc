@@ -287,7 +287,7 @@ y 为正数时为从源图区域左上角的纵坐标，为负数时，左上角
 `<Mode>` = 1 时，表示图片水印：
 
     [GET] <ImageDownloadURL>?watermark/1 \ 
-                             /image/<EncodedImageURI> \
+                             /image/<EncodedImageURL> \
                              /dissolve/<Dissolve> \
                              /gravity/<Gravity> \
                              /dx/<DistanceX> \
@@ -299,8 +299,8 @@ y 为正数时为从源图区域左上角的纵坐标，为负数时，左上角
 
     [GET] <ImageDownloadURL>?watermark/2 \
                              /text/<EncodedText> \
-                             /font/<FontName> \
-                             /pointsize/<PointSize> \
+                             /font/<EncodedFontName> \
+                             /pointsize/<FontSize> \
                              /fill/<TextColor> \
                              /dissolve/<Dissolve> \
                              /gravity/<Gravity> \
@@ -312,23 +312,23 @@ y 为正数时为从源图区域左上角的纵坐标，为负数时，左上角
 
 **参数**
 
-`<EncodedImageURI>`
-: 水印图片，使用图片水印时需指定水印图片所在位置。其中 `EncodedImageURI = urlsafe_base64_encode(bucket:key)`。`urlsafe_base64_encode()` 参考 [URLSafeBase64Encode](/v3/api/words/#URLSafeBase64Encode)。 
+`<EncodedImageURL>`
+: 水印图片，使用图片水印时需指定用于水印的远程图片URL，需经过 [URLSafeBase64Encode](/v3/api/words/#URLSafeBase64Encode) 编码。即 `EncodedImageURL = URLSafeBase64Encode(stringImageURL)`。
 
 `<EncodedText>`
-: 水印文本，文字水印时必须。
+: 水印文本，文字水印时必须，需经过 [URLSafeBase64Encode](/v3/api/words/#URLSafeBase64Encode) 编码。即 `EncodedText = URLSafeBase64Encode(stringText)`。
 
-`<FontName>`
-: 字体名，可选。
+`<EncodedFontName>`
+: 字体名，可选，需经过 [URLSafeBase64Encode](/v3/api/words/#URLSafeBase64Encode) 编码。即 `EncodedFontName = URLSafeBase64Encode(stringFontName)`。
 
-`<PointSize>`
+`<FontSize>`
 : 字体大小，可选，0 表示默认，单位: 缇，等于 1/20 磅。
 
 `<TextColor>`
-: 字体颜色，可选。
+: 字体颜色，可选，字符串。RGB格式，可以是颜色名称（比如 `red`）或十六进制（比如 `#FF0000`），参考 [RGB颜色编码表](http://www.rapidtables.com/web/color/RGB_Color.htm)。
 
 `<Dissolve>`
-: 透明度，可选，字符串，如 50%。
+: 透明度，可选，取值范围 1-100，默认值 `100`，即表示 100%（不透明）。
 
 `<Gravity>`
 : 位置，可选，字符串，默认值为 `SouthEast`（右下角）。可选值：`NorthWest`, `North`, `NorthEast`, `West`, `Center`, `East`, `SouthWest`, `South`, `SouthEast` 。
