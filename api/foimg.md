@@ -6,11 +6,12 @@ title: 图像处理接口 | 七牛云存储
 
 ## 目录
 
-- [获取图片基本信息](#fo-imageInfo)
-- [获取图片EXIF信息](#fo-imageExif)
-- [生成指定规格的缩略图](#fo-imageView)
-- [高级图像处理接口（缩略、裁剪、旋转、转化）](#fo-imageMogr)
-- [高级图像处理接口（缩略、裁剪、旋转、转化）并持久化存储处理结果](#fo-imageMogrAs)
+- [获取图片基本信息](#imageInfo)
+- [获取图片EXIF信息](#imageExif)
+- [生成指定规格的缩略图](#imageView)
+- [高级图像处理接口（缩略、裁剪、旋转、转化）](#imageMogr)
+- [高级图像处理接口（缩略、裁剪、旋转、转化）并持久化存储处理结果](#imageMogrAs)
+- [图像水印接口](#watermark)
 
 
 ## 说明
@@ -21,7 +22,7 @@ title: 图像处理接口 | 七牛云存储
 
 ## 协议
 
-<a name="fo-imageInfo"></a>
+<a name="imageInfo"></a>
 
 ### 1. 获取图片基本信息
 
@@ -42,7 +43,7 @@ title: 图像处理接口 | 七牛云存储
         colorModel: <ImageColorModel> // "palette16", "ycbcr", etc.
     }
 
-<a name="fo-imageExif"></a>
+<a name="imageExif"></a>
 
 ### 2. 获取图片EXIF信息
 
@@ -61,13 +62,21 @@ title: 图像处理接口 | 七牛云存储
     }
 
 
-<a name="fo-imageView"></a>
+<a name="imageView"></a>
 
 ### 3. 生成指定规格的缩略图
 
 **请求**
 
-    GET <ImageDownloadURL>?imageView/<mode>/w/<Width>/h/<Height>/q/<Quality>/format/<Format>/sharpen/<Sharpen>/watermark/<HasWatermark>
+    [GET] <ImageDownloadURL>?imageView/<mode> \
+                             /w/<Width> \
+                             /h/<Height> \
+                             /q/<Quality> \
+                             /format/<Format> \
+                             /watermark/<HasWatermark>
+
+（注意：反斜杠（\）因排版换行需要，实际情况下请忽略）
+
 
 **响应**
 
@@ -95,9 +104,6 @@ title: 图像处理接口 | 七牛云存储
 
 `<Format>`
 : 指定目标缩略图的输出格式，取值范围：jpg, gif, png, tif 等图片格式
-
-`<Sharpen>`
-: 指定目标缩略图的锐化指数，值为正整数，此数值越大，锐化度越高，图像细节损失越大
 
 `<HasWatermark>`
 : 是否打水印，`<HasWatermark>` 可选值为 0 或者 1。为 0 或不传入 `/watermark/<HasWatermark>` 时表示不打水印；值为 1 时 即 `/watermark/1` 时表示取相应的水印模板进行打水印处理。水印模板设置会在后面介绍。
@@ -141,7 +147,7 @@ title: 图像处理接口 | 七牛云存储
 [![限定高度为 200px, 宽度等比缩略自适应](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageView/2/h/200)](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageView/2/h/200)
 
 
-<a name="fo-imageMogr"></a>
+<a name="imageMogr"></a>
 
 ### 4. 高级图像处理接口（缩略、裁剪、旋转、转化）
 
@@ -149,17 +155,17 @@ title: 图像处理接口 | 七牛云存储
 
 **请求**
 
-    GET <ImageDownloadURL>?imageMogr
+    [GET] <ImageDownloadURL>?imageMogr \
+          /thumbnail/<ImageSizeGeometry> \
+          /gravity/<GravityType> =NorthWest, North, NorthEast, West, Center, East, SouthWest, South, SouthEast \
+          /crop/<ImageSizeAndOffsetGeometry> \
+          /quality/<ImageQuality> \
+          /rotate/<RotateDegree> \
+          /format/<DestinationImageFormat> =jpg, gif, png, tif, etc. \
+          /auto-orient
 
-        /thumbnail/<ImageSizeGeometry>
-        /gravity/<GravityType> =NorthWest, North, NorthEast, West, Center, East, SouthWest, South, SouthEast
-        /crop/<ImageSizeAndOffsetGeometry>
-        /quality/<ImageQuality>
-        /rotate/<RotateDegree>
-        /format/<DestinationImageFormat> =jpg, gif, png, tif, etc.
-        /auto-orient
+（注意：反斜杠（\）因排版换行需要，实际情况下请忽略）
 
-注意，以上规格实际上为一行字符串，为了排版展示所以多行隔开陈述。
 
 **响应**
 
@@ -168,7 +174,13 @@ title: 图像处理接口 | 七牛云存储
 
 示例：
 
-    GET <ImageDownloadURL>?imageMogr/auto-orient/thumbnail/!50x50r/gravity/center/crop/!50x50/quality/80
+    [GET] <ImageDownloadURL>?imageMogr/auto-orient \
+                             /thumbnail/!50x50r \
+                             /gravity/center \
+                             /crop/!50x50 \
+                             /quality/80
+
+（注意：反斜杠（\）因排版换行需要，实际情况下请忽略）
 
 如此可对 \<ImageDownloadURL\> 文件进行缩略，根据原图EXIF信息进行自动旋转调正，并裁剪为 50x50 大小且以原图片格式压缩品质为80进行输出。
 
@@ -225,7 +237,7 @@ y 为正数时为从源图区域左上角的纵坐标，为负数时，左上角
 这个源图可以是 `/thumbnail/<ImageSizeGeometry>` 参数处理过后的图片，意味着 `thumbnail` 和 `crop` 之间的操作可以链式处理。
 
 
-<a name="fo-imageMogrAs"></a>
+<a name="imageMogrAs"></a>
 
 ### 5. 高级图像处理接口（缩略、裁剪、旋转、转化）并持久化存储处理结果
 
@@ -235,17 +247,17 @@ y 为正数时为从源图区域左上角的纵坐标，为负数时，左上角
 
 **请求**
 
-    POST <ImageDownloadURL>?imageMogr
-        /thumbnail/<ImageSizeGeometry>
-        /gravity/<GravityType> =NorthWest, North, NorthEast, West, Center, East, SouthWest, South, SouthEast
-        /crop/<ImageSizeAndOffsetGeometry>
-        /quality/<ImageQuality>
-        /rotate/<RotateDegree>
-        /format/<DestinationImageFormat> =jpg, gif, png, tif, etc.
-        /auto-orient
-        /save-as/<EncodedEntryURI>
+    [POST] <ImageDownloadURL>?imageMogr \
+           /thumbnail/<ImageSizeGeometry> \
+           /gravity/<GravityType> =NorthWest, North, NorthEast, West, Center, East, SouthWest, South, SouthEast \
+           /crop/<ImageSizeAndOffsetGeometry> \
+           /quality/<ImageQuality> \
+           /rotate/<RotateDegree> \
+           /format/<DestinationImageFormat> =jpg, gif, png, tif, etc. \
+           /auto-orient \
+           /save-as/<EncodedEntryURI>
 
-注意，以上规格实际上为一行字符串，为了排版展示所以多行隔开陈述。
+（注意：反斜杠（\）因排版换行需要，实际情况下请忽略）
 
 **参数**
 
@@ -260,3 +272,69 @@ y 为正数时为从源图区域左上角的纵坐标，为负数时，左上角
 
     200 OK
     {"hash" => "FrOXNat8VhBVmcMF3uGrILpTu8Cs"}
+
+
+<a name="watermark"></a>
+
+### 6. 图像水印接口
+
+**请求**
+
+    [GET] <ImageDownloadURL>?watermark/<Mode>/xxx
+
+其中，`<ImageDownloadURL>` 必须返回一张图片。
+
+`<Mode>` = 1 时，表示图片水印：
+
+    [GET] <ImageDownloadURL>?watermark/1 \ 
+                             /image/<EncodedImageURI> \
+                             /dissolve/<Dissolve> \
+                             /gravity/<Gravity> \
+                             /dx/<DistanceX> \
+                             /dy/<DistanceY>
+
+（注意：反斜杠（\）因排版换行需要，实际情况下请忽略）
+
+`<Mode>` = 2 时，表示纯文本水印：
+
+    [GET] <ImageDownloadURL>?watermark/2 \
+                             /text/<EncodedText> \
+                             /font/<FontName> \
+                             /pointsize/<PointSize> \
+                             /fill/<TextColor> \
+                             /dissolve/<Dissolve> \
+                             /gravity/<Gravity> \
+                             /dx/<DistanceX> \
+                             /dy/<DistanceY>
+
+（注意：反斜杠（\）因排版换行需要，实际情况下请忽略）
+
+
+**参数**
+
+`<EncodedImageURI>`
+: 水印图片，使用图片水印时需指定水印图片所在位置。其中 `EncodedImageURI = urlsafe_base64_encode(bucket:key)`。`urlsafe_base64_encode()` 参考 [URLSafeBase64Encode](/v3/api/words/#URLSafeBase64Encode)。 
+
+`<EncodedText>`
+: 水印文本，文字水印时必须。
+
+`<FontName>`
+: 字体名，可选。
+
+`<PointSize>`
+: 字体大小，可选，0 表示默认，单位: 缇，等于 1/20 磅。
+
+`<TextColor>`
+: 字体颜色，可选。
+
+`<Dissolve>`
+: 透明度，可选，字符串，如 50%。
+
+`<Gravity>`
+: 位置，可选，字符串，默认值为 `SouthEast`（右下角）。可选值：`NorthWest`, `North`, `NorthEast`, `West`, `Center`, `East`, `SouthWest`, `South`, `SouthEast` 。
+
+`<DistanceX>`
+: 横向边距，可选，单位：像素（px），默认值为 10。
+
+`<DistanceY>`
+: 纵向边距，可选，单位：像素（px），默认值为 10。

@@ -66,12 +66,12 @@ title: API | 七牛云存储
 
 [**图像处理接口**](/v3/api/foimg/)
 
-- [获取图片基本信息](/v3/api/foimg/#fo-imageInfo)
-- [获取图片EXIF信息](/v3/api/foimg/#fo-imageExif)
-- [生成指定规格的缩略图](/v3/api/foimg/#fo-imageView)
-- [高级图像处理接口（缩略、裁剪、旋转、转化）](/v3/api/foimg/#fo-imageMogr)
-- [高级图像处理接口（缩略、裁剪、旋转、转化）并持久化存储处理结果](/v3/api/foimg/#fo-imageMogrAs)
-
+- [获取图片基本信息](/v3/api/foimg/#imageInfo)
+- [获取图片EXIF信息](/v3/api/foimg/#imageExif)
+- [生成指定规格的缩略图](/v3/api/foimg/#imageView)
+- [高级图像处理接口（缩略、裁剪、旋转、转化）](/v3/api/foimg/#imageMogr)
+- [高级图像处理接口（缩略、裁剪、旋转、转化）并持久化存储处理结果](/v3/api/foimg/#imageMogrAs)
+- [图像水印接口](/v3/api/foimg/#watermark)
 
 [**理解常用术语**](/v3/api/words/)
 
