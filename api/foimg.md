@@ -72,8 +72,7 @@ title: 图像处理接口 | 七牛云存储
                              /w/<Width> \
                              /h/<Height> \
                              /q/<Quality> \
-                             /format/<Format> \
-                             /watermark/<HasWatermark>
+                             /format/<Format>
 
 （注意：反斜杠（\）因排版换行需要，实际情况下请忽略）
 
@@ -105,9 +104,6 @@ title: 图像处理接口 | 七牛云存储
 `<Format>`
 : 指定目标缩略图的输出格式，取值范围：jpg, gif, png, tif 等图片格式
 
-`<HasWatermark>`
-: 是否打水印，`<HasWatermark>` 可选值为 0 或者 1。为 0 或不传入 `/watermark/<HasWatermark>` 时表示不打水印；值为 1 时 即 `/watermark/1` 时表示取相应的水印模板进行打水印处理。水印模板设置会在后面介绍。
-
 **示例**
 
 示例1：针对原图进行缩略，并从缩略图的中央部位裁剪为 200x200 的缩略图：
@@ -116,31 +112,19 @@ title: 图像处理接口 | 七牛云存储
 
 [![200x200](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageView/1/w/200/h/200)](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageView/1/w/200/h/200)
 
-示例2：针对原图进行缩略，并从缩略图的中央部位裁剪为 200x200，图像质量为 1，gif 格式的缩略图：
-
-    http://qiniuphotos.qiniudn.com/gogopher.jpg?imageView/1/w/200/h/200/q/1/format/gif
-
-[![200x200，图像质量:1，格式:gif](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageView/1/w/200/h/200/q/1/format/gif)](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageView/1/w/200/h/200/q/1/format/gif)
-
-示例3：针对原图进行缩略，并从缩略图的中央部位裁剪为 200x200，图像质量为 85，格式为 png，锐度指数为 10 的缩略图：
-
-    http://qiniuphotos.qiniudn.com/gogopher.jpg?imageView/1/w/200/h/200/q/85/format/png/sharpen/10
-
-[![200x200，图像质量:85，格式:png，锐度:10](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageView/1/w/200/h/200/q/85/format/png/sharpen/10)](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageView/1/w/200/h/200/q/85/format/png/sharpen/10)
-
-示例4：针对原图进行缩略，并限定目标缩略图的长边为 200 px，短边自适应，缩略图宽和高都不会超出 200px：
+示例2：针对原图进行缩略，并限定目标缩略图的长边为 200 px，短边自适应，缩略图宽和高都不会超出 200px：
 
     http://qiniuphotos.qiniudn.com/gogopher.jpg?imageView/2/w/200/h/200
 
 [![限定长边为 200px，短边自适应，宽和高都不会超出 200px](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageView/2/w/200/h/200)](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageView/2/w/200/h/200)
 
-示例5：针对原图进行缩略，并限定目标缩略图的宽度为 200px，高度等比缩略自适应：
+示例3：针对原图进行缩略，并限定目标缩略图的宽度为 200px，高度等比缩略自适应：
 
     http://qiniuphotos.qiniudn.com/gogopher.jpg?imageView/2/w/200
 
 [![限定宽度为 200px, 高度等比缩略自适应](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageView/2/w/200)](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageView/2/w/200)
 
-示例6：针对原图进行缩略，并限定目标缩略图的高度为 200px，宽度等比缩略自适应：
+示例4：针对原图进行缩略，并限定目标缩略图的高度为 200px，宽度等比缩略自适应：
 
     http://qiniuphotos.qiniudn.com/gogopher.jpg?imageView/2/h/200
 
@@ -174,15 +158,17 @@ title: 图像处理接口 | 七牛云存储
 
 示例：
 
-    [GET] <ImageDownloadURL>?imageMogr/auto-orient \
-                             /thumbnail/!50x50r \
-                             /gravity/center \
-                             /crop/!50x50 \
-                             /quality/80
+    [GET] http://qiniuphotos.qiniudn.com/gogopher.jpg?imageMogr \
+                /thumbnail/!256x256r \
+                /gravity/center \
+                /crop/!256x256 \
+                /quality/80 \
+                /rotate/45 \
+                /auto-orient \
 
 （注意：反斜杠（\）因排版换行需要，实际情况下请忽略）
 
-如此可对 \<ImageDownloadURL\> 文件进行缩略，根据原图EXIF信息进行自动旋转调正，并裁剪为 50x50 大小且以原图片格式压缩品质为80进行输出。
+![[高级图像处理](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageMogr/auto-orient/thumbnail/!256x256r/gravity/center/crop/!256x256/quality/80/rotate/45)](http://qiniuphotos.qiniudn.com/gogopher.jpg?imageMogr/auto-orient/thumbnail/!256x256r/gravity/center/crop/!256x256/quality/80/rotate/45)
 
 您可能留意到部分参数以 ! 开头，这是参数被转义的标识。为了方便阅读，我们采用了特殊的转义方法。以下是转义符号列表：
 
@@ -300,8 +286,8 @@ y 为正数时为从源图区域左上角的纵坐标，为负数时，左上角
     [GET] <ImageDownloadURL>?watermark/2 \
                              /text/<EncodedText> \
                              /font/<EncodedFontName> \
-                             /pointsize/<FontSize> \
-                             /fill/<TextColor> \
+                             /fontsize/<FontSize> \
+                             /fill/<EncodedTextColor> \
                              /dissolve/<Dissolve> \
                              /gravity/<Gravity> \
                              /dx/<DistanceX> \
@@ -316,7 +302,7 @@ y 为正数时为从源图区域左上角的纵坐标，为负数时，左上角
 : 水印图片，使用图片水印时需指定用于水印的远程图片URL，需经过 [URLSafeBase64Encode](/v3/api/words/#URLSafeBase64Encode) 编码。即 `EncodedImageURL = URLSafeBase64Encode(stringImageURL)`。
 
 `<EncodedText>`
-: 水印文本，文字水印时必须，需经过 [URLSafeBase64Encode](/v3/api/words/#URLSafeBase64Encode) 编码。即 `EncodedText = URLSafeBase64Encode(stringText)`。
+: 水印文本，文字水印时必须，需经过 [URLSafeBase64Encode](/v3/api/words/#URLSafeBase64Encode) 编码。即 `EncodedText = URLSafeBase64Encode(stringText)`。注意：若水印文本为非英文字符（比如中文）构成，需要严格指定字体名称（`/font/<EncodedFontName>`）。
 
 `<EncodedFontName>`
 : 字体名，可选，需经过 [URLSafeBase64Encode](/v3/api/words/#URLSafeBase64Encode) 编码。即 `EncodedFontName = URLSafeBase64Encode(stringFontName)`。
@@ -324,8 +310,8 @@ y 为正数时为从源图区域左上角的纵坐标，为负数时，左上角
 `<FontSize>`
 : 字体大小，可选，0 表示默认，单位: 缇，等于 1/20 磅。
 
-`<TextColor>`
-: 字体颜色，可选，字符串。RGB格式，可以是颜色名称（比如 `red`）或十六进制（比如 `#FF0000`），参考 [RGB颜色编码表](http://www.rapidtables.com/web/color/RGB_Color.htm)。
+`<EncodedTextColor>`
+: 字体颜色，可选，字符串，需经过 [URLSafeBase64Encode](/v3/api/words/#URLSafeBase64Encode) 编码，即 `EncodedTextColor = URLSafeBase64Encode(stringTextColor)`。RGB格式，可以是颜色名称（比如 `red`）或十六进制（比如 `#FF0000`），参考 [RGB颜色编码表](http://www.rapidtables.com/web/color/RGB_Color.htm)。
 
 `<Dissolve>`
 : 透明度，可选，取值范围 1-100，默认值 `100`，即表示 100%（不透明）。
@@ -338,3 +324,73 @@ y 为正数时为从源图区域左上角的纵坐标，为负数时，左上角
 
 `<DistanceY>`
 : 纵向边距，可选，单位：像素（px），默认值为 10。
+
+**示例**
+
+图片水印样例
+ 
+ - 水印图片: <http://www.qiniutek.com/images/logo-2.png>
+     - `stringImageURL = "http://www.qiniutek.com/images/logo-2.png"`
+     - `EncodedImageURL = URLSafeBase64Encode(stringImageURL)`
+ - 水印透明度: 50% (`dissolve=50`)
+ - 水印位置: 右下角 (`gravity=SouthEast`)
+ - 横向边距: 20px
+ - 纵向边距: 20px
+ 
+[![图片水印](http://qiniuphotos.qiniudn.com/gogopher.jpg?watermark/1/image/aHR0cDovL3d3dy5xaW5pdXRlay5jb20vaW1hZ2VzL2xvZ28tMi5wbmc=/dissolve/50/gravity/SouthEast/dx/20/dy/20)](http://qiniuphotos.qiniudn.com/gogopher.jpg?watermark/1/image/aHR0cDovL3d3dy5xaW5pdXRlay5jb20vaW1hZ2VzL2xvZ28tMi5wbmc=/dissolve/50/gravity/SouthEast/dx/20/dy/20)
+
+点击以上图片获得链接可以查看水印生成的具体规格参数。
+
+
+文字水印样例
+
+- 水印文本：`七牛云存储`
+- 水印文本字体：`宋体`
+- 水印文本字体大小：`1000`
+- 水印文本颜色：`white`
+- 水印文本透明度：15% (`dissolve=85`)
+- 水印文本位置：右下脚 (`gravity=SouthEast`)
+
+[![文字水印](http://qiniuphotos.qiniudn.com/gogopher.jpg?watermark/2/text/5LiD54mb5LqR5a2Y5YKo/font/5a6L5L2T/fontsize/1000/fill/white/dissolve/85/gravity/SouthEast/dx/20/dy/20)](http://qiniuphotos.qiniudn.com/gogopher.jpg?watermark/2/text/5LiD54mb5LqR5a2Y5YKo/font/5a6L5L2T/fontsize/1000/fill/white/dissolve/85/gravity/SouthEast/dx/20/dy/20)
+
+点击以上图片获得链接可以查看水印生成的具体规格参数。
+
+**优化建议**
+
+- 1.图片上传完毕后，可异步进行水印预转，这样不必在初次访问时进行水印处理，访问速度更快。
+    - 参考 [uploadToken 之 asyncOps](/v3/api/io/#uploadToken-asyncOps) ，可以查看 SDK 提供的生成上传授权凭证（uploadToken）函数是否有实现该选项。
+
+- 2.给图片链接中的水印规格添加别名，使得URL更加友好。
+    - 设置别名，可使用 [qboxrsctl style 命令](/v3/tools/qboxrsctl/#style)
+    - 查看别名规格，可使用 [qboxrsctl bucketinfo 命令](/v3/tools/qboxrsctl/#bucketinfo)
+
+  示例
+
+    `qboxrsctl login <email> <password>`  
+    
+    `qboxrsctl style <bucket> watermarked.jpg watermark/2/text/<EncodedText>`  
+    
+    `qboxrsctl separator <bucket> -` 
+
+  此时，如下两个 URL 等价:
+  
+    `http://<Domain>/<Key>?watermark/2/text/<EncodedText>`  
+    
+    `http://<Domain>/<Key>-watermarked.jpg`    
+  
+
+- 3.设置原图保护，仅限使用缩略图样式别名的友好URL形式来访问目标图片。
+    - 设置原图保护，可使用 [qboxrsctl protected 命令](/v3/tools/qboxrsctl/#protected)
+    - 也可在 <https://dev.qiniutek.com/buckets> 操作。
+
+  设置原图保护后，原图不能访问：
+  
+    `http://<Domain>/<Key>`
+
+  同时也禁止根据图像处理API对原图进行参数枚举：
+
+    `http://<Domain>/<Key>?watermark/2/text/<EncodedText>`
+
+  此时只能访问指定规格的图片资源：
+
+    `http://<Domain>/<Key>-watermarked.jpg`
