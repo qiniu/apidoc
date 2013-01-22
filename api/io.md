@@ -73,7 +73,7 @@ title: 云存储接口 | 七牛云存储
 **参数**
 
 `<Bucket>`
-: 具体的空间名称，仅限[a-zA-Z0-9_]组合。
+: 具体的空间名称，仅限[a-zA-Z0-9_-]组合。
 
 如果您不想通过 API 创建空间，也可以直接在七牛云存储开发者网站上直接 [新建空间](https://dev.qiniutek.com/buckets/new)。
 
@@ -120,7 +120,7 @@ title: 云存储接口 | 七牛云存储
 
 字段名 | 类型 | 是否必须 | 说明
 ----- | --- | ------- | ----
-scope | string | 可选 | 一般指定文件要上传到的目标存储空间（Bucket）
+scope | string | 必选 | 一般指文件要上传到的目标存储空间（Bucket）。`scope` 字段还可以有更灵活的定义：若为"Bucket"，表示限定只能传到该Bucket（仅限于新增文件）；若为"Bucket:Key"，表示限定特定的文档，可新增或修改文件。
 deadline | int64 | 必须 | 定义 uploadToken 的失效时间，Unix时间戳，精确到秒
 callbackUrl | string | 可选 | 定义文件上传完毕后，云存储服务端执行回调的远程URL
 callbackBodyType | string | 可选 | 为执行远程回调指定Content-Type，比如可以是：application/x-www-form-urlencoded
@@ -209,15 +209,6 @@ returnBody | string | 可选 | 文件上传成功后，自定义从七牛云存�
 图片、视频预转类似，开发者需要熟悉七牛云存储 [图像处理接口](/v3/api/foimg/) 和 [音视频处理接口](/v3/api/avfmt/) 。
 
 注意：预转后的下载链接不一定是问号传参形式，如果预转指令有定义别名，同样可以使用别名的友好URL风格形式访问。
-
-
-**authInfo**
-
-`authInfo` 中的 `scope` 字段还可以有更灵活的定义：
-
-- 若为空，表示可以上传到任意Bucket（仅限于新增文件）
-- 若为"Bucket"，表示限定只能传到该Bucket（仅限于新增文件）
-- 若为"Bucket:Key"，表示限定特定的文档，可新增或修改文件
 
 
 **步骤2**
