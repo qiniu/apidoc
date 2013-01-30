@@ -140,13 +140,13 @@ title: 图像处理接口 | 七牛云存储
 **请求**
 
     [GET] <ImageDownloadURL>?imageMogr \
+          /auto-orient \
           /thumbnail/<ImageSizeGeometry> \
           /gravity/<GravityType> =NorthWest, North, NorthEast, West, Center, East, SouthWest, South, SouthEast \
           /crop/<ImageSizeAndOffsetGeometry> \
           /quality/<ImageQuality> \
           /rotate/<RotateDegree> \
-          /format/<DestinationImageFormat> =jpg, gif, png, tif, etc. \
-          /auto-orient
+          /format/<DestinationImageFormat> =jpg, gif, png, tif, etc.
 
 （注意：反斜杠（\）因排版换行需要，实际情况下请忽略）
 
@@ -159,12 +159,12 @@ title: 图像处理接口 | 七牛云存储
 示例：
 
     [GET] http://qiniuphotos.qiniudn.com/gogopher.jpg?imageMogr \
+                /auto-orient \
                 /thumbnail/!256x256r \
                 /gravity/center \
                 /crop/!256x256 \
                 /quality/80 \
-                /rotate/45 \
-                /auto-orient \
+                /rotate/45
 
 （注意：反斜杠（\）因排版换行需要，实际情况下请忽略）
 
@@ -234,13 +234,13 @@ y 为正数时为从源图区域左上角的纵坐标，为负数时，左上角
 **请求**
 
     [POST] <ImageDownloadURL>?imageMogr \
+           /auto-orient \
            /thumbnail/<ImageSizeGeometry> \
            /gravity/<GravityType> =NorthWest, North, NorthEast, West, Center, East, SouthWest, South, SouthEast \
            /crop/<ImageSizeAndOffsetGeometry> \
            /quality/<ImageQuality> \
            /rotate/<RotateDegree> \
            /format/<DestinationImageFormat> =jpg, gif, png, tif, etc. \
-           /auto-orient \
            /save-as/<EncodedEntryURI>
 
 （注意：反斜杠（\）因排版换行需要，实际情况下请忽略）
@@ -272,7 +272,7 @@ y 为正数时为从源图区域左上角的纵坐标，为负数时，左上角
 
 `<Mode>` = 1 时，表示图片水印：
 
-    [GET] <ImageDownloadURL>?watermark/1 \ 
+    [GET] <ImageDownloadURL>?watermark/1 \
                              /image/<EncodedImageURL> \
                              /dissolve/<Dissolve> \
                              /gravity/<Gravity> \
@@ -328,7 +328,7 @@ y 为正数时为从源图区域左上角的纵坐标，为负数时，左上角
 **示例**
 
 图片水印样例
- 
+
  - 水印图片: <http://www.qiniutek.com/images/logo-2.png>
      - `stringImageURL = "http://www.qiniutek.com/images/logo-2.png"`
      - `EncodedImageURL = URLSafeBase64Encode(stringImageURL)`
@@ -336,7 +336,7 @@ y 为正数时为从源图区域左上角的纵坐标，为负数时，左上角
  - 水印位置: 右下角 (`gravity=SouthEast`)
  - 横向边距: 20px
  - 纵向边距: 20px
- 
+
 [![图片水印](http://qiniuphotos.qiniudn.com/gogopher.jpg?watermark/1/image/aHR0cDovL3d3dy5xaW5pdXRlay5jb20vaW1hZ2VzL2xvZ28tMi5wbmc=/dissolve/50/gravity/SouthEast/dx/20/dy/20)](http://qiniuphotos.qiniudn.com/gogopher.jpg?watermark/1/image/aHR0cDovL3d3dy5xaW5pdXRlay5jb20vaW1hZ2VzL2xvZ28tMi5wbmc=/dissolve/50/gravity/SouthEast/dx/20/dy/20)
 
 点击以上图片获得链接可以查看水印生成的具体规格参数。
@@ -366,25 +366,25 @@ y 为正数时为从源图区域左上角的纵坐标，为负数时，左上角
 
   示例
 
-    `qboxrsctl login <email> <password>`  
-    
-    `qboxrsctl style <bucket> watermarked.jpg watermark/2/text/<EncodedText>`  
-    
-    `qboxrsctl separator <bucket> -` 
+    `qboxrsctl login <email> <password>`
+
+    `qboxrsctl style <bucket> watermarked.jpg watermark/2/text/<EncodedText>`
+
+    `qboxrsctl separator <bucket> -`
 
   此时，如下两个 URL 等价:
-  
-    `http://<Domain>/<Key>?watermark/2/text/<EncodedText>`  
-    
-    `http://<Domain>/<Key>-watermarked.jpg`    
-  
+
+    `http://<Domain>/<Key>?watermark/2/text/<EncodedText>`
+
+    `http://<Domain>/<Key>-watermarked.jpg`
+
 
 - 3.设置原图保护，仅限使用缩略图样式别名的友好URL形式来访问目标图片。
     - 设置原图保护，可使用 [qboxrsctl protected 命令](/v3/tools/qboxrsctl/#protected)
     - 也可在 <https://dev.qiniutek.com/buckets> 操作。
 
   设置原图保护后，原图不能访问：
-  
+
     `http://<Domain>/<Key>`
 
   同时也禁止根据图像处理API对原图进行参数枚举：
