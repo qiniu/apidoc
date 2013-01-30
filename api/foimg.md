@@ -148,7 +148,10 @@ title: 图像处理接口 | 七牛云存储
           /rotate/<RotateDegree> \
           /format/<DestinationImageFormat> =jpg, gif, png, tif, etc.
 
-（注意：反斜杠（\）因排版换行需要，实际情况下请忽略）
+注意：
+
+- 反斜杠（\）因排版换行需要，实际情况下请忽略。
+- `/auto-orient` 参数是和图像处理顺序相关的，一般建议放在首位（根据原图EXIF信息自动旋正）。
 
 
 **响应**
@@ -243,7 +246,11 @@ y 为正数时为从源图区域左上角的纵坐标，为负数时，左上角
            /format/<DestinationImageFormat> =jpg, gif, png, tif, etc. \
            /save-as/<EncodedEntryURI>
 
-（注意：反斜杠（\）因排版换行需要，实际情况下请忽略）
+注意：
+
+- 反斜杠（\）因排版换行需要，实际情况下请忽略。
+- `/auto-orient` 参数是和图像处理顺序相关的，一般建议放在首位（根据原图EXIF信息自动旋正）。
+
 
 **参数**
 
