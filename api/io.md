@@ -636,9 +636,7 @@ downloadToken 由三部分组成：
 
 `deadline` 为一个时间点，数值是1970年1月1日0点到此时间点的秒数，这个时间点之后，资源无法下载。
 
-`pattern` 为URL匹配模式，下载URL匹配该模式不成功的话，资源无法下载。
-
-注意：`pattern` 匹配完整的URL，而不是URL的子串。
+`pattern` 为URL匹配模式（非 `http://` 开头），下载URL匹配该模式不成功的话，资源无法下载。
 
 <a name="download-token-pattern"></a>
 
@@ -646,15 +644,15 @@ pattern 详解：
 
 模式 | 说明 | 示例
 -----|-----|------
-`*` | 匹配所有不含"/"字符的子串 | `http://dl.example.com/*-small.jpg`
-`?` | 匹配所有非"/"的字符 | `http://dl.example.com/a?.jpg`
-`abc` | 匹配字符串 "abc", ('*', '?', '\\', '[' 除外) | `http://dl.example.com/abc.jpg`
-`abc\\?d` | 匹配字符串 "`abc?d`", 双斜杠表示转义，可以包含特殊字符 | `http://dl.example.com/abc\\?d=xxx`
-`[abc]` | 匹配字符 a, b 或者 c | `http://dl.example.com/[abc].jpg`
-`[^abc]` | 匹配除 a, b 或者 c 以外的字符 | `http://dl.example.com/[^abc].jpg`
-`[a-z]` | 匹配 a-z 范围以内的任意字符 | `http://dl.example.com/[a-zA-Z0-9].jpg`
-`[^a-z]` | 匹配 a-z 范围以外的任意字符 | `http://dl.example.com/[^a-z].jpg`
-`[abc\\?d]` | 匹配字符 a, b, c, `?` 或者 d | `http://dl.example.com/[abc\\?d]`
+`*` | 匹配所有不含"/"字符的子串 | `dl.example.com/*-small.jpg`
+`?` | 匹配所有非"/"的字符 | `dl.example.com/a?.jpg`
+`abc` | 匹配字符串 "abc", ('*', '?', '\\', '[' 除外) | `dl.example.com/abc.jpg`
+`abc\\?d` | 匹配字符串 "`abc?d`", 双斜杠表示转义，可以包含特殊字符 | `dl.example.com/abc\\?d=xxx`
+`[abc]` | 匹配字符 a, b 或者 c | `dl.example.com/[abc].jpg`
+`[^abc]` | 匹配除 a, b 或者 c 以外的字符 | `dl.example.com/[^abc].jpg`
+`[a-z]` | 匹配 a-z 范围以内的任意字符 | `dl.example.com/[a-zA-Z0-9].jpg`
+`[^a-z]` | 匹配 a-z 范围以外的任意字符 | `dl.example.com/[^a-z].jpg`
+`[abc\\?d]` | 匹配字符 a, b, c, `?` 或者 d | `dl.example.com/[abc\\?d]`
 
 
 <a name="set-protected"></a>
