@@ -122,7 +122,7 @@ title: 云存储接口 | 七牛云存储
 ----- | --- | ------- | ----
 scope | string | 必选 | 一般指文件要上传到的目标存储空间（Bucket）。`scope` 字段还可以有更灵活的定义：若为"Bucket"，表示限定只能传到该Bucket（仅限于新增文件）；若为"Bucket:Key"，表示限定特定的文档，可新增或修改文件。
 deadline | int64 | 必须 | 定义 uploadToken 的失效时间，Unix时间戳，精确到秒
-callbackUrl | string | 可选 | 定义文件上传完毕后，云存储服务端执行回调的远程URL
+callbackUrl | string | 可选 | 定义文件上传完毕后，云存储服务端执行回调的远程URL。**注意**：若提供该字段，其值必须是公网上可以正常进行POST请求并能响应 HTTP Status 200 OK 的有效 URL ，且必须在 [`multipart/form-data` 上传流](#upload-file-by-multipart) 中指定 [`params` 字段](#CallbackParams) 的值。
 callbackBodyType | string | 可选 | 为执行远程回调指定Content-Type，比如可以是：application/x-www-form-urlencoded
 customer | string | 可选 | 给上传的文件添加唯一属主标识，特殊场景下非常有用，比如根据终端用户标识给图片打水印
 escape | int | 可选 | 可选值 0 或者 1，缺省为 0。值为 1 表示 callback 传递的自定义数据中允许存在转义符号 `$(VarExpression)`，参考 [VarExpression](/v3/api/words/#VarExpression)。
