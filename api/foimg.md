@@ -312,7 +312,7 @@ y 为正数时为从源图区域左上角的纵坐标，为负数时，左上角
 : 水印文本，文字水印时必须，需经过 [URLSafeBase64Encode](/v3/api/words/#URLSafeBase64Encode) 编码。即 `EncodedText = URLSafeBase64Encode(stringText)`。注意：若水印文本为非英文字符（比如中文）构成，需要严格指定字体名称（`/font/<EncodedFontName>`）。
 
 `<EncodedFontName>`
-: 字体名，可选，需经过 [URLSafeBase64Encode](/v3/api/words/#URLSafeBase64Encode) 编码。即 `EncodedFontName = URLSafeBase64Encode(stringFontName)`。
+: 字体名，必须，需经过 [URLSafeBase64Encode](/v3/api/words/#URLSafeBase64Encode) 编码。即 `EncodedFontName = URLSafeBase64Encode(stringFontName)`。
 
 `<FontSize>`
 : 字体大小，可选，0 表示默认，单位: 缇，等于 1/20 磅。
@@ -358,7 +358,7 @@ y 为正数时为从源图区域左上角的纵坐标，为负数时，左上角
 - 水印文本透明度：15% (`dissolve=85`)
 - 水印文本位置：右下脚 (`gravity=SouthEast`)
 
-[![文字水印](http://qiniuphotos.qiniudn.com/gogopher.jpg?watermark/2/text/5LiD54mb5LqR5a2Y5YKo/font/5a6L5L2T/fontsize/1000/fill/white/dissolve/85/gravity/SouthEast/dx/20/dy/20)](http://qiniuphotos.qiniudn.com/gogopher.jpg?watermark/2/text/5LiD54mb5LqR5a2Y5YKo/font/5a6L5L2T/fontsize/1000/fill/white/dissolve/85/gravity/SouthEast/dx/20/dy/20)
+[![文字水印](http://qiniuphotos.qiniudn.com/gogopher.jpg?watermark/2/text/5LiD54mb5LqR5a2Y5YKo/font/5a6L5L2T/fontsize/1000/fill/d2hpdGU=/dissolve/85/gravity/SouthEast/dx/20/dy/20)](http://qiniuphotos.qiniudn.com/gogopher.jpg?watermark/2/text/5LiD54mb5LqR5a2Y5YKo/font/5a6L5L2T/fontsize/1000/fill/d2hpdGU=/dissolve/85/gravity/SouthEast/dx/20/dy/20)
 
 点击以上图片获得链接可以查看水印生成的具体规格参数。
 
