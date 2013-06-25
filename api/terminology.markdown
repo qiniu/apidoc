@@ -18,7 +18,7 @@ title: "概念和术语"
   - [异步云处理（预处理）](#FOP-Async)
 - [魔法变量](#Magic-Variable)
 - [自定义变量](#Selfdef-Variable)
-- [Callback和Return]（#Callback-Return）
+- [Callback和Return](#Callback-Return)
 
 
 <a name="Bucket"></a>
