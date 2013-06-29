@@ -117,7 +117,7 @@ EncodedEntryURIDest | 目标 EncodedEntryURI
 
 其中 `op=<Operation>` 是一个操作指令。例如 `/get/`, `/stat/`, `/delete/`, …
 
-** 说明 **  由于Content-Type是application/x-www-form-urlencoded，所以上述RequestBody的内容在发送前需要做url-encode。如op=/stat/YTphYQ== 需要转码成为：op=%2Fstat%2FYTphYQ%3D%3D。
+**说明**  由于Content-Type是application/x-www-form-urlencoded，所以上述RequestBody的内容在发送前需要做url-encode。如op=/stat/YTphYQ== 需要转码成为：op=%2Fstat%2FYTphYQ%3D%3D。
 
 <a name="batch-stat"></a>
 
