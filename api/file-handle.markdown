@@ -117,7 +117,7 @@ EncodedEntryURIDest | 目标 EncodedEntryURI
 
 其中 `op=<Operation>` 是一个操作指令。例如 `/get/`, `/stat/`, `/delete/`, …
 
-**说明：**  由于批量操作请求的Content-Type是application/x-www-form-urlencoded，所以上述RequestBody的内容在发送前需要做url-encode。比如，Bucket是a，Key是aa，那么EncodedEntryURI就是：urlsafe_base64_encode("a:aa") => "YTphYQ=="。相应的文件操作就是：op=/stat/YTphYQ==。最后，需要url-encoded转码成为：op=%2Fstat%2FYTphYQ%3D%3D。
+**说明：**  由于批量操作请求的Content-Type是application/x-www-form-urlencoded，所以上述RequestBody的内容在发送前需要做url-encode。比如，Bucket是a，Key是aa，那么EncodedEntryURI就是：urlsafe_base64_encode("a:aa") => "YTphYQ=="。相应的文件操作就是：op=/stat/YTphYQ==。最后，需要转码成为：op=%2Fstat%2FYTphYQ%3D%3D。
 
 <a name="batch-stat"></a>
 
