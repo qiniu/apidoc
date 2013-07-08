@@ -38,10 +38,27 @@ EncodedEntryURIDest | 目标 EncodedEntryURI
 <a name="file"></a>
 
 ## 单文件操作
+单文件操作提供了对存储在七牛云上的单个文件进行查看、移动、复制和删除的处理功能。同时我们也支持对批量文件的处理操作，请参考[批量操作](#batch)。
 
 <a name="stat"></a>
 
 ### 查看
+查看一个文件的相关信息，只需提交一个符合如下条件的HTTP POST请求：
+
+- 请求URL格式为：http://rs.qbox.me/stat/`<EncodedEntryURI>`
+- HTTP头部中包含一个如下键值对用于认证： `Authorization: QBox <AccessToken>`
+- Content-Type为application/x-www-form-urlencoded
+
+该文件的相关信息将会以JSON的形式包含在对应的 Response 的 Body 中，格式如下：
+
+    {
+        hash: <FileEtag>, 	// string 类型，文件的Hash值
+        fsize: <FileSize>, 	// int 类型，文件的大小(单位: 字节)
+        mimeType: <MimeType>,	// string 类型，文件的媒体类型，比如"image/gif"
+        putTime: <PutTime>	// int64 类型，文件上传到七牛云的时间(Unix时间戳)
+    }
+
+一个完整的HTTP请求和应答格式如下：
 
     HTTP/1.1
     POST http://rs.qbox.me/stat/<EncodedEntryURI>
@@ -54,15 +71,22 @@ EncodedEntryURIDest | 目标 EncodedEntryURI
     Content-Type: application/json
     Cache-Control: no-store
     Response Body: {
-        hash: <FileETag string>,
         fsize: <FileSize int>,
-        putTime: <PutTime int64>, // 文件上传时候的七牛云存储服务器时间
-        mimeType: <MimeType string>
+        hash: <FileETag string>,
+        mimeType: <MimeType string>,
+        putTime: <PutTime int64>  // 文件上传时候的七牛云存储服务器时间
     }
 
 <a name="move"></a>
 
 ### 移动
+移动一个文件，只需提交一个符合如下条件的HTTP POST请求：
+
+- 请求URL格式为：http://rs.qbox.me/move/`<EncodedEntryURISrc>`/`<EncodedEntryURIDest>`
+- HTTP头部中包含一个用于认证的键值对： `Authorization: QBox <AccessToken>`
+- Content-Type为application/x-www-form-urlencoded
+
+服务器将会以HTTP Status Code的方式返回操作结果，如果返回200，则说明操作成功，其余状态码请参考[错误码](#error-code)。
 
     HTTP/1.1
     POST http://rs.qbox.me/move/<EncodedEntryURISrc>/<EncodedEntryURIDest>
@@ -78,6 +102,13 @@ EncodedEntryURIDest | 目标 EncodedEntryURI
 <a name="copy"></a>
 
 ### 复制
+复制一个文件，和[移动](#move)操作十分类似，需提交一个符合如下条件的HTTP POST请求：
+
+- 请求URL格式为：http://rs.qbox.me/copy/`<EncodedEntryURISrc>`/`<EncodedEntryURIDest>`
+- HTTP头部中包含一个用于认证的键值对： `Authorization: QBox <AccessToken>`
+- Content-Type为application/x-www-form-urlencoded
+
+服务器将会以HTTP Status Code的方式返回操作结果，如果返回200，则说明操作成功，其余状态码请参考[错误码](#error-code)。
 
     HTTP/1.1
     POST http://rs.qbox.me/copy/<EncodedEntryURISrc>/<EncodedEntryURIDest>
@@ -93,6 +124,13 @@ EncodedEntryURIDest | 目标 EncodedEntryURI
 <a name="delete"></a>
 
 ### 删除
+删除一个文件也很简单，提交一个符合如下条件的HTTP POST请求即可：
+
+- 请求URL格式为：http://rs.qbox.me/delete/`<EncodedEntryURI>`
+- HTTP头部中包含一个用于认证的键值对： `Authorization: QBox <AccessToken>`
+- Content-Type为application/x-www-form-urlencoded
+
+服务器将会以HTTP Status Code的方式返回操作结果，如果返回200，则说明操作成功，其余状态码请参考[错误码](#error-code)。
 
     HTTP/1.1
     POST http://rs.qbox.me/delete/<EncodedEntryURI>
@@ -109,17 +147,45 @@ EncodedEntryURIDest | 目标 EncodedEntryURI
 
 ## 批量操作
 
+在支持对单个文件资源操作的同时，七牛云存储还支持批量地对多个文件进行查看、删除、复制和移动操作。
+
 **请求**
+
+批量操作的请求是由多个单文件操作指令组成的，请求格式统一为：
 
     POST http://rs.qbox.me/batch
     Content-Type: application/x-www-form-urlencoded
     RequestBody: op=<Operation>&op=<Operation>&...
 
-其中 `op=<Operation>` 是一个操作指令。例如 `/get/`, `/stat/`, `/delete/`, …
+其中 `op=<Operation>` 是一个单文件操作指令。例如 `/stat/<EncodeEntryURI>`， `/delete/<EncodeEntryURI>` 等。
+
+**响应**
+
+批量操作的服务端响应格式如下：
+
+    200 OK [
+        <Result1>, <Result2>, ...
+    ]
+    298 Partial OK [
+        <Result1>, <Result2>, ...
+    ]
+
+    其中 <Result> 是 {
+        code: <HttpCode int>,
+    }
+    或者 {
+        code: <HttpCode int>,
+        data: <Data> 或 data: { error: <ErrorMessage string> }
+    }
+
+响应包的HTTP Status Code若为`200 OK`则意味着所有操作全部成功，若为`298 Partial OK`则意味着存在部分或全部操作出错。顺序解析响应包的Body的JSON数据可得到每个操作对应的执行结果信息。
+
 
 <a name="batch-stat"></a>
 
 ### 批量查看
+
+批量查看可用来一次查看多个文件的文件信息，请求格式如下：
 
     POST http://rs.qbox.me/batch
     Content-Type: application/x-www-form-urlencoded
@@ -131,6 +197,8 @@ EncodedEntryURIDest | 目标 EncodedEntryURI
 
 ### 批量移动
 
+批量移动可用来一次移动多个文件，请求格式如下：
+
     POST http://rs.qbox.me/batch
     Content-Type: application/x-www-form-urlencoded
     RequestBody: op=/move/<EncodedEntryURISrc>/<EncodedEntryURIDest>&
@@ -141,6 +209,8 @@ EncodedEntryURIDest | 目标 EncodedEntryURI
 
 ### 批量复制
 
+批量移动可用来一次复制多个文件，请求格式如下：
+
     POST http://rs.qbox.me/batch
     Content-Type: application/x-www-form-urlencoded
     RequestBody: op=/copy/<EncodedEntryURISrc>/<EncodedEntryURIDest>&
@@ -150,27 +220,13 @@ EncodedEntryURIDest | 目标 EncodedEntryURI
 <a name="batch-delete"></a>
 
 ### 批量删除
+批量移动可用来一次删除多个文件，请求格式如下：
 
     POST http://rs.qbox.me/batch
     Content-Type: application/x-www-form-urlencoded
     RequestBody: op=/delete/<EncodedEntryURI>&
                  op=/delete/<EncodedEntryURI>&
                  ...
-
-**响应**
-
-    200 OK [
-        <Result1>, <Result2>, ...
-    ]
-    298 Partial OK [
-        <Result1>, <Result2>, ...
-    ]
-
-    <Result> 是 {
-        code: <HttpCode int>,
-        data: <Data> 或 error: <ErrorMessage string>
-    }
-
 
 <a name="list"></a>
 
@@ -220,7 +276,33 @@ prefix | 否     | 指定要过滤出来的前缀
 
 ## 授权认证 - AccessToken
 
-生成 AccessToken 示例代码如下
+AccessToken的计算公式： `<ACCESS_KEY>`:`urlsafe_base64_encode(hmac_sha1(<SECRET_KEY>, data))`
+
+一个典型的请求为：
+
+    HTTP1.1
+    POST http://<host>/<path>?<query>
+    Request Headers: {
+        Content-Type: application/x-www-form-urlencoded
+        Authorization: <AccessToken>
+    }
+    Request Body: {
+        <Body>
+    }
+
+对应AccessToken的计算公式，AccessToken的生成步骤可以分解为：
+
+- Step1. 明确需要被签名的数据`data`：
+    - 如果请求不含Body，则data=`<path>?<query>\n`（注意最后的`\n`）
+    - 如果请求包含Body，那么data=`<path>?<query>\n<Body>`
+- Step2. 使用`SECRET_KEY`对`data`进行SHA1签名，即`hmac_sha1(<SECRET_KEY>, data)`，得到`<SignData>`
+- Step3. 对得到的签名进行Base64编码，即`urlsafe_base64_encode(<SignData>)`，得到`<EncodedSignData>`
+- Step4. 将`<ACCESS_KEY>`和`<EncodedSignData>`利用`:`连接，得到`<ACCESS_KEY>:<EncodedSignData>`，即AccessToken
+
+注意：
+    所有请求的Content-Type必须为application/x-www-form-urlencoded，否则可能会造成批处理指令无法正确执行。
+
+生成 AccessToken 示例代码如下:
 
 **PHP**
 
@@ -246,10 +328,10 @@ prefix | 否     | 指定要过滤出来的前缀
      * @param string $access_key
      * @param string $secret_key
      * @param string $url
-     * @param array  $params
+     * @param string $body
      * @return string
      */
-    function generate_access_token($access_key, $secret_key, $url, $params){
+    function generate_access_token($access_key, $secret_key, $url, $body){
         $parsed_url = parse_url($url);
         $path = $parsed_url['path'];
         $access = $path;
@@ -257,12 +339,11 @@ prefix | 否     | 指定要过滤出来的前缀
             $access .= "?" . $parsed_url['query'];
         }
         $access .= "\n";
-        if($params){
-            if (is_array($params)){
-                $params = http_build_query($params);
-            }
-            $access .= $params;
+
+        if($body){
+            $access .= $body;
         }
+
         $digest = hash_hmac('sha1', $access, $secret_key, true);
         return $access_key.':'.urlsafe_base64_encode($digest);
     }
@@ -273,13 +354,10 @@ prefix | 否     | 指定要过滤出来的前缀
     $access_key = 'YOUR_ACCESS_KEY';
     $secret_key = 'YOUR_SECRET_KEY';
     $url = 'http://rsf.qbox.me/list';
-    $params = array(
-        "bucket" => "myTestBucket",
-        "marker" => 200,
-        "limit"  => 100,
-        "prefix" => "",
-    );
-    $access_token = generate_access_token($access_key, $secret_key, $url, $params);
+    $query = 'bucket=myTestBucket&marker=200&limit=100&prefix='
+    $url .= "?" . $query
+    $body = null
+    $access_token = generate_access_token($access_key, $secret_key, $url, $body);
     var_dump($access_token);
 
 **Ruby**
@@ -294,17 +372,15 @@ prefix | 否     | 指定要过滤出来的前缀
         Base64.encode64(content).strip.gsub('+', '-').gsub('/','_').gsub(/\r?\n/, '')
     end
 
-    def generate_access_token(access_key, secret_key, url, params)
+    def generate_access_token(access_key, secret_key, url, body)
         uri = URI.parse(url)
         access = uri.path
         query_string = uri.query
         access += '?' + query_string if !query_string.nil? && !query_string.empty?
         access += "\n";
-        if params.is_a?(Hash)
-            total_param = params.map do |key, value|
-                %Q(#{CGI.escape(key.to_s)}=#{CGI.escape(value.to_s).gsub('+', '%20')})
-            end
-            access += total_param.join("&")
+
+        if body
+            access += body
         end
         hmac = HMAC::SHA1.new(secret_key)
         hmac.update(access)
@@ -315,13 +391,10 @@ prefix | 否     | 指定要过滤出来的前缀
     access_key = 'YOUR_ACCESS_KEY_HERE'
     secret_key = 'YOUR_SECRET_KEY_HERE'
     url = 'http://rsf.qbox.me/list'
-    params = {
-        "bucket" => "myTestBucket",
-        "marker" => 200,
-        "limit"  => 100,
-        "prefix" => "",
-    }
-    access_token = generate_access_token(access_key, secret_key, url, params)
+    query = 'bucket=myTestBucket&marker=200&limit=100&prefix='
+    url += '?' + query
+    body = nil
+    access_token = generate_access_token(access_key, secret_key, url, body)
     puts access_token
 
 **请求认证**
@@ -334,7 +407,7 @@ prefix | 否     | 指定要过滤出来的前缀
 完整的授权认证示范代码可参考SDK实现，例如:
 
 - Go - <https://github.com/qiniu/api/blob/develop/auth/digest/digest_auth.go>
-- Python - <https://github.com/qiniu/python-sdk/blob/develop/qiniu/auth_digest.py>
+- Python - <https://github.com/qiniu/python-sdk/blob/develop/qiniu/auth/digest.py>
 
 
 <a name="error-code"></a>
