@@ -209,7 +209,7 @@ EncodedEntryURIDest | 目标 EncodedEntryURI
 
 ### 批量复制
 
-批量移动可用来一次复制多个文件，请求格式如下：
+批量复制可用来一次复制多个文件，请求格式如下：
 
     POST http://rs.qbox.me/batch
     Content-Type: application/x-www-form-urlencoded
@@ -220,7 +220,7 @@ EncodedEntryURIDest | 目标 EncodedEntryURI
 <a name="batch-delete"></a>
 
 ### 批量删除
-批量移动可用来一次删除多个文件，请求格式如下：
+批量删除可用来一次删除多个文件，请求格式如下：
 
     POST http://rs.qbox.me/batch
     Content-Type: application/x-www-form-urlencoded
