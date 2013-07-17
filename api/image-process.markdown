@@ -14,6 +14,8 @@ title: "图像处理"
 
 ## 获取图片基本信息
 
+图片基本信息包括图片格式,图片大小，色彩模式
+
 **请求**
 
     GET <ImageDownloadURL>?imageInfo
@@ -31,9 +33,21 @@ title: "图像处理"
         colorModel: <ImageColorModel> // "palette16", "ycbcr", etc.
     }
 
+**示例**
+
+获取图片基本信息样例(在WEB浏览器中输入以下图片地址)
+
+    http://qiniuphotos.qiniudn.com/gogopher.jpg?imageInfo
+
+结果
+
+	{"format":"jpeg","width":640,"height":427,"colorModel":"ycbcr"}
+
 <a name="imageExif"></a>
 
 ## 获取图片EXIF信息
+
+EXIF (Exchangeable image file format),是专门为数码相机的照片设定的可交换图像文件格式。详情参见[EXIF](http://zh.wikipedia.org/wiki/EXIF)。
 
 **请求**
 
@@ -49,10 +63,21 @@ title: "图像处理"
         // ...EXIF Data...
     }
 
+**示例**
+
+获取图片EXIF信息样例(在WEB浏览器中输入以下图片地址)
+
+    http://qiniuphotos.qiniudn.com/gogopher.jpg?exif
+
+结果
+
+	{"ApertureValue":{"val":"5.00 EV (f/5.7)","type":5},"ColorSpace":{"val":"sRGB","type":3},"ComponentsConfiguration":{"val":"- - - -","type":7},"CustomRendered":{"val":"正常过程","type":3},"DateTime":{"val":"2011:11:19 17:09:23","type":2},"DateTimeDigitized":{"val":"2011:11:19 17:09:23","type":2},"DateTimeOriginal":{"val":"2011:11:19 17:09:23","type":2},"ExifVersion":{"val":"未知的Exif版本","type":7},"ExposureBiasValue":{"val":"0.33 EV","type":10},"ExposureMode":{"val":"自动曝光","type":3},"ExposureProgram":{"val":"光圈优先","type":3},"ExposureTime":{"val":"1/50 sec.","type":5},"FNumber":{"val":"f/5.6","type":5},"Flash":{"val":"Flash did not fire, compulsory flash mode","type":3},"FlashPixVersion":{"val":"FlashPix版本 1.0","type":7},"FocalLength":{"val":"45.0 mm","type":5},"FocalPlaneResolutionUnit":{"val":"英寸","type":3},"FocalPlaneXResolution":{"val":"5728.18","type":5},"FocalPlaneYResolution":{"val":"5808.40","type":5},"ISOSpeedRatings":{"val":"3200","type":3},"Make":{"val":"Canon","type":2},"MaxApertureValue":{"val":"5.19 EV (f/6.0)","type":5},"MeteringMode":{"val":"样式","type":3},"Model":{"val":"Canon EOS 600D","type":2},"Orientation":{"val":"Top-left","type":3},"PixelXDimension":{"val":"640","type":4},"PixelYDimension":{"val":"427","type":4},"ResolutionUnit":{"val":"英寸","type":3},"SceneCaptureType":{"val":"标准","type":3},"ShutterSpeedValue":{"val":"5.62 EV (1/49 sec.)","type":10},"SubSecTimeDigitized":{"val":"11","type":2},"SubSecTimeOriginal":{"val":"11","type":2},"SubsecTime":{"val":"11","type":2},"WhiteBalance":{"val":"自动白平衡","type":3},"XResolution":{"val":"72","type":5},"YResolution":{"val":"72","type":5}}
 
 <a name="imageView"></a>
 
 ## 生成指定规格的缩略图
+
+
 
 **请求**
 
@@ -119,7 +144,7 @@ title: "图像处理"
 
 ## 高级图像处理接口（第二版）（缩略、裁剪、旋转、转化）
 
-除了对图像进行缩略有单独的处理接口，七牛云存储还提供了比较高级的图像处理接口，包含缩略、裁剪、旋转等一系列的功能，imageMogr第二版的接口规格如下：
+除了能够方便的生成图像缩略图之外，七牛云存储提供了其它高级图像处理接口，包含缩略、裁剪、旋转等一系列的功能。imageMogr第二版的接口规格如下：
 
 **请求**
 
@@ -228,11 +253,13 @@ y 为正数时为从源图区域左上角的纵坐标，为负数时，左上角
 
 ## 图像水印接口
 
+图像水印接口支持两种加水印的方式:`图片水印`和`文字水印`。
+
 **请求**
 
     [GET] <ImageDownloadURL>?watermark/<Mode>/xxx
 
-其中，`<ImageDownloadURL>` 必须返回一张图片。
+其中，`<ImageDownloadURL>`为需要加水印的源图片地址，该地址必须是有效的，且能够返回一张图片。
 
 `<Mode>` = 1 时，表示图片水印：
 
@@ -243,7 +270,7 @@ y 为正数时为从源图区域左上角的纵坐标，为负数时，左上角
                              /dx/<DistanceX>
                              /dy/<DistanceY>
 
-`<Mode>` = 2 时，表示纯文本水印：
+`<Mode>` = 2 时，表示文字水印：
 
     [GET] <ImageDownloadURL>?watermark/2
                              /text/<EncodedText>
