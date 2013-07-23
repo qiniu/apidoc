@@ -20,8 +20,8 @@ title: "云处理结果持久化"
 
 名称            | 类型   | 必须 | 说明
 ----------------|--------|------|------------------------------------------------------------------------------
-encodedEntryURI | string | 是   | 保存资源的空间和key，`encodedEntryURI = urlsafe_base64_encode("bucket:key")`
-sign            | string | 是   | AccessKey:urlsafe_base64_encode(hmac_sha1(SecretKey, "Domain/Key?Fop/Params|saveas/encodedEntryURI"))
+encodedEntryURI | string | 是   | 保存资源的bucket和key，`encodedEntryURI = urlsafe_base64_encode("bucket:key")`
+sign            | string | 是   | 签名的结果：`accessKey:urlsafe_base64_encode(hmac_sha1(SecretKey, "Domain/Key?Fop/Params|saveas/encodedEntryURI"))`
 
 ## 样例
 
@@ -30,11 +30,10 @@ sign            | string | 是   | AccessKey:urlsafe_base64_encode(hmac_sha1(Sec
 - 将 mp4 视频格式转换为 flv 格式，帧率为 24，使用 x264 进行视频编码 
   - http://woyao.qiniudn.com/thinking-in-go.mp4?avthumb/flv/r/24/vcodec/libx264
 - 对上述云处理结果进行持久化保存
-  - 保存资源为："woyao:thinking-in-go.flv",那么encodedEntryURI结果为："d295YW86dGhpbmtpbmctaW4tZ28uZmx2"
-  - 需要签名的内容是"woyao.qiniudn.com/thinking-in-go.mp4?avthumb/flv/r/28/vcodec/libx264"，urlsafe_base64_encode(hmac_sha1("woyao.qiniudn.com/thinking-in-go.mp4?avthumb/flv/r/28/vcodec/libx264"),结果为："jx5twELFWIwgzID4fXIRC80owsk="
-  - 完整的sign为:"Bmja3JzCXdQbvLwIwvFGa9WWJYhRT37WqsRA3dCo:jx5twELFWIwgzID4fXIRC80owsk="
-  - 完整的请求URL:"http://woyao.qiniudn.com/thinking-in-go.mp4?avthumb/flv/r/24/vcodec/libx264|saveas/d295YW86dGhpbmtpbmctaW4tZ28uZmx2/sign/Bmja3JzCXdQbvLwIwvFGa9WWJYhRT37WqsRA3dCo:jx5twELFWIwgzID4fXIRC80owsk=
-"
+  - 保存资源为：`woyao:thinking-in-go.flv`,那么encodedEntryURI结果为：`d295YW86dGhpbmtpbmctaW4tZ28uZmx2`
+  - 需要签名的内容是`woyao.qiniudn.com/thinking-in-go.mp4?avthumb/flv/r/28/vcodec/libx264`，`urlsafe_base64_encode(hmac_sha1("woyao.qiniudn.com/thinking-in-go.mp4?avthumb/flv/r/28/vcodec/libx264"))`,结果为：`jx5twELFWIwgzID4fXIRC80owsk=`
+  - 完整的sign为:`Bmja3JzCXdQbvLwIwvFGa9WWJYhRT37WqsRA3dCo:jx5twELFWIwgzID4fXIRC80owsk=`
+  - 完整的请求URL:`http://woyao.qiniudn.com/thinking-in-go.mp4?avthumb/flv/r/24/vcodec/libx264|saveas/d295YW86dGhpbmtpbmctaW4tZ28uZmx2/sign/Bmja3JzCXdQbvLwIwvFGa9WWJYhRT37WqsRA3dCo:jx5twELFWIwgzID4fXIRC80owsk=`
 - 保存的转码后的资源可通过如下访问
   - http://woyao.qiniudn.com/thinking-in-go.flv
 
