@@ -31,7 +31,7 @@ sign            | string | 是   | AccessKey:urlsafe_base64_encode(hmac_sha1(Sec
   - http://woyao.qiniudn.com/thinking-in-go.mp4?avthumb/flv/r/24/vcodec/libx264
 - 对上述云处理结果进行持久化保存
   - 保存资源为："woyao:thinking-in-go.flv",那么encodedEntryURI结果为："d295YW86dGhpbmtpbmctaW4tZ28uZmx2"
-  - 需要签名的内容是"woyao.qiniudn.com/thinking-in-go.mp4?avthumb/flv/r/28/vcodec/libx264"，urlsafe_base64_encode(hmac_sha1("woyao.qiniudn.com/thinking-in-go.mp4?avthumb/flv/r/28/vcodec/libx264")的结果为："jx5twELFWIwgzID4fXIRC80owsk="
+  - 需要签名的内容是"woyao.qiniudn.com/thinking-in-go.mp4?avthumb/flv/r/28/vcodec/libx264"，urlsafe_base64_encode(hmac_sha1("woyao.qiniudn.com/thinking-in-go.mp4?avthumb/flv/r/28/vcodec/libx264"),结果为："jx5twELFWIwgzID4fXIRC80owsk="
   - 完整的sign为:"Bmja3JzCXdQbvLwIwvFGa9WWJYhRT37WqsRA3dCo:jx5twELFWIwgzID4fXIRC80owsk="
   - 完整的请求URL:"http://woyao.qiniudn.com/thinking-in-go.mp4?avthumb/flv/r/24/vcodec/libx264|saveas/d295YW86dGhpbmtpbmctaW4tZ28uZmx2/sign/Bmja3JzCXdQbvLwIwvFGa9WWJYhRT37WqsRA3dCo:jx5twELFWIwgzID4fXIRC80owsk=
 "
@@ -41,7 +41,6 @@ sign            | string | 是   | AccessKey:urlsafe_base64_encode(hmac_sha1(Sec
 
 生成saveas请求的完整go代码如下：
 
-**go**
 func makeSaveasUrl(URL, accessKey string, secretKey []byte, saveBucket, saveKey string) string {
 
 	encodedEntryURI := base64.URLEncoding.EncodeToString([]byte(saveBucket+":"+saveKey))
@@ -62,5 +61,4 @@ func makeSaveasUrl(URL, accessKey string, secretKey []byte, saveBucket, saveKey 
 
 - `urlsafe_base64_encode()` 函数按照标准的 [RFC 4648](http://www.ietf.org/rfc/rfc4648.txt) 实现，开发者可以参考 [github.com/qiniu](https://github.com/qiniu) 上各SDK的样例代码。
 - `AccessKey:EncodedSign` 这里的冒号是字符串，仅作为连接分隔符使用，最终连接组合的 downloadToken 也是一个字符串（String）。
-- 这里签名内容与生成download token签名内容不一样，这里签名内容不包含scheme字段。
 - 当要持久化保存的fop耗时较长时候，saveas请求会返回CDN超时，但是只要保证发送的saveas请求合法，七牛服务器还是会对请求做正确处理。
