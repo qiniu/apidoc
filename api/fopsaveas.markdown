@@ -61,5 +61,5 @@ func makeSaveasUrl(URL, accessKey string, secretKey []byte, saveBucket, saveKey 
 ## 备注
 
 - `urlsafe_base64_encode()` 函数按照标准的 [RFC 4648](http://www.ietf.org/rfc/rfc4648.txt) 实现，开发者可以参考 [github.com/qiniu](https://github.com/qiniu) 上各SDK的样例代码。
-- `AccessKey:EncodedSign` 这里的冒号是字符串，仅作为连接分隔符使用，最终连接组合的 downloadToken 也是一个字符串（String）。
+- 这里的签名内容是不包含scheme字段，与download token签名不一样。
 - 当要持久化保存的fop耗时较长时候，saveas请求会返回CDN超时，但是只要保证发送的saveas请求合法，七牛服务器还是会对请求做正确处理。
