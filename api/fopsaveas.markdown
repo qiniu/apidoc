@@ -21,7 +21,7 @@ title: "云处理结果持久化"
 名称            | 类型   | 必须 | 说明
 ----------------|--------|------|------------------------------------------------------------------------------
 encodedEntryURI | string | 是   | 保存资源的bucket和key，`encodedEntryURI = urlsafe_base64_encode("bucket:key")`
-sign            | string | 是   | 签名：`accessKey:urlsafe_base64_encode(hmac_sha1(secretKey, Domain/Key?Fop/Params|saveas/encodedEntryURI))`
+sign            | string | 是   | 生成的签名部分，算法见下方。
 
 ## 样例
 
@@ -40,6 +40,7 @@ sign            | string | 是   | 签名：`accessKey:urlsafe_base64_encode(hma
 
 生成saveas请求的完整go代码如下：
 
+```{go}
 func makeSaveasUrl(URL, accessKey string, secretKey []byte, saveBucket, saveKey string) string {
 
 	encodedEntryURI := base64.URLEncoding.EncodeToString([]byte(saveBucket+":"+saveKey))
@@ -55,6 +56,7 @@ func makeSaveasUrl(URL, accessKey string, secretKey []byte, saveBucket, saveKey 
 
 	return URL + "/sigin/" + sign
 }
+```
 
 ## 备注
 
