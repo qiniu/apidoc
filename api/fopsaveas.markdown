@@ -21,7 +21,7 @@ title: "云处理结果持久化"
 名称            | 类型   | 必须 | 说明
 ----------------|--------|------|------------------------------------------------------------------------------
 encodedEntryURI | string | 是   | 保存资源的bucket和key，`encodedEntryURI = urlsafe_base64_encode("bucket:key")`
-sign            | string | 是   | 签名："accessKey:urlsafe_base64_encode(hmac_sha1(SecretKey, "Domain/Key?Fop/Params|saveas/encodedEntryURI"))"
+sign            | string | 是   | 签名：accessKey:urlsafe_base64_encode(hmac_sha1(secretKey, Domain/Key?Fop/Params|saveas/encodedEntryURI))
 
 ## 样例
 
@@ -31,7 +31,7 @@ sign            | string | 是   | 签名："accessKey:urlsafe_base64_encode(hma
  - http://woyao.qiniudn.com/thinking-in-go.mp4?avthumb/flv/r/24/vcodec/libx264
 3. 对上述云处理结果进行持久化保存
  - entryURI：`woyao:thinking-in-go.flv`,那么encodedEntryURI结果为：`d295YW86dGhpbmtpbmctaW4tZ28uZmx2`
- - 需要签名的内容是`woyao.qiniudn.com/thinking-in-go.mp4?avthumb/flv/r/28/vcodec/libx264`, `urlsafe_base64_encode(hmac_sha1(<sign>))`,结果为：`jx5twELFWIwgzID4fXIRC80owsk=`
+ - 需要签名的内容是:`woyao.qiniudn.com/thinking-in-go.mp4?avthumb/flv/r/28/vcodec/libx264`, `urlsafe_base64_encode(hmac_sha1(<sign>))`,结果为：`jx5twELFWIwgzID4fXIRC80owsk=`
 4. 完整的请求URL
  - http://woyao.qiniudn.com/thinking-in-go.mp4?avthumb/flv/r/24/vcodec/libx264|saveas/d295YW86dGhpbmtpbmctaW4tZ28uZmx2/sign/Bmja3JzCXdQbvLwIwvFGa9WWJYhRT37WqsRA3dCo:jx5twELFWIwgzID4fXIRC80owsk=
 5. 保存的转码后的资源可通过如下访问
