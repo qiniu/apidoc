@@ -21,7 +21,7 @@ title: "云处理结果持久化"
 名称            | 类型   | 必须 | 说明
 ----------------|--------|------|------------------------------------------------------------------------------
 encodedEntryURI | string | 是   | 保存资源的bucket和key，`encodedEntryURI = urlsafe_base64_encode("bucket:key")`
-sign            | string | 是   | 签名：accessKey:urlsafe_base64_encode(hmac_sha1(secretKey, Domain/Key?Fop/Params|saveas/encodedEntryURI))
+sign            | string | 是   | 签名：accessKey:urlsafe_base64_encode(hmac_sha1(secretKey, Domain/Key?Fop/Params\|saveas/encodedEntryURI))
 
 ## 样例
 
