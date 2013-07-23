@@ -31,14 +31,11 @@ sign            | string | 是   | 签名："accessKey:urlsafe_base64_encode(hma
   - http://woyao.qiniudn.com/thinking-in-go.mp4?avthumb/flv/r/24/vcodec/libx264
 - 对上述云处理结果进行持久化保存
   - 保存资源为：`woyao:thinking-in-go.flv`,那么encodedEntryURI结果为：`d295YW86dGhpbmtpbmctaW4tZ28uZmx2`
-  - 需要签名的内容是`woyao.qiniudn.com/thinking-in-go.mp4?avthumb/flv/r/28/vcodec/libx264`
-    - `urlsafe_base64_encode(hmac_sha1("woyao.qiniudn.com/thinking-in-go.mp4?avthumb/flv/r/28/vcodec/libx264"))`,结果为：`jx5twELFWIwgzID4fXIRC80owsk=`
-  - 完整的sign为
-    - `Bmja3JzCXdQbvLwIwvFGa9WWJYhRT37WqsRA3dCo:jx5twELFWIwgzID4fXIRC80owsk=`
-  - 完整的请求URL
-    - "http://woyao.qiniudn.com/thinking-in-go.mp4?avthumb/flv/r/24/vcodec/libx264|saveas/d295YW86dGhpbmtpbmctaW4tZ28uZmx2/sign/Bmja3JzCXdQbvLwIwvFGa9WWJYhRT37WqsRA3dCo:jx5twELFWIwgzID4fXIRC80owsk="
-- 保存的转码后的资源可通过如下访问
-  - http://woyao.qiniudn.com/thinking-in-go.flv
+需要签名的内容是`woyao.qiniudn.com/thinking-in-go.mp4?avthumb/flv/r/28/vcodec/libx264`，`urlsafe_base64_encode(hmac_sha1("woyao.qiniudn.com/thinking-in-go.mp4?avthumb/flv/r/28/vcodec/libx264"))`,结果为：`jx5twELFWIwgzID4fXIRC80owsk=`
+完整的sign为:`Bmja3JzCXdQbvLwIwvFGa9WWJYhRT37WqsRA3dCo:jx5twELFWIwgzID4fXIRC80owsk=`
+完整的请求URL:"http://woyao.qiniudn.com/thinking-in-go.mp4?avthumb/flv/r/24/vcodec/libx264|saveas/d295YW86dGhpbmtpbmctaW4tZ28uZmx2/sign/Bmja3JzCXdQbvLwIwvFGa9WWJYhRT37WqsRA3dCo:jx5twELFWIwgzID4fXIRC80owsk="
+保存的转码后的资源可通过如下访问
+http://woyao.qiniudn.com/thinking-in-go.flv
 
 
 生成saveas请求的完整go代码如下：
