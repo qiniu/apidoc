@@ -26,16 +26,16 @@ sign            | string | 是   | 签名："accessKey:urlsafe_base64_encode(hma
 ## 样例
 
 1. 原资源是一个视频文件
-- http://woyao.qiniudn.com/thinking-in-go.mp4
+ - http://woyao.qiniudn.com/thinking-in-go.mp4
 2. 将 mp4 视频格式转换为 flv 格式，帧率为 24，使用 x264 进行视频编码 
-- http://woyao.qiniudn.com/thinking-in-go.mp4?avthumb/flv/r/24/vcodec/libx264
+ - http://woyao.qiniudn.com/thinking-in-go.mp4?avthumb/flv/r/24/vcodec/libx264
 3. 对上述云处理结果进行持久化保存
-- entryURI：`woyao:thinking-in-go.flv`,那么encodedEntryURI结果为：`d295YW86dGhpbmtpbmctaW4tZ28uZmx2`
-- 需要签名的内容是`woyao.qiniudn.com/thinking-in-go.mp4?avthumb/flv/r/28/vcodec/libx264`, `urlsafe_base64_encode(hmac_sha1(<sign>))`,结果为：`jx5twELFWIwgzID4fXIRC80owsk=`
+ - entryURI：`woyao:thinking-in-go.flv`,那么encodedEntryURI结果为：`d295YW86dGhpbmtpbmctaW4tZ28uZmx2`
+ - 需要签名的内容是`woyao.qiniudn.com/thinking-in-go.mp4?avthumb/flv/r/28/vcodec/libx264`, `urlsafe_base64_encode(hmac_sha1(<sign>))`,结果为：`jx5twELFWIwgzID4fXIRC80owsk=`
 4. 完整的请求URL
-- "http://woyao.qiniudn.com/thinking-in-go.mp4?avthumb/flv/r/24/vcodec/libx264|saveas/d295YW86dGhpbmtpbmctaW4tZ28uZmx2/sign/Bmja3JzCXdQbvLwIwvFGa9WWJYhRT37WqsRA3dCo:jx5twELFWIwgzID4fXIRC80owsk="
+ - "http://woyao.qiniudn.com/thinking-in-go.mp4?avthumb/flv/r/24/vcodec/libx264|saveas/d295YW86dGhpbmtpbmctaW4tZ28uZmx2/sign/Bmja3JzCXdQbvLwIwvFGa9WWJYhRT37WqsRA3dCo:jx5twELFWIwgzID4fXIRC80owsk="
 5. 保存的转码后的资源可通过如下访问
-http://woyao.qiniudn.com/thinking-in-go.flv
+ - http://woyao.qiniudn.com/thinking-in-go.flv
 
 
 生成saveas请求的完整go代码如下：
