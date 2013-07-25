@@ -293,7 +293,7 @@ AccessToken的计算公式： `<ACCESS_KEY>`:`urlsafe_base64_encode(hmac_sha1(<S
 对应AccessToken的计算公式，AccessToken的生成步骤可以分解为：
 
 - Step1. 明确需要被签名的数据`data`：
-    - 如果请求不含Body，则data=`<path>?<query>\n`（注意最后的`\n`）
+    - 如果请求不含Body，或者Content-Type不是application/x-www-form-urlencoded，则data=`<path>?<query>\n`（注意最后的`\n`）
     - 如果请求包含Body，那么data=`<path>?<query>\n<Body>`
 - Step2. 使用`SECRET_KEY`对`data`进行SHA1签名，即`hmac_sha1(<SECRET_KEY>, data)`，得到`<SignData>`
 - Step3. 对得到的签名进行Base64编码，即`urlsafe_base64_encode(<SignData>)`，得到`<EncodedSignData>`
