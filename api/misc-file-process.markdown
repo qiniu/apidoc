@@ -1,7 +1,9 @@
 ---
 layout: default
-title: "生成二维码 - QR code"
+title: "数据处理(杂项篇)"
 ---
+
+#生成二维码 - QR code#
 
 **格式**
 
