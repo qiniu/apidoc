@@ -1,6 +1,6 @@
 ## CHANGE LOG
 
-### v6.0.0
+### v6.1.2
 
 2013-06-21 issue [#39](https://github.com/qiniu/apidoc/pull/39)
 
