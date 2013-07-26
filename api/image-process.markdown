@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "图像处理"
+title: "数据处理(图片篇)"
 ---
 
 - [获取图片基本信息](#imageInfo)
