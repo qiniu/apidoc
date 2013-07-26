@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "文件管理接口"
+title: "资源管理操作"
 ---
 
 - [术语](#words)
