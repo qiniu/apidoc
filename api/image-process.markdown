@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "图像处理"
+title: "数据处理(图片篇)"
 ---
 
 - [获取图片基本信息](#imageInfo)
@@ -355,7 +355,7 @@ y 为正数时为从源图区域左上角的纵坐标，为负数时，左上角
 
 - 3.设置原图保护，仅限使用缩略图样式别名的友好URL形式来访问目标图片。
     - 设置原图保护，可使用 [qboxrsctl protected 命令](/tools/qboxrsctl.html#protected)
-    - 也可在 <http://www.qiniu.com/>  上进行可视觉化操作。
+    - 也可在 <https://portal.qiniu.com/>  上进行可视觉化操作。
 
   设置原图保护后，原图不能访问：
 
