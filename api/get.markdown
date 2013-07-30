@@ -41,41 +41,7 @@ domain | bucket 绑定的自定义域名
 
 **流程**
 
-              *************
-          ****             ****
-        **                     **
-      **                         **
-      *    Qiniu-Cloud-Storage    *
-      **                         **
-        **                     **
-          ****             ****
-              *************
-                  ^  |
-                  |  |
-                  |  |
-      (1) Request |  |
-                  |  |
-                  |  |
-                  |  |
-                  |  |
-                  |  |
-                  |  |
-                  |  |
-                  |  |
-                  |  | (2) Response
-                  |  |
-                  |  |
-                  |  v
-       +-------------------------+
-       |                         |
-       |                         |
-       |                         |
-       |        App-Client       |
-       |(Web/iOS/Android/etc,...)|
-       |                         |
-       |                         |
-       |                         |
-       +-------------------------+
+<img src="api/img/pub_download.png" alt="公有资源下载" width="100" height="100"/>
 
 1. App-Client 访问文件 URL 请求下载资源
 2. Qiniu-Cloud-Storage 响应 App-Client, 命令距离 App-Client 物理距离最近的 IO 节点输出文件内容
@@ -112,40 +78,7 @@ downloadToken | 下载授权凭证，由 App-Server 根据 [downloadToken 签名
 
 **流程**
 
-                                         *************
-                                     ****             ****
-                                   **                     **
-                                 **                         **
-                                 *    Qiniu-Cloud-Storage    *
-                                 **                         **
-                                   **                     **
-                                 ^   ****             ****
-                                /   /    *************
-                               /   /
-                              /   /
-        (3) Request Download /   /
-                            /   /
-                           /   /
-                          /   /
-                         /   /  (4) Return Result
-                        /   /
-                       /   /
-                      /   /
-                     /   /
-                    /   /
-                   /   /
-                  /   /
-                 /   /
-                /   v
-        +------------------+                                        +------------------+
-        |                  |                                        |                  |
-        |                  |    (1) Request (can be once)           |                  |
-        |                  |--------------------------------------->|                  |
-        |    App-Client    |                                        |    App-Server    |
-        |                  |<---------------------------------------|                  |
-        |                  |    (2) Return DownloadToken            |                  |
-        |                  |                                        |                  |
-        +------------------+                                        +------------------+
+<img src="api/img/src_download.png" alt="私有资源下载" width="100" height="100"/>
 
 1. App-Client 向 App-Server 请求下载授权
 2. App-Server 根据 [downloadToken 签名算法](#download-token-algorithm) 生成 downloadToken, 并颁发给 App-Client

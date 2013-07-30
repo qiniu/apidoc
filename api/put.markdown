@@ -49,45 +49,7 @@ title: "上传接口"
 
 **上传模式1——普通上传**
 
-```
-                                       *************
-                                   ****             ****
-                                 **                     **
-                               **                         **
-                               *    Qiniu-Cloud-Storage    *
-                               **                         **
-                                 **                     **
-                               ^   ****             ****
-                              /   /    *************
-                             /   /
-                            /   /
-                           /   /
-                          /   /
-                         /   /
-                        /   / (4) Return Result
-                       /   /
-      (3) Upload File /   /
-                     /   /
-                    /   /
-                   /   /
-                  /   /
-                 /   /
-                /   /
-               /   /
-              /   v
-      +------------------+                                        +------------------+
-      |                  |                                        |                  |
-      |                  |    (1) Request Upload (can be once)    |                  |
-      |                  |--------------------------------------->|                  |
-      |    App-Client    |                                        |    App-Server    |
-      |                  |<---------------------------------------|                  |
-      |                  |    (2) Make Policy / UploadToken       |                  |
-      |                  |                                        |                  |
-      +------------------+                                        +------------------+
-               |                                                           ^
-               |              (5) Callback                                 |
-               +-----------------------------------------------------------+
-```
+<img src="api/img/normal_upload.png" alt="普通上传" width="100" height="100"/>
 
 1. App-Client 向 App-Server 请求上传文件
 2. App-Server 使用 Qiniu-SDK 生成上传授权凭证（UploadToken），并颁发给 App-Client
@@ -98,43 +60,7 @@ title: "上传接口"
 
 <a name="upload-with-callback"></a>
 
-**上传模式2——高级上传（带回调）**
-
-                                           *************
-                                       ****             ****
-                                     **                     **
-                                   **                         **
-                                   *    Qiniu-Cloud-Storage    *
-                                   **                         **
-                                     **                     **
-                                   ^   ****             ****    \
-                                  /   /    *************     ^   \
-                                 /   /                        \   \
-                                /   /                          \   \
-                               /   /                            \   \
-                              /   /                              \   \
-                             /   /                                \   \
-                            /   /                                  \   \ (4) Callback
-                           /   /                                    \   \
-          (3) Upload File /   /                                      \   \
-                         /   /                                        \   \
-                        /   / (6) Return Result                        \   \
-                       /   /                                            \   \
-                      /   /                            (5) Return Result \   \
-                     /   /                                                \   \
-                    /   /                                                  \   \
-                   /   /                                                    \   \
-                  /   v                                                      \   v
-          +------------------+                                        +------------------+
-          |                  |                                        |                  |
-          |                  |    (1) Request Upload                  |                  |
-          |                  |--------------------------------------->|                  |
-          |    App-Client    |                                        |    App-Server    |
-          |                  |<---------------------------------------|                  |
-          |                  |    (2) Make Policy / UploadToken       |                  |
-          |                  |                                        |                  |
-          +------------------+                                        +------------------+
-
+<img src="api/img/callback_upload.png" alt="普通上传" width="100" height="100"/>
 
 1. App-Client 向 App-Server 请求上传文件
 2. App-Server 使用 Qiniu-SDK 生成上传授权凭证（UploadToken），并颁发给 App-Client
