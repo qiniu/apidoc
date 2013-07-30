@@ -49,7 +49,7 @@ title: "上传接口"
 
 **上传模式1——普通上传**
 
-<img src="api/img/normal_upload.png" alt="普通上传" width="100" height="100"/>
+<div class="imgwrap"><img src="img/normal_upload.png" alt="普通上传"/></div>
 
 1. App-Client 向 App-Server 请求上传文件
 2. App-Server 使用 Qiniu-SDK 生成上传授权凭证（UploadToken），并颁发给 App-Client
@@ -60,7 +60,9 @@ title: "上传接口"
 
 <a name="upload-with-callback"></a>
 
-<img src="api/img/callback_upload.png" alt="普通上传" width="100" height="100"/>
+**上传模式2——高级上传 (带回调)**
+
+<div class="imgwrap"><img src="img/callback_upload.png" alt="回调上传"/></div>
 
 1. App-Client 向 App-Server 请求上传文件
 2. App-Server 使用 Qiniu-SDK 生成上传授权凭证（UploadToken），并颁发给 App-Client

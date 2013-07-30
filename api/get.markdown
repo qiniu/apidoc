@@ -41,7 +41,7 @@ domain | bucket 绑定的自定义域名
 
 **流程**
 
-<img src="api/img/pub_download.png" alt="公有资源下载" width="100" height="100"/>
+<div class="imgwrap"><img src="img/pub_download.png" alt="公有资源下载"/></div>
 
 1. App-Client 访问文件 URL 请求下载资源
 2. Qiniu-Cloud-Storage 响应 App-Client, 命令距离 App-Client 物理距离最近的 IO 节点输出文件内容
@@ -78,7 +78,7 @@ downloadToken | 下载授权凭证，由 App-Server 根据 [downloadToken 签名
 
 **流程**
 
-<img src="api/img/src_download.png" alt="私有资源下载" width="100" height="100"/>
+<div class="imgwrap"><img src="img/src_download.png" alt="私有资源下载"/></div>
 
 1. App-Client 向 App-Server 请求下载授权
 2. App-Server 根据 [downloadToken 签名算法](#download-token-algorithm) 生成 downloadToken, 并颁发给 App-Client
