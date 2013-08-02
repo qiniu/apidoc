@@ -4,17 +4,19 @@ title: "上传接口"
 ---
 
 - [上传流程](#workflow)
-    - [Local - 本地上传](#local-upload) 
-    - [UGC - 终端用户加速直传](#ugc-upload) 
-    	- [上传模式1——普通上传](#upload-without-callback)
-    	- [上传模式2——高级上传（带回调）](#upload-with-callback)
+    - [本地上传](#local-upload) 
+    - [客户端加速直传](#ugc-upload) 
+        - [普通上传](#normal-upload)
+        - [高级上传 - 重定向功能](#upload-with-redirect)
+        - [高级上传 - 回调功能](#upload-with-callback)
 - [上传文件](#upload)
-    - [接口 - API](#upload-api)
-    - [凭证 - uploadToken](#uploadToken)
-        - [算法](#uploadToken-algorithm)
-        - [参数](#uploadToken-args)
-        - [使用上传模型1，App-Client 接收来自 Qiniu-Cloud-Storage 的 Response Body](#uploadToken-returnBody)
-        - [使用上传模型2，App-Client 接收来自 App-Server 的 Response Body](#upload-with-callback-appserver)
+    - [上传接口 - API](#upload-api)
+    - [上传凭证 - uploadToken](#uploadToken)
+        - [生成算法](#uploadToken-algorithm)
+        - [参数说明](#uploadToken-args)
+        - [使用普通上传，App-Client 接收来自 Qiniu-Cloud-Storage 的 Response Body](#uploadToken-returnBody)
+        - [使用高级上传的重定向功能，实现 HTML Form 上传后跳转](#upload-with-redirect)
+        - [使用高级上传的回调功能，App-Client 接收来自 App-Server 的 Response Body](#upload-with-callback-appserver)
         - [音视频上传预转 - asyncOps](#uploadToken-asyncOps)
         - [样例代码](#uploadToken-examples)
 - [附录](#dictionary)
@@ -28,7 +30,7 @@ title: "上传接口"
 
 <a name="local-upload"></a>
 
-### Local - 本地上传
+### 本地上传
 
 若您需要上传已存在您电脑或者是服务器上的文件到七牛云存储，可以直接使用七牛提供的上传工具：
 
@@ -38,57 +40,68 @@ title: "上传接口"
 | [qiniu-autosync](/tools/qiniu-autosync.html) | 命令行 | Linux                        | 自动同步指定文件夹内的新增或改动文件 |
 
 
-如果是需要通过网站(Web)或是移动应用(App)等客户端上传文件，则可以参考如下 UGC (User Generated Content) 上传流程。
-
+如果是需要通过网站(Web)或是移动应用(App)等客户端上传文件，则可以参考[客户端加速直传](#ugc-upload)部分的流程。
 
 <a name="ugc-upload"></a>
 
-### UGC - 终端用户加速直传
+### 客户端加速直传
 
 <a name="upload-without-callback"></a>
 
-**上传模式1——普通上传**
+#### 普通上传
 
-<div class="imgwrap"><img src="img/normal_upload.png" alt="普通上传"/></div>
+<div class="imgwrap"><img src="img/normal_upload.png" alt="普通上传"/></div><br/>
+
+流程简述：
 
 1. App-Client 向 App-Server 请求上传文件
-2. App-Server 使用 Qiniu-SDK 生成上传授权凭证（UploadToken），并颁发给 App-Client
-3. App-Client 取得上传授权许可（UploadToken）后，使用 Qiniu-Client-SDK 直传文件到最近的存储节点
-4. 文件上传成功后，Qiniu 返回给 App-Client 上传结果（可包含相应的文件信息）
-5. App-Client 将文件上传结果及相关信息汇报给 App-Server，App-Server 可写表做记录等操作
+2. App-Server 根据算法（也可使用我们提供的 SDK）生成上传凭证（UploadToken），并颁发给 App-Client
+3. App-Client 取得上传凭证（UploadToken）后，将文件直传到最近的存储节点
+4. 文件上传成功后，Qiniu-Cloud-Storage 返回给 App-Client 上传结果（可包含相应的文件信息）
+5. App-Client 将文件上传结果及相关信息汇报给 App-Server，App-Server 可执行后续的业务逻辑
 
+<a name="upload-with-redirect"></a>
+
+#### 高级上传 - 重定向功能
+
+重定向功能可以让我们的服务器在文件上传结束后通知业务客户端（App-Client）进行301跳转操作。特别适用于浏览器端的文件上传操作。
+
+<div class="imgwrap"><img src="img/redirect_upload.png" alt="重定向上传"/></div><br/>
+
+流程简述：
+
+1. App-Client 向 App-Server 请求上传文件
+2. App-Server 根据算法（也可使用我们提供的 SDK）生成上传凭证（UploadToken），并颁发给 App-Client
+3. App-Client 取得上传凭证（UploadToken）后，将文件直传到最近的存储节点
+4. 文件上传成功后，Qiniu-Cloud-Storage 将返回状态码为 301 的重定向 HTTP Response （可包含相应的文件信息）给上传者 App-Client
+5. App-Client 访问并跳转到重定向的页面。
 
 <a name="upload-with-callback"></a>
 
-**上传模式2——高级上传 (带回调)**
+#### 高级上传 - 回调功能
 
-<div class="imgwrap"><img src="img/callback_upload.png" alt="回调上传"/></div>
+回调功能可以让我们的服务器在文件上传结束后回调一个指定的URL以通知业务服务器（App-Server）。
+
+<div class="imgwrap"><img src="img/callback_upload.png" alt="回调上传"/></div><br/>
+
+流程简述：
 
 1. App-Client 向 App-Server 请求上传文件
-2. App-Server 使用 Qiniu-SDK 生成上传授权凭证（UploadToken），并颁发给 App-Client
-3. App-Client 取得上传授权许可（UploadToken）后，使用 Qiniu-Client-SDK 直传文件到最近的存储节点
-4. 文件上传成功后，Qiniu 以 HTTP POST 方式告知 App-Server 上传结果（可包含相应的文件信息）
-5. App-Server 可写表做记录等操作，然后经 Qiniu 中转返回给 App-Client 它想要的信息
-6. Qiniu 作为代理，原封不动地将回调 App-Server 的返回结果回传给 App-Client
+2. App-Server 根据算法（也可使用我们提供的 SDK）生成上传凭证（UploadToken），并颁发给 App-Client
+3. App-Client 取得上传凭证（UploadToken）后，将文件直传到最近的存储节点
+4. 文件上传成功后，Qiniu-Cloud-Storage 以 HTTP POST 方式告知 App-Server 上传结果（可包含相应的文件信息）
+5. App-Server 可执行相应的业务逻辑，然后经 Qiniu-Cloud-Storage 中转返回给 App-Client 它想要的信息
+6. Qiniu-Cloud-Storage 作为代理，原封不动地将回调 App-Server 的返回结果回传给 App-Client
 
-**其中模型2相对于模型1更为高级，体现在以下几方面**:
+**带回调功能的高级上传相对于普通上传的优势，体现在以下几方面**:
 
-1. App Client 无需向 App-Server 发送通知，全部统一由 Qiniu 发送 Callback，当存在多种终端（比如Web/iOS/Android）都需要上传文件时，每个终端不需要各自处理 Callback 业务逻辑。
-
+1. App Client 无需向 App-Server 发送通知，全部统一由 Qiniu-Cloud-Storage 发送 Callback，当存在多种终端（比如Web/iOS/Android）都需要上传文件时，每个终端不需要各自处理 Callback 业务逻辑。
 2. Callback 环节加速，七牛云存储的就近节点能比 App-Client 以更优异的网络回调 App-Server 。
-
 3. 只要文件上传成功，App-Server 必然知情。即使 App-Server 回调失败，App-Client 还是会得到完整的回调数据，可自定义策略进行异步处理。
-
 
 **注意**
 
-- 以上两种上传模型中，步骤(1)和步骤(2)中 App-Client 获取上传授权凭证（UploadToken）不用重复频繁获取，UploadToken 可通过 `deadline` 选项设置有效期，在设定的有效期内可多次复用。后续 [上传授权凭证 - uploadToken 算法说明](#uploadToken-algorithm) 会解释各选项的具体作用。
-
-
-| 适用平台                                                              |
-| --------------------------------------------------------------------- |
-| APP - 移动端应用（iOS、Android、WindowsPhone、BlackBerry、Symbian 等）|
-| WEB - 浏览器网页                                                      |
+- 以上所有的上传流程中，步骤(1)和步骤(2)中 App-Client 获取上传凭证（UploadToken）不用重复频繁获取，UploadToken 可通过 `deadline` 选项设置有效期，在设定的有效期内可多次复用。后续 [上传凭证 - uploadToken 算法说明](#uploadToken-algorithm) 会解释各选项的具体作用。
 
 
 <a name="upload-api"></a>
@@ -108,10 +121,10 @@ HTML Form API
 
 名称        | 类型   | 必须 | 说明
 ------------|--------|------|-------------------------------------
-key         | string | 否   | 标识文件的索引，所在的存储空间内唯一。key可包含斜杠，但不以斜杠开头，比如 `a/b/c.jpg` 是一个合法的key。若不指定 key，缺省使用文件的 etag（即上传成功后返回的hash值）作为key；此时若 UploadToken 有指定 returnUrl 选项，则文件上传成功后跳转到 `returnUrl?query_string`, query_string 包含`key={FileID}`
+key         | string | 否   | 标识文件的索引，所在的存储空间内唯一。key可包含斜杠，**但不能以斜杠开头**，比如 `a/b/c.jpg` 是一个合法的key。若不指定 key，缺省使用文件的 etag（即上传成功后返回的hash值）作为key；此时若 UploadToken 有指定 returnUrl 选项，则文件上传成功后跳转到 `returnUrl?query_string`, query_string 包含`key={FileID}`
 x:custom_field_name | string | 否 | [自定义变量](#xVariables)，必须以 `x:` 开头命名，不限个数。可以在 uploadToken 的 `callbackBody` 选项中使用 `$(x:custom_field_name)` 求值。
-token       | string | 是   | 上传授权凭证 - UploadToken
-file        | file   | 是   | 文件本身
+token       | string | 是   | 上传凭证 - UploadToken
+file        | file   | 是   | 文件内容本身
 
 该 HTML Form API 还可以用如下 `multipart/form-data` 形式表达。
 
@@ -139,7 +152,7 @@ file        | file   | 是   | 文件本身
 
     <FileContent>
 
-上传完毕，Qiniu-Cloud-Storage 向 App-Client 返回如下信息：
+上传完毕后，Qiniu-Cloud-Storage 会向 App-Client 返回如下信息：
 
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -152,13 +165,15 @@ file        | file   | 是   | 文件本身
 
 <a name="uploadToken"></a>
 
-## 凭证 - uploadToken
+## 上传凭证 - uploadToken
+
+相关术语说明：
 
 术语        | 说明
 ------------|-------------------------------
 AccessKey   | 公钥，可用于识别七牛云存储帐号
 SecretKey   | 密钥，可用于签名过程中进行加密
-uploadToken | 令牌，也称上传授权凭证
+uploadToken | 令牌，也称上传凭证
 
 uploadToken 有 3 个作用:
 
@@ -169,7 +184,7 @@ uploadToken 有 3 个作用:
 
 <a name="uploadToken-algorithm"></a>
 
-### 算法
+### 生成算法
 
 uploadToken 算法如下：
 
@@ -194,7 +209,7 @@ uploadToken 算法如下：
     // 步骤4：将签名摘要值进行安全编码
     EncodedSign = urlsafe_base64_encode(Signature)
 
-    // 步骤5：连接各字符串，生成上传授权凭证
+    // 步骤5：连接各字符串，生成上传凭证
     uploadToken = AccessKey:EncodedSign:EncodedFlags
 
 **注意**
@@ -209,27 +224,27 @@ uploadToken 算法如下：
 
 <a name="uploadToken-args"></a>
 
-### 参数
+### 参数说明
 
 uploadToken 参数详解：
 
  字段名       | 必须 | 说明
 --------------|------|-----------------------------------------------------------------------
- scope        | 是   | 一般指文件要上传到的目标存储空间（Bucket）。若为"Bucket"，表示限定只能传到该Bucket（仅限于新增文件）；若为"Bucket:Key"，表示限定特定的文件，可修改该文件。
- deadline     | 否   | 定义 uploadToken 的失效时间，Unix时间戳，精确到秒，缺省为 3600 秒
+ scope        | 是   | 用于指定文件要上传到的目标Bucket和Key。格式为：\<bucket name\>\[:\<key\>\]。若只指定Bucket名，表示文件上传至该Bucket。若同时指定了Bucket和Key（\<bucket name\>:\<key\>），表示上传文件限制在指定的Key上。两种形式的差别在于，前者是“**新增**”操作：如果所上传文件的Key在Bucket中已存在，上传操作将失败。而后者则是“**新增或覆盖**”操作：如果Key在Bucket中已经存在，将会被覆盖；如不存在，则将文件新增至Bucket中。
+ deadline     | 否   | 定义 uploadToken 的失效时间，Unix时间戳，精确到秒，缺省为当前时间 3600 秒之后的Unix时间戳
  endUser      | 否   | 给上传的文件添加唯一属主标识，特殊场景下非常有用，比如根据终端用户标识给图片或视频打水印
- returnUrl    | 否   | 设置用于浏览器端文件上传成功后，浏览器执行301跳转的URL，一般为 HTML Form 上传时使用。文件上传成功后会跳转到 returnUrl?query_string, query_string 会包含 returnBody 内容。returnUrl 不可与 callbackUrl 同时使用。
- returnBody   | 否   | 文件上传成功后，自定义从 Qiniu-Cloud-Server 最终返回給终端 App-Client 的数据。支持 [魔法变量](#MagicVariables)，不可与 callbackBody 同时使用。
- callbackBody | 否   | 文件上传成功后，Qiniu-Cloud-Server 向 App-Server 发送POST请求的数据。支持 [魔法变量](#MagicVariables) 和 [自定义变量](#xVariables)，不可与 returnBody 同时使用。
- callbackUrl  | 否   | 文件上传成功后，Qiniu-Cloud-Server 向 App-Server 发送POST请求的URL，必须是公网上可以正常进行POST请求并能响应 HTTP Status 200 OK 的有效 URL 
+ returnUrl    | 否   | 设置用于浏览器端文件上传成功后，浏览器执行301跳转的URL，一般为 HTML Form 上传时使用。文件上传成功后会跳转到 returnUrl?query_string, query_string 会包含 returnBody 内容。注意：returnUrl 不可与 callbackUrl 同时使用。
+ returnBody   | 否   | 文件上传成功后，自定义从 Qiniu-Cloud-Storage 最终返回給终端 App-Client 的数据。支持 [魔法变量](#MagicVariables)，不可与 callbackBody 同时使用。
+ callbackBody | 否   | 文件上传成功后，Qiniu-Cloud-Storage 向 App-Server 发送POST请求的数据。支持 [魔法变量](#MagicVariables) 和 [自定义变量](#xVariables)，不可与 returnBody 同时使用。
+ callbackUrl  | 否   | 文件上传成功后，Qiniu-Cloud-Storage 向 App-Server 发送POST请求的URL，必须是公网上可以正常进行 POST 请求并能响应 HTTP Status 200 OK 的有效 URL 
  asyncOps     | 否   | 指定文件（图片/音频/视频）上传成功后异步地执行指定的预转操作。每个预转指令是一个API规格字符串，多个预转指令可以使用分号“;”隔开
 
 
 <a name="uploadToken-returnBody"></a>
 
-### 使用上传模型1，App-Client 接收来自 Qiniu-Cloud-Storage 的 Response Body
+### 使用普通上传，App-Client 接收来自 Qiniu-Cloud-Storage 的 Response Body
 
-如果开发者使用上传模型1，App-Client 上传一张图片到 Qiniu-Cloud-Storage 后，App-Client 想知道该图片的一些信息比如 Etag, EXIF 等信息，那么此时即可在 uploadToken 中使用 **`returnBody`** 参数。 
+如果开发者使用普通上传模型，App-Client 上传一张图片到 Qiniu-Cloud-Storage 后，App-Client 想知道该图片的一些信息比如 Etag, EXIF 等信息，那么此时即可在 uploadToken 中使用 **`returnBody`** 参数。 
 
 App-Client 想求值得到的这些 Etag, EXIF 等信息我们称之为魔法变量（[MagicVariables](#MagicVariables)）。
 
@@ -266,9 +281,11 @@ returnBody 赋值可以把 魔法变量（[MagicVariables](#MagicVariables)）�
 
 可用的魔法变量列表参考：[MagicVariables](#MagicVariables)
 
-### HTML Form 上传后跳转
+<a name="upload-with-redirect"></a>
 
-若在 uploadToken 中指定了 `returnUrl` 和 `returnBody` 选项，且文件上传成功，Qiniu-Cloud-Storage 会返回如下应答：
+### 使用高级上传的重定向功能实现 HTML Form 上传后跳转
+
+如果在 uploadToken 中指定了 `returnUrl` 和 `returnBody` 选项，那么就可以使用带重定向功能的上传模型，在文件上传成功后，Qiniu-Cloud-Storage 会返回如下应答：
 
     HTTP/1.1 301 Moved Permanently
     Location: returnUrl?upload_ret={returnBodyEncoded}
@@ -283,9 +300,9 @@ returnBody 赋值可以把 魔法变量（[MagicVariables](#MagicVariables)）�
 
 <a name="upload-with-callback-appserver"></a>
 
-### 使用上传模型2，App-Client 接收来自 App-Server 的 Response Body
+### 使用高级上传的回调功能，App-Client 接收来自 App-Server 的 Response Body
 
-如果开发者使用了上传模型2，在 uploadToken 中指定了 `callbackUrl` 和 `callbackBody` 选项。App-Client 使用该 uploadToken 将文件上传成功后，Qiniu-Cloud-Storage 会向指定的 `callbackUrl` 以 HTTP POST 方式将 `callbackBody` 的值以 `application/x-www-form-urlencoded` 的形式发送给 App-Server。App-Server 接收请求后，返回 `Content-Type: "application/json"` 形式的 Response Body, 该段 JSON 数据会原封不动地经由 Qiniu-Cloud-Storage 返回给 App-Client 。
+如果在 uploadToken 中指定了 `callbackUrl` 和 `callbackBody` 选项，那么就可以使用带回调功能的高级上传模型，App-Client 使用该 uploadToken 将文件上传成功后，Qiniu-Cloud-Storage 会向指定的 `callbackUrl` 以 HTTP POST 方式将 `callbackBody` 的值以 `application/x-www-form-urlencoded` 的形式发送给 App-Server。App-Server 接收请求后，返回 `Content-Type: "application/json"` 形式的 Response Body, 该段 JSON 数据会原封不动地经由 Qiniu-Cloud-Storage 返回给 App-Client 。
 
 **callbackUrl** 必须是公网上可以公开访问的 URL  
 
@@ -293,7 +310,7 @@ returnBody 赋值可以把 魔法变量（[MagicVariables](#MagicVariables)）�
 
 **callbackBody** 必须是 `a=1&b=2&c=3` 这种形式的字符串。当包含 [魔法变量](#MagicVariables) 时，可以是这样一种形式：`a=1&key=$(etag)&size=$(fsize)&uid=$(endUser)` 。当包含 [自定义变量](#xVariables) 时，可以是这样一种形式：`test=$(x:test)&key=$(etag)&size=$(fsize)&uid=$(endUser)`，其中 `x:test` 是一个自定义变量。自定义变量命名必须以 `x:` 开头，且在 `multipart/form-data` 上传流中存在。
 
-Qiniu-Cloud-Storage 回调 App-Server 成功后，App-Server 必须返回如下格式的 Response:
+Qiniu-Cloud-Storage 在回调 App-Server 成功后，App-Server 必须返回如下格式的 Response:
 
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -350,9 +367,9 @@ Qiniu-Cloud-Storage 回调 App-Server 成功后，App-Server 必须返回如下�
 **上传**
 
 1. 设定 `asyncOps = "avthumb/mp3/ar/44100/ab/32k;avthumb/mp3/aq/6/ar/16000"`
-2. 以此生成带有预转功能的上传授权凭证（UploadToken）
+2. 以此生成带有预转功能的上传凭证（UploadToken）
 3. 向七牛云存储上传一个 aac 格式的音频文件
-4. 传成功后，服务器会对这个 aac 音频文件异步地做如下两个预转操作
+4. 上传成功后，服务器会对这个 aac 音频文件异步地做如下两个预转操作
     - `avthumb/mp3/ar/44100/ab/32k`
     - `avthumb/mp3/aq/6/ar/16000`
 
