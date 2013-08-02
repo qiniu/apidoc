@@ -230,7 +230,7 @@ uploadToken 参数详解：
 
  字段名       | 必须 | 说明
 --------------|------|-----------------------------------------------------------------------
- scope        | 是   | 用于指定文件要上传到的目标Bucket和Key。格式为：\<bucket name\>\[:\<key\>\]。若只指定Bucket名，表示文件上传至该Bucket。若同时指定了Bucket和Key（\<bucket name\>:\<key\>），表示上传文件限制在指定的Key上。两种形式的差别在于，前者是“**新增**”操作：如果所上传文件的Key在Bucket中已存在，上传操作将失败。而后者则是“**新增或覆盖**”操作：如果Key在Bucket中已经存在，将会被覆盖；如不存在，则将文件新增至Bucket中。
+ scope        | 是   | 用于指定文件要上传到的目标Bucket和Key。格式为：\<bucket name\>\[:\<key\>\]。若只指定Bucket名，表示文件上传至该Bucket。若同时指定了Bucket和Key（\<bucket name\>:\<key\>），表示上传文件限制在指定的Key上。两种形式的差别在于，前者是 **“新增”**” 操作：如果所上传文件的Key在Bucket中已存在，上传操作将失败。而后者则是 **“新增或覆盖”** 操作：如果Key在Bucket中已经存在，将会被覆盖；如不存在，则将文件新增至Bucket中。
  deadline     | 否   | 定义 uploadToken 的失效时间，Unix时间戳，精确到秒，缺省为当前时间 3600 秒之后的Unix时间戳
  endUser      | 否   | 给上传的文件添加唯一属主标识，特殊场景下非常有用，比如根据终端用户标识给图片或视频打水印
  returnUrl    | 否   | 设置用于浏览器端文件上传成功后，浏览器执行301跳转的URL，一般为 HTML Form 上传时使用。文件上传成功后会跳转到 returnUrl?query_string, query_string 会包含 returnBody 内容。注意：returnUrl 不可与 callbackUrl 同时使用。
