@@ -15,7 +15,7 @@ title: "上传接口"
         - [生成算法](#uploadToken-algorithm)
         - [参数说明](#uploadToken-args)
         - [使用普通上传，App-Client 接收来自 Qiniu-Cloud-Storage 的 Response Body](#uploadToken-returnBody)
-        - [使用高级上传的重定向功能，实现 HTML Form 上传后跳转](#upload-with-redirect)
+        - [使用高级上传的重定向功能，实现 HTML Form 上传后跳转](#upload-with-redirect-appclient)
         - [使用高级上传的回调功能，App-Client 接收来自 App-Server 的 Response Body](#upload-with-callback-appserver)
         - [音视频上传预转 - asyncOps](#uploadToken-asyncOps)
         - [样例代码](#uploadToken-examples)
@@ -230,7 +230,7 @@ uploadToken 参数详解：
 
  字段名       | 必须 | 说明
 --------------|------|-----------------------------------------------------------------------
- scope        | 是   | 用于指定文件要上传到的目标Bucket和Key。格式为：\<bucket name\>\[:\<key\>\]。若只指定Bucket名，表示文件上传至该Bucket。若同时指定了Bucket和Key（\<bucket name\>:\<key\>），表示上传文件限制在指定的Key上。两种形式的差别在于，前者是 **“新增”**” 操作：如果所上传文件的Key在Bucket中已存在，上传操作将失败。而后者则是 **“新增或覆盖”** 操作：如果Key在Bucket中已经存在，将会被覆盖；如不存在，则将文件新增至Bucket中。
+ scope        | 是   | 用于指定文件要上传到的目标Bucket和Key。格式为：\<bucket name\>\[:\<key\>\]。若只指定Bucket名，表示文件上传至该Bucket。若同时指定了Bucket和Key（\<bucket name\>:\<key\>），表示上传文件限制在指定的Key上。两种形式的差别在于，前者是 **“新增”** 操作：如果所上传文件的Key在Bucket中已存在，上传操作将失败。而后者则是 **“新增或覆盖”** 操作：如果Key在Bucket中已经存在，将会被覆盖；如不存在，则将文件新增至Bucket中。
  deadline     | 否   | 定义 uploadToken 的失效时间，Unix时间戳，精确到秒，缺省为当前时间 3600 秒之后的Unix时间戳
  endUser      | 否   | 给上传的文件添加唯一属主标识，特殊场景下非常有用，比如根据终端用户标识给图片或视频打水印
  returnUrl    | 否   | 设置用于浏览器端文件上传成功后，浏览器执行301跳转的URL，一般为 HTML Form 上传时使用。文件上传成功后会跳转到 returnUrl?query_string, query_string 会包含 returnBody 内容。注意：returnUrl 不可与 callbackUrl 同时使用。
@@ -249,6 +249,8 @@ uploadToken 参数详解：
 App-Client 想求值得到的这些 Etag, EXIF 等信息我们称之为魔法变量（[MagicVariables](#MagicVariables)）。
 
 returnBody 赋值可以把 魔法变量（[MagicVariables](#MagicVariables)）的求值结果以 `Content-Type: application/json` 形式返回給 App-Client。
+
+<a name="use-returnBody"></a>
 
 一个典型的包含 MagicVariables 的 returnBody 字段声明如下（returnBody 必须是一个JSON字符串）：
 
@@ -281,7 +283,7 @@ returnBody 赋值可以把 魔法变量（[MagicVariables](#MagicVariables)）�
 
 可用的魔法变量列表参考：[MagicVariables](#MagicVariables)
 
-<a name="upload-with-redirect"></a>
+<a name="upload-with-redirect-appclient"></a>
 
 ### 使用高级上传的重定向功能实现 HTML Form 上传后跳转
 
@@ -306,7 +308,7 @@ returnBody 赋值可以把 魔法变量（[MagicVariables](#MagicVariables)）�
 
 **callbackUrl** 必须是公网上可以公开访问的 URL  
 
-**callbackUrl** 若指定，**callbackBody** 也必须指定，且两者的值都不能为空  
+**callbackUrl** 若指定， **callbackBody** 也必须指定，且两者的值都不能为空  
 
 **callbackBody** 必须是 `a=1&b=2&c=3` 这种形式的字符串。当包含 [魔法变量](#MagicVariables) 时，可以是这样一种形式：`a=1&key=$(etag)&size=$(fsize)&uid=$(endUser)` 。当包含 [自定义变量](#xVariables) 时，可以是这样一种形式：`test=$(x:test)&key=$(etag)&size=$(fsize)&uid=$(endUser)`，其中 `x:test` 是一个自定义变量。自定义变量命名必须以 `x:` 开头，且在 `multipart/form-data` 上传流中存在。
 
@@ -431,7 +433,7 @@ Qiniu-Cloud-Storage 在回调 App-Server 成功后，App-Server 必须返回如�
 
 例如 App-Client 成功上传一张图片到 Qiniu-Cloud-Storage，App-Client 想知道该图片的一些信息像是 Etag, EXIF 等信息，App-Client 想求值得到的这些 Etag, EXIF 等信息我们可以通过魔法变量（MagicVariables）的方式获取。 
 
-MagicVariables 是一组规定的 API Call，可以使用 `$(APIName)` 或者是 `$(APIName.FieldName)` 的形式进行求值。主要用在 [uploadToken 的 returnBody 选项](#uploadToken-returnBody) 中。
+MagicVariables 是一组规定的 API Call，可以使用 `$(APIName)` 或者是 `$(APIName.FieldName)` 的形式进行求值。主要用在 [uploadToken 的 returnBody 选项](#use-returnBody) 中。
 
 可用 MagicVariables 列表:
 
