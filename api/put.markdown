@@ -8,7 +8,6 @@ title: "上传接口"
     - [UGC - 终端用户加速直传](#ugc-upload) 
     	- [上传模式1——普通上传](#upload-without-callback)
     	- [上传模式2——高级上传（带回调）](#upload-with-callback)
-- [上传文件](#upload)
     - [接口 - API](#upload-api)
     - [凭证 - uploadToken](#uploadToken)
         - [算法](#uploadToken-algorithm)
