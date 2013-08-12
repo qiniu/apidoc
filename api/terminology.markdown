@@ -22,7 +22,7 @@ title: "概念和术语"
 
 ### 资源（Resource）
 
-`资源` 是用户存放在七牛云存储的非结构化数据或文件。用户可以通过七牛云存储的[API](http://docs.qiniu.com/api/index.html)或[SDK](http://docs.qiniu.com/sdk/index.html)访问这些 `资源` 。 `资源` 通过 [`资源名`](#Key)标识。 `资源` 存放在 [`资源空间`](#Bucket)中。 `资源` 可以在不同的 `资源空间` 中复制、移动。用户可以对一个 `资源` 进行各种[云处理](#FOP)。
+资源是用户存放在七牛云存储的非结构化数据或文件。用户可以通过七牛云存储的[API](http://docs.qiniu.com/api/index.html)或[SDK](http://docs.qiniu.com/sdk/index.html)访问这些资源 。 `资源` 通过 [`资源名`](#Key)标识。 资源存放在 [`资源空间`](#Bucket)中。 资源可以在不同的资源空间之间复制、移动。用户可以对一个资源进行各种[云处理](#FOP)。
 
 <a name="Bucket"></a>
 
