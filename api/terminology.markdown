@@ -3,6 +3,7 @@ layout: default
 title: "概念和术语"
 ---
 
+- [资源（Resource）](#Resource)
 - [资源空间（Bucket）](#Bucket)
 - [空间名（Key）](#Key)
 - [应用服务器（App-Server）](#App-Server)
