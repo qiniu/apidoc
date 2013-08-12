@@ -17,6 +17,12 @@ title: "概念和术语"
 - [魔法变量（Magic Variable）](#Magic-Variable)
 - [自定义变量（xVariable）](#Selfdef-Variable)
 - [Callback（回调）、Return（返回）和重定向（Redirect）](#Callback-Return)
+- [EncodedEntryURI](#Encoded-Entry-URI)
+- [EncodedEntryURISrc](#Encoded-Entry-URI-Src)
+- [EncodedEntryURIDest](#Encoded-Entry-URI-Dest)
+- [URL安全的base64编码](#URLSafeBase64)
+
+
 
 <a name="Resource"></a>
 
@@ -82,7 +88,7 @@ title: "概念和术语"
 
 ##### 上传令牌（UploadToken）
 
-用于上传数据对象。将[资源空间](#Bucket)、[资源名](#Key)、失效时间等请求内容序列化成jason格式，使用hmac-sha1算法和[签名密钥](#Secret-Key)加密，并转换成url-safe的base64编码。
+用于上传数据对象。将[资源空间](#Bucket)、[资源名](#Key)、失效时间等请求内容序列化成[json](http://www.json.org/)格式，使用hmac-sha1算法和[签名密钥](#Secret-Key)加密，并转换成[URL安全的base64编码](#URLSafeBase64)。
 
 ##### 下载令牌（DownloadToken）
 
@@ -90,7 +96,7 @@ title: "概念和术语"
 
 ##### 管理令牌（AccessToken）
 
-用于数据对象管理的身份验证令牌。其算法同下载令牌类似：构造完管理操作的url，然后用[签名密钥](#Secret-Key)对其做hmac加密，然后进行base64编码，产生令牌。
+用于数据对象管理的身份验证令牌。其算法同下载令牌类似：构造完管理操作的url，然后用[签名密钥](#Secret-Key)对其做hmac加密，然后进行[URL安全的base64编码](#URLSafeBase64)，产生令牌。
 
 <a name="FOP"></a>
 
@@ -108,13 +114,13 @@ title: "概念和术语"
 
 ### 魔法变量（Magic Variable）
 
-魔法变量是七牛云存储提供的服务端的一些信息。魔法变量主要用于数据上传完成后，七牛服务端向用户反馈相关的信息。用户资源上传时在[PutPolicy](http://docs.qiniu.com/api/v6/put.html#uploadToken-args)数据结构中的returnBody，或者callbackBody字段中，指定所需的魔法变量。上传完成后，服务器会填充相应的变量，然后在HTTP Response Body中，以JSON格式返回。
+魔法变量是七牛云存储提供的服务端的一些信息。魔法变量主要用于数据上传完成后，七牛服务端向用户反馈相关的信息。用户资源上传时在[PutPolicy](http://docs.qiniu.com/api/v6/put.html#uploadToken-args)数据结构中的returnBody，或者callbackBody字段中，指定所需的魔法变量。上传完成后，服务器会填充相应的变量，然后在HTTP Response Body中，以[json](http://www.json.org/)格式返回。
 
 <a name="Selfdef-Variable"></a>
 
 ### 自定义变量（xVariable）
 
-自定义变量是用户的[应用客户端](#App-Client)同[应用服务器](#App-Server)之间交换信息途径。主要用于数据上传。应用客户端通过POST中的<x:...>参数携带自定义的变量信息。七牛云存储服务会根据PutPolicy结构中的returnBody，或者callbackBody字段中的设定，将请求中的自定义变量填充入返回结果，反馈给应用客户端， 或者用户指定的回调URL。
+自定义变量是用户的[应用客户端](#App-Client)同[应用服务器](#App-Server)之间交换信息途径。主要用于数据上传。应用客户端通过POST中的 `x:<field-name>` 参数携带自定义的变量信息。七牛云存储服务会根据PutPolicy结构中的returnBody，或者callbackBody字段中的设定，将请求中的自定义变量填充入返回结果，反馈给应用客户端， 或者用户指定的回调URL。
 
 <a name="Callback-Return"></a>
 
@@ -127,3 +133,32 @@ title: "概念和术语"
 重定向是用于文件上传成功后，七牛云存储反馈301，引导浏览器跳转至用户指定的URL。用户可以通过[returnBody](http://docs.qiniu.com/api/v6/put.html#uploadToken-args)控制反馈的内容。
 
 回调是指七牛云存储服务端在完成数据上传完成后，向用户指定的URL（[应用服务器](#App-Server)）发送结果，应用服务器可趁此机会进行一些处理，然后可以将一些信息反馈给七牛云存储服务端，七牛会再将这些结果反馈给[应用客户端](#App-Client)。
+
+<a name="Encoded-Entry-URI"></a>
+
+### EncodedEntryURI
+
+指代要操作的资源。在[资源管理操作](http://docs.qiniu.com/api/v6/rs.html)中使用，用于指定被操作的资源。是对EntryURI进行[URL安全的base64编码](#URLSafeBase64)所得的字符串。EntryURI的基本构造是 `<资源空间名>:<资源名>` 。EncodedEntryURI的生成算法如下：
+
+`EncodedEntryURI = urlsafe_base64_encode("<bucket>:<key>")`
+
+<a name="Encoded-Entry-URI-Src"></a>
+
+### EncodedEntryURISrc
+
+源EncodedEntryURI。用于[移动（Move）](http://docs.qiniu.com/api/v6/rs.html#move)，[复制（Copy）](http://docs.qiniu.com/api/v6/rs.html#copy)等操作指定源资源。
+
+<a name="Encoded-Entry-URI-Dest"></a>
+
+### EncodedEntryURIDest
+
+目标EncodedEntryURI。用于[移动（Move）](http://docs.qiniu.com/api/v6/rs.html#move)，[复制（Copy）](http://docs.qiniu.com/api/v6/rs.html#copy)等操作指定目标资源。
+
+<a name="URLSafeBase64"></a>
+
+### URL安全的base64编码（URLSafeBase64Encode）
+
+用于URL传递安全格式的Base64编码字符，该编码方式是将一字符串用base64编码，同时将编码后字符中的加号“+”换成中划线“-”，斜杠“/”换成下划线“_”。
+
+urlsafe_base64_encode(string) 函数按照标准的 [RFC 4648](http://www.ietf.org/rfc/rfc4648.txt) 实现，开发者可以参考七牛提供的各[SDK](http://docs.qiniu.com/sdk/index.html)的样例代码。
+
