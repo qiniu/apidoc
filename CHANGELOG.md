@@ -1,5 +1,11 @@
 ## CHANGE LOG
 
+### v6.1.3 issue [#47](https://github.com/qiniu/apidoc/pull/47)
+
+- 增加术语表
+- 增加错误代码表
+- 增加fop的saveas说明
+
 ### v6.1.2
 
 2013-06-21 issue [#39](https://github.com/qiniu/apidoc/pull/39)
