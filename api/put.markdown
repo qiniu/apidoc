@@ -117,26 +117,28 @@ file        | file   | 是   | 文件本身
     POST http://up.qiniu.com/
     Content-Type: multipart/form-data; boundary=<Boundary>
 
-    <Boundary>
+    --<Boundary>
     Content-Disposition: form-data; name="key"
 
     <FileID>
 
-    <Boundary>
+    --<Boundary>
     Content-Disposition: form-data; name="x:custom_field_name"
 
     <SomeVal>
 
-    <Boundary>
+    --<Boundary>
     Content-Disposition: form-data; name="token"
 
     <UploadToken>
 
-    <Boundary>
+    --<Boundary>
     Content-Disposition: form-data; name="file"; filename="<FileName>"
     Content-Type: <MimeType>
 
     <FileContent>
+    
+    --<Boundary>--
 
 上传完毕，Qiniu-Cloud-Storage 向 App-Client 返回如下信息：
 
