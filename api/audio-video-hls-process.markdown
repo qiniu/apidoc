@@ -5,6 +5,8 @@ title: "数据处理(音频/视频/流媒体篇)"
 
 - [音频转换](#audio-convert)
 - [视频转换](#video-convert)
+    - [视频转换预设集](#video-preset)
+    - [视频自定义转码](#self-def-video-convert)
 - [视频帧缩略图](#video-thumbnail)
 - [HTTP Live Streaming](#hls)
     - [使用七牛提供的 HLS 服务](#hls-usage)
@@ -58,7 +60,53 @@ title: "数据处理(音频/视频/流媒体篇)"
 
 <a name="video-convert"></a>
 
-## 视频转换
+## 视频转码
+
+视频转码是七牛云存储提供的云处理功能。使用视频转码功能，用户可以对存放在七牛云存储的视频资源进行编码和转换处理。视频转码包括两种方式： [视频转换预设集](#video-preset)和[视频自定义转换](#self-def-video-convert)。
+
+<a name="video-preset"></a>
+
+### 视频转换预设集
+
+视频转换预设集是七牛云存储提供的一组预设的视频转码设置。用户可以方便地使用这些预设的转码设置，面向特定格式进行转码。
+
+**请求**
+
+    [GET] <VideoDownloadURL>?avthumb/<Preset>
+
+**响应**
+
+    HTTP/1.1 200 OK
+    Body: <VideoBinaryData>
+
+**示例**
+
+示例1：将 mp4 视频格式转换为 `iphone` 格式：
+
+    [GET] http://open.qiniudn.com/thinking-in-go.mp4?avthumb/iphone
+
+示例2：将 mp4 视频格式转换为 `andriod-high` ：
+
+    [GET] http://open.qiniudn.com/thinking-in-go.mp4?avthumb/android-high
+
+预设集 | 视频编码器 | 视频格式 | 解析率 | 视频码率 | 音频编码器 | 音频码率 | 音频采样率
+------|-----------|---------|-------|---------|-----------|---------|---------------
+android-high | libx264 | mp4 | 480x320 | 700k | libfaac | 128k | 48k
+android-low | libx264 | mp4 | 480x320 | 96k | libfaac | 64k | 48k
+android | libx264 | mp4 | 480x320 | 512k | libfaac | 128k | 48k
+flash | flv | flv | 320x240 | 512k | libmp3lame | 64k | 44100
+ipad-high | libx264 | mp4 | 1024x768 | 1200k | libfaac | 128k | 48k
+ipad-low | libx264 | mp4 | 1024x768 | 512k | libfaac | 128k | 48k
+ipad | libx264 | mp4 | 1024x768 | 700k | libfaac | 128k | 48k
+iphone-high | libx264 | mp4 | 480x320 | 700k | libfaac | 128k | 48k
+iphone-low | libx264 | mp4 | 480x320 | 96k | libfaac | 64k | 48k
+iphone | libx264 | mp4 | 480x320 | 512k | libfaac | 128k | 48k
+webm | libvpx | webm | 700k | libvorbis | 128k | 48k
+
+
+<a name="self-def-video-convert"></a>
+
+### 视频自定义转换
 
 **请求**
 
@@ -295,7 +343,6 @@ video_4x3_150k  | 码率为150K，长宽比为4x3，推荐在 3G 环境下使用
 video_4x3_240k  | 码率为240K，长宽比为4x3，推荐在 3G 环境下使用
 video_4x3_440k  | 码率为440K，长宽比为4x3，推荐在 WIFI 环境下使用
 video_4x3_640k  | 码率为640K，长宽比为4x3，推荐在 WIFI 环境下使用
-
 
 #### 自定义
 
