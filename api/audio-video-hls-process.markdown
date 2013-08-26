@@ -101,7 +101,7 @@ ipad | libx264 | mp4 | 1024x768 | 700k | libfaac | 128k | 48k
 iphone-high | libx264 | mp4 | 480x320 | 700k | libfaac | 128k | 48k
 iphone-low | libx264 | mp4 | 480x320 | 96k | libfaac | 64k | 48k
 iphone | libx264 | mp4 | 480x320 | 512k | libfaac | 128k | 48k
-webm | libvpx | webm | 700k | libvorbis | 128k | 48k
+webm | libvpx | webm | | 700k | libvorbis | 128k | 48k
 
 
 <a name="self-def-video-convert"></a>
