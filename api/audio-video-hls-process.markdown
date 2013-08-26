@@ -87,19 +87,19 @@ title: "数据处理(音频/视频/流媒体篇)"
 
 示例2：将 mp4 视频格式转换为 `andriod-high` ：
 
-    [GET] http://open.qiniudn.com/thinking-in-go.mp4?avthumb/android-high
+    [GET] http://open.qiniudn.com/thinking-in-go.mp4?avthumb/android_high
 
 预设集 | 视频编码器 | 视频格式 | 解析率 | 视频码率 | 音频编码器 | 音频码率 | 音频采样率
 ------|-----------|---------|-------|---------|-----------|---------|---------------
-android-high | libx264 | mp4 | 480x320 | 700k | libfaac | 128k | 48k
-android-low | libx264 | mp4 | 480x320 | 96k | libfaac | 64k | 48k
+android_high | libx264 | mp4 | 480x320 | 700k | libfaac | 128k | 48k
+android_low | libx264 | mp4 | 480x320 | 96k | libfaac | 64k | 48k
 android | libx264 | mp4 | 480x320 | 512k | libfaac | 128k | 48k
 flash | flv | flv | 320x240 | 512k | libmp3lame | 64k | 44100
-ipad-high | libx264 | mp4 | 1024x768 | 1200k | libfaac | 128k | 48k
-ipad-low | libx264 | mp4 | 1024x768 | 512k | libfaac | 128k | 48k
+ipad_high | libx264 | mp4 | 1024x768 | 1200k | libfaac | 128k | 48k
+ipad_low | libx264 | mp4 | 1024x768 | 512k | libfaac | 128k | 48k
 ipad | libx264 | mp4 | 1024x768 | 700k | libfaac | 128k | 48k
-iphone-high | libx264 | mp4 | 480x320 | 700k | libfaac | 128k | 48k
-iphone-low | libx264 | mp4 | 480x320 | 96k | libfaac | 64k | 48k
+iphone_high | libx264 | mp4 | 480x320 | 700k | libfaac | 128k | 48k
+iphone_low | libx264 | mp4 | 480x320 | 96k | libfaac | 64k | 48k
 iphone | libx264 | mp4 | 480x320 | 512k | libfaac | 128k | 48k
 webm | libvpx | webm | | 700k | libvorbis | 128k | 48k
 
