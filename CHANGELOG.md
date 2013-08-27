@@ -1,5 +1,10 @@
 ## CHANGE LOG
 
+### v6.1.4 issue [#51](https://github.com/qiniu/apidoc/pull/51)
+
+- 增加视频转换预设集
+- 修订上传部分文档
+
 ### v6.1.3 issue [#47](https://github.com/qiniu/apidoc/pull/47)
 
 - 增加术语表
