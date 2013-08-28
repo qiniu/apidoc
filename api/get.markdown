@@ -12,16 +12,16 @@ title: "资源下载"
 - [自定义资源下载时所保存的名称](#define-download-friendly-name)
 
 
-用户在七牛云存储的[空间]()有两种保护状态：公开（public）和私有（private）。当用户下载资源的时候，需要对这两种状态采用不同的访问方式。公开资源可以使用[资源名]()和空间名构造出URL，直接下载，无需签名授权。私有资源则需要用户对资源访问URL做认证签名，向资源下载方授权。
+用户在七牛云存储的[空间](http://docs.qiniu.com/api/v6/terminology.html#Bucket)有两种保护状态：公开（public）和私有（private）。当用户下载资源的时候，需要对这两种状态采用不同的访问方式。公开资源可以使用[资源名](http://docs.qiniu.com/api/v6/terminology.html#Key)和空间名构造出URL，直接下载，无需签名授权。私有资源则需要用户对资源访问URL做认证签名，向资源下载方授权。
 
-另外，七牛云存储的空间还可以设置成为[原图保护]()。在这种特殊的模式下，空间内保存的“原图”（即用户上传的原始资源），需要像私有资源那样受权访问。而这些“原图”通过云处理生成的派生资源，可以如同公开资源那样直接访问，无需授权。
+另外，七牛云存储的空间还可以设置成为[原图保护](http://docs.qiniu.com/api/v6/terminology.html#Origin-Protect)。在这种特殊的模式下，空间内保存的“原图”（即用户上传的原始资源），需要像私有资源那样受权访问。而这些“原图”通过云处理生成的派生资源，可以如同公开资源那样直接访问，无需授权。
 
 
 <a name="download-proto"></a>
 
 ## 下载协议
 
-七牛云存储的资源下载采用 `HTTP GET` 实现。下载所需的参数都放置在URL的[Query String]()里：
+七牛云存储的资源下载采用 `HTTP GET` 实现。下载所需的参数都放置在URL的 `Query String` 里：
 
 ```
   http://<domain>/<key>?<param1>=<value1>&<param2>=<value2>...
@@ -62,7 +62,7 @@ title: "资源下载"
 
 七牛二级域名是一个空间默认的域名，格式为：`<bucket>.qiniudn.com` 。 `<bucket>` 为空间名。比如，名为 `my-bucket` 空间，其域名为： `my-bucket.qiniudn.com` 。用户可以通过 `http://my-bucket.qiniu.com/sunflower.jpg` 下载名为 `sunflower.jpg` 的资源。
 
-用户可以将一个自己的域名[绑定到一个空间]()，一旦绑定成功，便可以通过这个域名访问空间内的资源。比如，用户将 `www.my-blog-base.com` 同 `my-bucket` 空间绑定，之后便可以通过此域名访问： `http://www.my-blog-base.com/sunflower.jpg` 。
+用户可以将一个自己的域名绑定到一个资源空间，一旦绑定成功，便可以通过这个域名访问空间内的资源。比如，用户将 `www.my-blog-base.com` 同 `my-bucket` 空间绑定，之后便可以通过此域名访问： `http://www.my-blog-base.com/sunflower.jpg` 。
 
 
 **流程**
@@ -75,16 +75,16 @@ title: "资源下载"
 
 1. 应用客户端构造资源的URL
 1. 应用客户端向七牛云存储发送下载请求（HTTP GET）
-1. 七牛云存储向应用客户端反馈结果。如果发生错误，则反馈相应的 [HTTP 状态码]()
+1. 七牛云存储向应用客户端反馈结果。如果发生错误，则反馈相应的 [HTTP 状态码](http://docs.qiniu.com/api/v6/errno.html)
 
 
 <a name="private-download"></a>
 
 ## 私有资源下载
 
-当用户将空间设置成[私有]()后，所有对空间内资源的访问都必须获得授权。
+当用户将空间设置成私有后，所有对空间内资源的访问都必须获得授权。
 
-私有资源下载也是通过一个URL完成。与公有资源下载不同的是，URL中增加了 `e` 和 `token` 两个参数，分别用于放置URL的过期时间和[下载凭证（Download Token）]()：
+私有资源下载也是通过一个URL完成。与公有资源下载不同的是，URL中增加了 `e` 和 `token` 两个参数，分别用于放置URL的过期时间和[下载凭证（Download Token）](#download-token)：
 
 ```
   http://<domain>/<key>?e=<deadline>&token=<downloadToken>
@@ -114,7 +114,7 @@ title: "资源下载"
       http://my-bucket.qiniu.com/sunflower.jpg?e=1451491200
     ```
 
-1. 然后，对所得的URL进行HMAC-SHA1的加密，密钥是用户的SecretKey，并做[URL安全的Base64编码]()：
+1. 然后，对所得的URL进行HMAC-SHA1的加密，密钥是用户的SecretKey，并做[URL安全的Base64编码](http://docs.qiniu.com/api/v6/terminology.html#URLSafeBase64)：
 
     ```
       urlsafe_base64_encode(hmac_sha1(
