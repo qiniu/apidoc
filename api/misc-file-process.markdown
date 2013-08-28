@@ -80,7 +80,8 @@ L 是最低级别的冗余度，H 最高，冗余度越高，生成的图片体�
 
 - <https://code.google.com/p/zxing/wiki/BarcodeContents>
 
-# 云处理结果持久化
+
+## 云处理结果持久化
 
 七牛云存储的云处理API满足如下规格:
 
@@ -102,7 +103,7 @@ L 是最低级别的冗余度，H 最高，冗余度越高，生成的图片体�
 encodedEntryURI | string | 是   | 保存资源的bucket和key，`encodedEntryURI = urlsafe_base64_encode("bucket:key")`
 sign            | string | 是   | 生成的签名部分，算法见下方。
 
-## 样例
+### 样例
 
 1. 原资源是一个视频文件
  - http://woyao.qiniudn.com/thinking-in-go.mp4
@@ -137,8 +138,39 @@ func makeSaveasUrl(URL, accessKey string, secretKey []byte, saveBucket, saveKey 
 }
 ```
 
-## 备注
+### 备注
 
 - `urlsafe_base64_encode()` 函数按照标准的 [RFC 4648](http://www.ietf.org/rfc/rfc4648.txt) 实现，开发者可以参考 [github.com/qiniu](https://github.com/qiniu) 上各SDK的样例代码。
 - 这里的签名内容是不包含scheme字段，与download token签名不一样。
 - 当要持久化保存的fop耗时较长时候，saveas请求会返回CDN超时，但是只要保证发送的saveas请求合法，七牛服务器还是会对请求做正确处理。
+
+
+<a name="alias"></a>
+
+## 别名
+
+如果觉得 `url?<fop1>|<fop2>|<fop3>|<fopN>` 这样的形式够冗长，还可以为这些串行的 `<fop>` 集合定义一个友好别名。如此一来，就可以用友好URL风格进行访问。
+
+我们先来熟悉 [qboxrsctl](/tools/qboxrsctl.html) 的两个命令行，
+
+    // 定义 url 和 fop 之间的分隔符为 separator 
+    qboxrsctl separator <bucket> <separator>
+
+    // 定义 fop 的别名为 aliasName
+    qboxrsctl style <bucket> <aliasName> <fop>
+
+例如:
+
+    qboxrsctl separator <bucket> "."
+    qboxrsctl style <bucket> "jpg" "vframe/jpg/offset/7/w/480/h/360|watermark/1/image/aHR0cDovL3d3dy5iMS5xaW5pdWRuLmNvbS9pbWFnZXMvbG9nby0yLnBuZw=="
+
+那么，以下两个 URL 则等价:
+
+原始URL:
+
+- <http://open.qiniudn.com/thinking-in-go.mp4?vframe/jpg/offset/7/w/480/h/360|watermark/1/image/aHR0cDovL3d3dy5iMS5xaW5pdWRuLmNvbS9pbWFnZXMvbG9nby0yLnBuZw==>
+
+友好风格URL:
+
+- <http://open.qiniudn.com/thinking-in-go.mp4.jpg>
+
