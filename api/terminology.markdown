@@ -5,7 +5,7 @@ title: "概念和术语"
 
 - [资源（Resource）](#Resource)
 - [资源空间（Bucket）](#Bucket)
-- [空间名（Key）](#Key)
+- [资源名（Key）](#Key)
 - [应用服务器（App-Server）](#App-Server)
 - [应用客户端（App-Client）](#App-Client)
 - [用户凭证（Access Key）](#Access-Key)
