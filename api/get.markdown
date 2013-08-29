@@ -14,7 +14,7 @@ title: "资源下载"
 
 用户在七牛云存储的[空间](http://docs.qiniu.com/api/v6/terminology.html#Bucket)有两种保护状态：公开（public）和私有（private）。当用户下载资源的时候，需要对这两种状态采用不同的访问方式。公开资源可以使用[资源名](http://docs.qiniu.com/api/v6/terminology.html#Key)和空间名构造出URL，直接下载，无需签名授权。私有资源则需要用户对资源访问URL做认证签名，向资源下载方授权。
 
-另外，七牛云存储的空间还可以设置成为[原图保护](http://docs.qiniu.com/api/v6/terminology.html#Origin-Protect)。在这种特殊的模式下，空间内保存的“原图”（即用户上传的原始资源），需要像私有资源那样受权访问。而这些“原图”通过云处理生成的派生资源，可以如同公开资源那样直接访问，无需授权。
+另外，七牛云存储的空间还可以设置成为[原图保护](http://docs.qiniu.com/api/v6/terminology.html#Origin-Protect)。在这种特殊的模式下，空间内保存的“原图”（即用户上传的原始资源），需要像私有资源那样受权访问。而这些“原图”通过用户指定的云处理生成的派生资源，可以如同公开资源那样直接访问，无需授权。
 
 
 <a name="download-proto"></a>
@@ -92,9 +92,9 @@ title: "资源下载"
 
 实际上，私有资源下载使用的URL就是在公有资源下载URL后加上 `e` 和 `token` 两个参数。
 
-参数 `e` 表示URL的过期时间，采用[Unix时间](http://en.wikipedia.org/wiki/Unix_time)。当此参数指定的时间一过，URL随即失效，七牛云存储将视此URL为无效请求，任何人都无法凭此URL访问所指的资源。需要注意的是，如果发起请求的应用客户端，或应用服务器的时钟偏离标准Unix时间，那么可能会造成URL尚未使用便已过期。所以， **应用客户端或应用服务器的时钟应当同Unix时间校准**
+参数 `e` 表示URL的过期时间，采用[Unix时间](http://en.wikipedia.org/wiki/Unix_time)。当此参数指定的时间一过，URL随即失效，七牛云存储将视此URL为无效请求，任何人都无法凭此URL访问所指的资源。需要注意的是，如果发起请求的应用客户端，或应用服务器的时钟偏离标准Unix时间，那么可能会造成URL尚未使用便已过期。所以， **应用客户端或应用服务器的时钟应当同Unix时间校准。**
 
-参数 `token` 携带下载凭证。下载凭证是对资源的授权，通过对请求的签名，确保下载请求是获得资源所有者的合法授权的。
+参数 `token` 携带下载凭证。下载凭证是对资源访问的授权，通过对请求的签名，确保下载请求是获得资源所有者的合法授权的。
 
 <a name="download-token"></a>
 
@@ -108,7 +108,7 @@ title: "资源下载"
       http://my-bucket.qiniu.com/sunflower.jpg
     ```
 
-1. 然后，加上URL的过期时间：
+1. 接着，加上URL的过期时间：
 
     ```
       http://my-bucket.qiniu.com/sunflower.jpg?e=1451491200
@@ -135,9 +135,9 @@ title: "资源下载"
 
 在下载资源时，把下载凭证作为 `token` 参数追加至URL的尾部：
 
-    ```
-      http://my-bucket.qiniu.com/sunflower.jpg?e=1451491200&token=j6XaEDm5DwWvn0H9TTJs9MugjunHK8Cwo3luCglo:HbAKtTogKqDLWEkq7zVSX6T35NI=
-    ```
+```
+    http://my-bucket.qiniu.com/sunflower.jpg?e=1451491200&token=j6XaEDm5DwWvn0H9TTJs9MugjunHK8Cwo3luCglo:HbAKtTogKqDLWEkq7zVSX6T35NI=
+```
 
 七牛云存储收到此请求后，会从URL中分离出 `token` ，对其余部分执行签名算法，以验证URL的合法性。同时，七牛云存储还将验证URL是否过期。
 
@@ -147,7 +147,7 @@ title: "资源下载"
 
 <a name="private-download-proc"></a>
 
-**流程**
+**私有资源下载流程**
 
 ![私有资源下载](img/private-download.png)
 

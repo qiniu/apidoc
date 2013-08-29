@@ -1,22 +1,22 @@
 ---
 layout: default
-title: "访问概述"
+title: "七牛云存储访问概述"
 ---
 
 - [准备工作](#prepare)
 - [验证和Token](#auth-token)
-  - [用户请求的验证](#auth-request)
-  - [Upload Token](#upload-token)
-  - [Download Token](#download-token)
-  - [Access Token](#access-token)
+    - [用户请求的验证](#auth-request)
+    - [Upload Token](#upload-token)
+    - [Download Token](#download-token)
+    - [Access Token](#access-token)
 - [上传模型](#upload-models)
-  - [本地上传](#local-upload)
-  - [普通客户端直传](#normal-upload)
-  - [重定向上传](#redirect-upload)
-  - [回调上传](#callback-upload)
+    - [本地上传](#local-upload)
+    - [普通客户端直传](#normal-upload)
+    - [重定向上传](#redirect-upload)
+    - [回调上传](#callback-upload)
 - [下载模型](#download-models)
-  - [公有资源下载](#public-download)
-  - [私有资源下载](#private-download)
+    - [公有资源下载](#public-download)
+    - [私有资源下载](#private-download)
 - [资源管理](#rs-manage)
 - [云处理](#fop)
 
@@ -50,11 +50,11 @@ title: "访问概述"
 验证方式并不复杂，大致有这样几个步骤：
 
 1. 按照既定规则，将请求中的关键部分整合成待签名数据；
-1. 以SecretKey为密钥，对带签名数据进行hmac_sha1()计算；
+1. 以SecretKey为密钥，对带签名数据进行hmac_sha1计算；
 1. 对上一步所得的结果进行URL安全的Base64编码；
 1. 将编码结果同AccessKey等数据合并起来，构成最终的token。
 
-用户在自己的业务服务器中执行上述验证算法，获得token。然后将token交付给最终客户端，客户端据此向七牛云存储发起请求，执行所需的操作。
+用户在自己的业务服务器中执行上述验证算法，获得token。然后将token交付给应用客户端，客户端据此向七牛云存储发起请求，执行所需的操作。
 
 如果用户仅仅是从自己的服务器，或者桌面计算机发起请求，那么执行验证算法后，可随即发请求。
 
@@ -88,7 +88,7 @@ Upload Token用于资源上传请求的验证。由上传请求（使用[mulit-p
 
 下面是一个Upload Token的示例：
 
-`j6XaEDm5DwWvn0H9TTJs9MugjunHK8Cwo3luCglo:PDpKklPEog5x3bpcY5Jkgh0YsPY=:eyJzY29wZSI6IndvbGZnYW5nIiwiZGVhZGxpbmUiOjEzNzMxMDExOTN9`。
+`j6XaEDm5DwWvn0H9TTJs9MugjunHK8Cwo3luCglo:PDpKklPEog5x3bpcY5Jkgh0YsPY=:eyJzY29wZSI6IndvbGZnYW5nIiwiZGVhZGxpbmUiOjEzNzMxMDExOTN9`
 
 <a name="download-token"></a>
 
@@ -141,7 +141,7 @@ Access Token用于[资源管理](http://docs.qiniu.com/api/v6/rs.html)的请求�
 
 ### 本地上传
 
-所谓本地上传，是将用户的本地资源同步到七牛云存储的过程。存放在用户服务器中的数据文件，或者用户桌面计算机中的存档文件等等，都可以通过这种方式，方便地同步到七牛云存储
+所谓本地上传，是将用户的本地资源同步到七牛云存储的过程。存放在用户服务器中的数据文件，或者用户桌面计算机中的存档文件等等，都可以通过这种方式，方便地同步到七牛云存储。
 
 七牛云存储提供了下面两种同步工具，可以帮助您轻松地将文件同步到七牛云存储：
 
@@ -156,9 +156,9 @@ Access Token用于[资源管理](http://docs.qiniu.com/api/v6/rs.html)的请求�
 
 ### 普通客户端直传
 
-更多的用户从事网络应用、网站、移动应用等产品的开发，需要从App-Client上传文件。传统的方式是从App-Client将文件上传至App-Server，再由App-Server将文件传送到云存储服务。这种模式会增加用户App-Server的带宽压力，和服务器压力。同时，还使得用户不得不承担文件的入和出两份流量，增加用户的成本。
+更多的用户从事网络应用、网站、移动应用等产品的开发，需要从[应用客户端](http://docs.qiniu.com/api/v6/terminology.html#App-Client)上传文件。传统的方式是从应用客户端将文件上传至[应用服务器](http://docs.qiniu.com/api/v6/terminology.html#App-Server)，再由应用服务器将文件传送到云存储服务。这种模式会增加用户应用服务器的处理和带宽压力。同时，还使得用户不得不承担文件的入和出两份流量，增加用户的成本。
 
-为消除这些问题，七牛云存储提供了从App-Client直接上传文件的模式。出于用户资源安全的考略，访问的签名需要在用户所控制的App-Server中进行。因此，需要由App-Server向App-Client颁发相应的访问授权。App-Client获得访问请求和授权后，向七牛云存储上传文件。
+为消除这些问题，七牛云存储提供了从应用客户端直接上传文件的模式。出于用户资源安全的考略，访问的签名需要在用户所控制的应用服务器中进行。因此，需要由应用服务器向应用客户端颁发相应的访问授权。应用客户端获得访问请求和授权后，向七牛云存储上传文件。
 
 典型的上传流程如下图所示：
 
@@ -166,11 +166,11 @@ Access Token用于[资源管理](http://docs.qiniu.com/api/v6/rs.html)的请求�
 
 流程简述：
 
-1. App-Client向App-Server 请求上传文件
-2. App-Server使用相应的[算法](#upload-token)或者使用七牛提供的 SDK 生成上传凭证（UploadToken），并颁发给App-Client
-3. App-Client 取得上传许可（UploadToken）后，使用七牛提供的 SDK 或者直接使用[上传 API](api/put.html) 直传文件到最近的存储节点
-4. 文件上传成功后，Qiniu-Cloud-Storage 返回给 App-Client 上传结果（可包含相应的文件信息）
-5. App-Client 将文件上传结果及相关信息汇报给 App-Server，App-Server 可据此执行后续野无逻辑。
+1. 应用客户端向应用服务器 请求上传文件
+2. 应用服务器使用相应的[算法](#upload-token)或者使用七牛提供的 SDK 生成上传凭证（UploadToken），并颁发给应用客户端
+3. 应用客户端 取得上传许可（UploadToken）后，使用七牛提供的 SDK 或者直接使用[上传 API](api/put.html) 直传文件到最近的存储节点
+4. 文件上传成功后，七牛云存储向应用客户端返回上传结果（可包含相应的资源信息）
+5. 应用客户端将文件上传结果及相关信息汇报给应用服务器，应用服务器可据此执行后续业务逻辑。
 
 普通上传模型用途广泛。几乎所有的网络应用、网站、在线服务等等，都可以使用普通上传提升服务品质，优化资源配置。
 
@@ -187,21 +187,20 @@ Access Token用于[资源管理](http://docs.qiniu.com/api/v6/rs.html)的请求�
 
 流程简述：
 
-1. App-Client 向 App-Server 请求上传文件；
-2. App-Server 使用相应的[算法](#upload-token)或者使用七牛提供的 SDK 生成上传凭证（UploadToken），并颁发给 App-Client；
-3. App-Client 取得上传许可（UploadToken）后，使用七牛提供的 SDK 或者直接使用[上传 API](api/put.html) 直传文件到最近的存储节点；
-4. 文件上传成功后，Qiniu-Cloud-Storage 将返回状态码为 301 的重定向HTTP Response 给上传者App-Client（可包含相应的文件信息）；
-5. App-Client 访问跳转到重定向页面。
+1. 应用客户端向应用服务器请求上传文件；
+2. 应用服务器使用相应的[算法](#upload-token)或者使用七牛提供的[SDK](http://docs.qiniu.com/sdk/index.html)生成上传凭证（UploadToken），并颁发给应用客户端；
+3. 应用客户端取得上传许可（UploadToken）后，使用七牛提供的SDK或者直接使用[上传 API](api/put.html) 直传文件到最近的存储节点；
+4. 文件上传成功后，七牛云存储将状态码为301的重定向HTTP Response返回给上传者应用客户端（可包含相应的资源信息）；
+5. 应用客户端 访问跳转到重定向页面。
 
 
 <a name="callback-upload"></a>
 
 ### 回调上传
 
-回调上传是普通客户端直传的另一种扩展。用户在上传请求中指定回调URL（[callbackUrl](http://docs.qiniu.com/api/v6/put.html#put-policy)），七牛云存储在上传完成后以特定的方式调用用户所提供的URL，将上传的结果传送至用户的App-Server。用户可以在收到回调结果后执行相关的业务逻辑。此后，用户可以将一些数据安置在响应回调的HTTP Response中，反回给七牛云存储。七牛云存储收到响应后，将其中的数据放在HTTP Response中，传递给App-
-Client。
+回调上传是普通客户端直传的另一种扩展。用户在上传请求中指定回调URL（[callbackUrl](http://docs.qiniu.com/api/v6/put.html#put-policy)），七牛云存储在上传完成后以特定的方式调用用户所提供的URL，将上传的结果传送至用户的应用服务器。用户可以在收到回调结果后执行相关的业务逻辑。此后，用户可以将一些数据安置在响应回调的HTTP Response中，反回给七牛云存储。七牛云存储收到响应后，将其中的数据放在HTTP Response中，传递给应用客户端。
 
-这种上传模型对于那些需要在App-Client和App-Server之间进行复杂交互的用户非常有用。比如，移动应用的客户终端往往没有很好的网络环境，频繁地进行客户端-服务器之间的交互严重影响使用体验。而使用回调上传模型，客户终端在上传过程中只需一次HTTP访问，即可完成包括服务端通知在内的多个操作。
+这种上传模型对于那些需要在应用客户端和应用服务器之间进行复杂交互的用户非常有用。比如，移动应用的客户终端往往没有很好的网络环境，频繁地进行客户端-服务器之间的交互严重影响使用体验。而使用回调上传模型，客户终端在上传过程中只需一次HTTP访问，即可完成包括服务端通知在内的多个操作。
 
 一个回调上传模型典型的上传流程为：
 
@@ -209,21 +208,21 @@ Client。
 
 流程简述：
 
-1. App-Client 向 App-Server 请求上传文件
-2. App-Server 使用相应的[算法](#upload-token)或者使用七牛提供的 SDK 生成上传凭证（UploadToken），并颁发给 App-Client
-3. App-Client 取得上传许可（UploadToken）后，使用七牛提供的 SDK 或者直接使用[上传 API](api/put.html) 直传文件到最近的存储节点
-4. 文件上传成功后，Qiniu-Cloud-Storage 以 HTTP POST 方式告知 App-Server 上传结果（可包含相应的文件信息）
-5. App-Server 处理完回调的请求后返回相应的结果信息，经 Qiniu-Cloud-Storage 中转返回给 App-Client
-6. Qiniu-Cloud-Storage 作为代理，原封不动地将回调 App-Server 的返回结果回传给 App-Client
+1. 应用客户端向应用服务器请求上传文件
+2. 应用服务器使用相应的[算法](#upload-token)或者使用七牛提供的SDK生成上传凭证（UploadToken），并颁发给 应用客户端
+3. 应用客户端取得上传许可（UploadToken）后，使用七牛提供的SDK或者直接使用[上传 API](api/put.html) 直传文件到最近的存储节点
+4. 文件上传成功后，七牛云存储以HTTP POST方式告知应用服务器上传结果（可包含相应的文件信息）
+5. 应用服务器处理完回调的请求后返回相应的结果信息，经七牛云存储中转返回给应用客户端
+6. 七牛云存储作为代理，原封不动地将回调应用服务器的返回结果回传给应用客户端
 
 
 回调模型相对于普通上传更为高级，体现在以下几方面:
 
-1. App-Client 无需向 App-Server 发送通知，全部统一由 Qiniu 发送 Callback，当存在多种终端（比如Web/iOS/Android）都需要上传文件时，每个终端不需要各自处理 Callback 业务逻辑。
-2. Callback 环节加速，七牛云存储的就近节点能以比 App-Client 更优异的网络回调 App-Server。
-3. 只要文件上传成功，App-Server 必然知情。即使 App-Server 回调失败，App-Client 还是会得到完整的回调数据，可自定义策略进行异步处理。
+1. 应用客户端无需向应用服务器发送通知，全部统一由七牛云存储发送回调，当存在多种终端（比如Web/iOS/Android）都需要上传文件时，每个终端不需要各自处理回调业务逻辑。
+2. 加速回调环节，七牛云存储的就近节点能以比应用客户端更优异的网络环境回调应用服务器。
+3. 只要文件上传成功，应用服务器将会直接获得通知。即使应用服务器回调失败，应用客户端还是会得到完整的回调数据，可自定义策略进行异步处理。
 
-在这种上传模型中，七牛云存储的服务器不只是作为文件传输的接受和存储者，同时也参与到了其余的业务逻辑中，为您的业务服务器(App-Server)和业务客户端(App-Client)简化了业务逻辑的实现。同时，利用七牛云存储服务器端的网络优势，可以缩短整个流程的完成时间，并大大提高一次上传流程的成功率。
+在这种上传模型中，七牛云存储的服务器不只是作为文件传输的接受和存储者，同时也参与到了其余的业务逻辑中，为应用服务器和应用客户端简化了业务逻辑的实现。同时，利用七牛云存储服务器端的网络优势，可以缩短整个流程的完成时间，并大大提高一次上传流程的成功率。
 
 
 <a name="download-models"></a>
@@ -238,9 +237,9 @@ Client。
 
 ### 公开资源下载
 
-公开资源资源下载，非常简单，就如同下载互联网上任何公开文件和数据那样，客户仅需要构造出资源的`URL`，然后发出HTTP请求即可。
+公开资源资源下载，非常简单，就如同下载互联网上任何公开文件和数据那样，客户仅需要构造出资源的URL，然后发出HTTP请求即可。
 
-七牛云存储资源的`URL`的格式为：
+七牛云存储资源的URL的格式为：
 
 ```
 	http://<domain>/<key>
@@ -261,8 +260,8 @@ Client。
 
 流程简述：
 
-1. App-Client 访问文件 URL 请求下载资源
-2. Qiniu-Cloud-Storage 响应 App-Client, 指令距离 App-Client 物理距离最近的 IO 节点输出文件内容。
+1. 应用客户端访问文件URL请求下载资源
+2. 七牛云存储 响应 应用客户端, 指令距离 应用客户端 物理距离最近的 IO 节点输出文件内容。
 
 
 <a name="private-download"></a>
@@ -288,10 +287,10 @@ Client。
 
 流程简述：
 
-1. App-Client 向 App-Server 请求下载授权
-2. App-Server 根据 [下载凭证签名算法](#download-token) 生成 `downloadToken`, 并颁发给 App-Client
-3. App-Client 拿到 `downloadToken` 后，向 Qiniu-Cloud-Storage 请求下载文件
-4. Qiniu-Cloud-Storage 在校验 `downloadToken` 成功后，输出文件内容。如果校验失败，返错误信息（401 bad token）
+1. 应用客户端 向 应用服务器 请求下载授权
+2. 应用服务器 根据 [下载凭证签名算法](#download-token) 生成 `downloadToken`, 并颁发给 应用客户端
+3. 应用客户端 拿到 `downloadToken` 后，向 七牛云存储 请求下载文件
+4. 七牛云存储 在校验 `downloadToken` 成功后，输出文件内容。如果校验失败，返错误信息（401 bad token）
 
 
 <a name="rs-manage"></a>

@@ -1,29 +1,29 @@
 ---
 layout: default
-title: "上传方式"
+title: "资源上传"
 ---
 
 
 - [资源上传基础](#upload-basic)
-  - [上传协议](#upload-proto)
-  - [在HTML页面中上传资源](#html-form-post)
-  - [非HTML客户端上传](#multipart)
-  - [上传参数](#parameters)
-  - [上传策略（PutPolicy）](#put-policy）)
-  - [上传凭证（Upload Token）](#upload-token)
-  - [上传请求的反馈](#response)
-    - [基本反馈](#basic-resp)
-    - [Return Body](#return-body)
-    - [Callback Body](#callback-body)
-    - [重定向的反馈](#redirect-response)
-  - [魔法变量（MagicVariables）](#MagicVariables)
-  - [自定义变量（xVariables）](#xVariables)
+    - [上传协议](#upload-proto)
+    - [在HTML页面中上传资源](#html-form-post)
+    - [非HTML客户端上传](#multipart)
+    - [上传参数](#parameters)
+    - [上传策略（PutPolicy）](#put-policy）)
+    - [上传凭证（Upload Token）](#upload-token)
+    - [上传请求的反馈](#response)
+        - [基本反馈](#basic-resp)
+        - [Return Body](#return-body)
+        - [Callback Body](#callback-body)
+        - [重定向的反馈](#redirect-response)
+    - [魔法变量（MagicVariables）](#MagicVariables)
+    - [自定义变量（xVariables）](#xVariables)
 - [上传资源](#do-upload)
-  - [本地上传](#local-upload)
-  - [普通客户端直传](#direct-upload)
-  - [重定向上传](#redirect-upload)
-  - [回调上传](#callback-upload)
-  - [上传中的云处理（Async-Ops）](#uploadToken-asyncOps)
+    - [本地上传](#local-upload)
+    - [普通客户端直传](#direct-upload)
+    - [重定向上传](#redirect-upload)
+    - [回调上传](#callback-upload)
+    - [上传中的云处理（Async-Ops）](#uploadToken-asyncOps)
 
 
 <a name="upload-basic"></a>
@@ -36,10 +36,10 @@ title: "上传方式"
 
 在资源上传的基础上，七牛云存储还提供一组与上传有关的附加功能，包括：
 
-1. 用户定义返回值；
-1. 客户端重定向；
-1. 回调；
-1. 异步云处理；
+1. [用户定义返回值](#return-body)；
+1. [客户端重定向](#redirect-upload)；
+1. [回调](#callback-upload)；
+1. [异步云处理](#uploadToken-asyncOps)；
 
 这些功能极大地方便了用户对上传资源的处理，使得用户可以在一次资源操作中完成较为复杂的业务处理。
 
@@ -109,14 +109,14 @@ Content-Type: <MimeType>
 
 ## 上传参数
 
-上传参数包括两类，一类是服务参数，有三个，分别是：key、token和file。三者具体的含义参考以下表格。另一类是用户[自定义变量](#xVariables)，即xVariable。用户可以通过 `x:\<custom_field_name\>` 参数将其传递到七牛云存储。七牛云存储根据[callbackUrl](#put-policy)的设置，构造出回调结果。
+上传参数包括两类，一类是服务参数，有三个，分别是：key、token和file。三者具体的含义参考以下表格。另一类是用户[自定义变量](#xVariables)，即xVariable。用户可以通过 `x:<custom_field_name>` 参数将其传递到七牛云存储。七牛云存储根据[callbackUrl](#put-policy)的设置，构造出回调结果。
 
 名称        | 类型   | 必须 | 说明
 ------------|--------|------|-------------------------------------
 token       | string | 是   | 上传授权凭证 - [UploadToken](#uploadtoken)
 file        | file   | 是   | 文件本身
-key         | string | 否   | 标识文件的索引，所在的存储空间内唯一。key可包含`/`，但不以`/`开头。若不指定 key，七牛云存储将使用文件的 etag（即上传成功后返回的hash值）作为key，并在返回结果中传递给客户端。
-x:\<custom_field_name\> | string | 否 | 自定义变量，必须以 `x:` 开头命名，不限个数。里面的内容将在 `callbackBody` 参数中的 `$(x:custom_field_name)` 求值时使用。
+key         | string | 否   | 标识文件的索引，所在的资源空间内唯一。key可包含`/`，但不以`/`开头。若不指定 key，七牛云存储将使用文件的 etag（即上传成功后返回的hash值）作为key，并在返回结果中传递给客户端。
+x:\<custom_field_name\> | string | 否 | [自定义变量](#xVariables)，必须以 `x:` 开头命名，不限个数。里面的内容将在 `callbackBody` 参数中的 `$(x:custom_field_name)` 求值时使用。
 
 
 <a name="put-policy"></a>
@@ -188,7 +188,7 @@ x:\<custom_field_name\> | string | 否 | 自定义变量，必须以 `x:` 开头
     put_policy = '{"scope":"my-bucket:sunflower.jpg","deadline":1451491200,"returnUrl":"{\"name\": $(fname),\"size\": $(fsize),\"w\": $(imageInfo.width),\"h\": $(imageInfo.height),\"hash\": $(etag),}"}'
     ```
 
-1. 对json序列化后的上传策略进行[URL安全的Base64编码](http://en.wikipedia.org/wiki/Base64)：
+1. 对json序列化后的上传策略进行[URL安全的Base64编码](http://docs.qiniu.com/api/v6/terminology.html#URLSafeBase64)：
 
     ```
     encoded = urlsafe_base64_encode(put_policy)
@@ -236,10 +236,10 @@ x:\<custom_field_name\> | string | 否 | 自定义变量，必须以 `x:` 开头
 
 ### 基本反馈
 
-当用户的资源上传请求得到正确执行，七牛云存储会反馈成功，Status Code 200。Resopnse Body中携带两个值：
+当用户的资源上传请求得到正确执行，七牛云存储会反馈成功，Status Code 200。Response Body中携带两个值：
 
 - `name`：已成功上传的资源名，即Key；
-- `hash`：衣裳穿资源的校验码，供用户核对使用。
+- `hash`：已上传资源的校验码，供用户核对使用。
 
 以下是一个典型的上传成功反馈：
 
@@ -254,7 +254,7 @@ x:\<custom_field_name\> | string | 否 | 自定义变量，必须以 `x:` 开头
   }
 ```
 
-当用户的资源上传请求出现错误，七牛云存储会反馈相应的错误。比如，401代表验证失败。此时，Response Body中携带具体的错误信息。错误信息同样以 json 格式组织，基本形式为：{"error":"\<reason\>"}
+当用户的资源上传请求出现错误，七牛云存储会反馈相应的错误码。比如，401代表验证失败。此时，Response Body中携带具体的错误信息。错误信息同样以 json 格式组织，基本形式为：{"error":"\<reason\>"}
 
 以下是一个典型的上传失败反馈：
 
@@ -280,14 +280,14 @@ x:\<custom_field_name\> | string | 否 | 自定义变量，必须以 `x:` 开头
 
 除错误信息外，七牛云存储的 Response Header 中也携带了一些有用的信息，有助于问题定位。其中主要有：
 
-1. X-Reqid：用户请求的唯一id。通过这个id，七牛云存储可以快速查找到用户请求的相关记录。当用户在使用七牛云存储遇到问题时，可以通过该id，获得更多的信息；
+1. X-Reqid：上传请求的唯一id。通过这个id，七牛云存储可以快速查找到用户请求的相关记录。当用户在使用七牛云存储遇到问题时，可以通过该id，获得更多的信息；
 1. X-Log：用户请求的日志缩略信息。通过这些信息，七牛云存储可以大致地获得用户请求的执行情况，帮助用户定位问题。
 
 <a name="return-body"></a>
 
 ### Return Body
 
-基本的上传反馈只会包含资源最基本的信息。很多情况下，用户希望得到更多有关资源的信息。用户可以通过七牛云存储提供云处理操作获得这些扩展信息。但需要用户另外发起请求，查询这些资源。为了方便用户的使用，七牛云存储可以在上传请求中直接向用户反馈这些额外的信息。
+基本的上传反馈只会包含资源最基本的信息。很多情况下，用户希望得到更多有关资源的信息。用户可以通过七牛云存储提供管理操作（Status）操作，和云处理操作，获得这些扩展信息。但需要用户另外发起请求，查询这些资源。为了方便用户的使用，七牛云存储可以在上传请求中直接向用户反馈这些额外的信息。
 
 用户可以通过 `returnBody` 参数指定需要返回的信息，比如资源的大小、类型，图片的尺寸等等。`returenBody` 实际上是一个用户定义的反馈信息模板。下面是一个returnBody的案例：
 
@@ -304,7 +304,7 @@ x:\<custom_field_name\> | string | 否 | 自定义变量，必须以 `x:` 开头
   }
 ```
 
-`returnBody` 同真正的返回信息一样，也是json格式。在 `returnBody` 中，用户通过设定所谓[魔法变量（MagicVariable）](#MagicVariables)，通知七牛云存储反馈那些信息。“魔法变量”采用 `$(<variable-name>)` 的形式，在反馈信息中占位。七牛云存储会根据变量名，将相应的数据替换“魔法变量”，反馈给用户：
+`returnBody` 同真正的返回信息一样，也是json格式。在 `returnBody` 中，用户通过设定所谓[魔法变量（MagicVariable）](#MagicVariables)，通知七牛云存储反馈哪些信息。“魔法变量”采用 `$(<variable-name>)` 的形式，在反馈信息中占位。七牛云存储会根据变量名，将相应的数据替换“魔法变量”，反馈给用户：
 
 ```
   {
@@ -422,15 +422,9 @@ MagicVariables 求值示例：
 - `$(imageInfo.height)` - 获取当前上传图片的原始高度
 - `$(imageInfo.format)` -  获取当前上传图片的格式
 - `$(endUser)` - 获取 uploadToken 中指定的 endUser 选项的值，即终端用户ID
-
-imageInfo 接口返回的 JSON 数据可参考：<http://qiniuphotos.qiniudn.com/gogopher.jpg?imageInfo>
-
 - `$(exif)` - 获取当前上传图片的 EXIF 信息
 - `$(exif.ApertureValue)` - 获取当前上传图片所拍照时的光圈信息
 - `$(exif.ApertureValue.val)` - 获取当前上传图片拍照时的具体光圈值
-
-exif 接口返回的 JSON 数据可参考：<http://qiniuphotos.qiniudn.com/gogopher.jpg?exif>
-
 
 <a name="xVariables"></a>
 
@@ -454,7 +448,7 @@ exif 接口返回的 JSON 数据可参考：<http://qiniuphotos.qiniudn.com/gogo
 
 其中，$(x:location) 和 $(x:prise) 就是自定义变量。
 
-之后，用户构造了如下请求：
+之后，用户的客户端构造了如下请求：
 
 ```
     <form method="post" action="http://up.qiniu.com/" enctype="multipart/form-data">
@@ -472,13 +466,13 @@ exif 接口返回的 JSON 数据可参考：<http://qiniuphotos.qiniudn.com/gogo
   name=sunflower.jpg&hash=Fn6qeQi4VDLQ347NiRm-RlQx_4O2&location=Shanghai&prise=1500.00
 ```
 
-然后，七牛云存储将此结果进行[URL安全的Base64编码](http://en.wikipedia.org/wiki/Base64)，作为回调请求的Body调用 `callbackUrl` 指定的回调服务器。
+然后，七牛云存储将此结果进行[URL安全的Base64编码](http://docs.qiniu.com/api/v6/terminology.html#URLSafeBase64)，作为回调请求的Body调用 `callbackUrl` 指定的回调服务器。
 
 
 
 <a name="do-upload"></a>
 
-# 上传资源
+# 资源上传
 
 <a name="local-upload"></a>
 
@@ -491,7 +485,7 @@ exif 接口返回的 JSON 数据可参考：<http://qiniuphotos.qiniudn.com/gogo
 | [qrsync](/tools/qrsync.html)                 | 命令行 | Linux,Windows,MacOSX,FreeBSD | 手动同步文件/文件夹到七牛云存储      |
 | [qiniu-autosync](/tools/qiniu-autosync.html) | 命令行 | Linux                        | 自动同步指定文件夹内的新增或改动文件 |
 
-除了这类离线的备份以外，用户还可以在自己的程序中向七牛云存储上传文件。但是，进行本地上传的程序必须是运行在用户自己的服务器，或者桌面计算机上的程序。 **本地上传模式不能在客户端中使用。**
+除了这类离线的备份以外，用户还可以在自己的程序中向七牛云存储上传文件。但是，进行本地上传的程序必须是运行在用户自己的服务器，或者桌面计算机上的程序。 **注意：本地上传模式不能在应用客户端中使用。**
 
 ![本地上传](img/local-upload.png)
 
@@ -566,7 +560,7 @@ exif 接口返回的 JSON 数据可参考：<http://qiniuphotos.qiniudn.com/gogo
 
 ## 上传中的云处理（Async-Ops）
 
-七牛云存储提供一系列[云处理（fop）]()操作，用于对存放在七牛云存储的资源进行再处理。有时用户需要上传一个文件，然后随即对其进行某种处理。一个典型的例子就是：用户上传了一张图片，然后立刻生成几个不同格式的缩略图，用于不同的客户端。通常，用户可以上传完成之后，调用云处理功能，执行对资源的处理。但七牛云存储提供了更简洁的方式，允许在一次上传中，指定上传完成后对资源进行云处理操作。
+七牛云存储提供一系列[云处理（fop）](http://docs.qiniu.com/api/v6/gen-use.html#fop)操作，用于对存放在七牛云存储的资源进行再处理。有时用户需要上传一个文件，然后随即对其进行某种处理。一个典型的例子就是：用户上传了一张图片，然后立刻生成几个不同格式的缩略图，用于不同的客户端。通常，用户可以上传完成之后，调用云处理功能，执行对资源的处理。但七牛云存储提供了更简洁的方式，允许在一次上传中，指定上传完成后对资源进行云处理操作。
 
 用户只需在构造 `上传策略` 时，设置 `asyncOps` 参数，即可触发附加的云处理。正如该参数名称所指，附加的云处理是异步执行，即资源上传操作完成后，七牛云存储会触发云处理，但不等处理完成，便返回上传请求的响应。七牛云存储的云处理系统会继续完成相应的操作。
 
@@ -576,7 +570,7 @@ exif 接口返回的 JSON 数据可参考：<http://qiniuphotos.qiniudn.com/gogo
     asyncOps = <fop>[;<fop2>;<fop3>;…;<fopN>]
 ```
 
-其中， `<fop>` 是云处理的指令。用户可以一次设置多个云处理指令，在一次上传中执行多种资源的操作。云处理指令间以“;”分割。关于云处理指令，详见[云处理参考](http://docs.qiniu.com/api/index.html)。
+其中， `<fop>` 是云处理的指令。用户可以一次设置多个云处理指令，在一次上传中执行多种资源的操作。云处理指令间以“;”分割。关于云处理指令，详见[云处理参考](http://docs.qiniu.com/api/v6/gen-use.html#fop)。
 
 下面以一个音频文件为例，演示如何在上传中实现云处理。
 
@@ -606,5 +600,5 @@ exif 接口返回的 JSON 数据可参考：<http://qiniuphotos.qiniudn.com/gogo
   [http://apitest.b1.qiniudn.com/sample.wav?avthumb/mp3/ar/44100/ab/32k](http://apitest.b1.qiniudn.com/sample.wav?avthumb/mp3/ar/44100/ab/32k)
 ```
 
-具体的云处理访问详见[云处理参考](http://docs.qiniu.com/api/index.html)
+具体的云处理访问详见[云处理参考](http://docs.qiniu.com/api/v6/gen-use.html#fop)
 
