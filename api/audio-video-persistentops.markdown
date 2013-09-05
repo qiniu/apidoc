@@ -403,30 +403,26 @@ video_4x3_640k  | 码率为640K，长宽比为4x3，推荐在 WIFI 环境下使�
 
     [GET] http://<Domain>/<Key>?p/1/<fop params>  
     
-这样形式的url访问处理结果。和普通的数据处理url不同，这里用`p/1`表明访问的是持久化处理的结果，不会出现缓存失效导致重新处理耗费大量时间的情况。
+这样形式的url访问处理结果。和普通的数据处理url不同，这里用`p/1`表明访问的是持久化处理的结果，不会出现重新处理耗费大量时间的情况。但需注意，如果访问一个没有在`PersistentOps`中指定的处理结果，会直接返回404。  
 
 
 <a name="persistentOps-status"></a>
 ### 数据处理状态通知和查询
 
 **通知**  
-服务端完成所有的数据处理后，会以 HTTP POST 的方式向用户指定的`PersistentNotifyUrl`发送处理状态。**格式存疑**    
+服务端完成所有的数据处理后，会以 HTTP POST 的方式向用户指定的`PersistentNotifyUrl`发送处理状态。  
 
-处理状态的内容及含义参考： [状态内容](#persistentOps-status-description) 
+    Content-Type: application/json
+    Body: <JsonStatusDescription>
+	
+处理状态`<JsonStatusDescription>`的内容及含义参考： [状态内容](#persistentOps-status-description) 
 
 **查询**  
 用户也可以使用`PersistentId`来主动查询数据处理的状态。查询的接口为：  
 
     [GET] http://api.qiniu.com/status/get/prefop?id=<PersistentId>  
 
-响应：
-
-    HTTP/1.1 200 OK
-    Content-Type: application/json  
-    Body: <JsonStatusDescription> 
-
-
-接口的返回及含义参考 [状态内容](#persistentOps-status-description)
+接口返回的内容及含义参考 [状态内容](#persistentOps-status-description)
 
 <a name="persistentOps-status-description"></a>
 **状态内容**  
