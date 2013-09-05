@@ -410,12 +410,12 @@ video_4x3_640k  | 码率为640K，长宽比为4x3，推荐在 WIFI 环境下使�
 ### 数据处理状态通知和查询
 
 **通知**  
-服务端完成所有的数据处理后，会以 HTTP POST 的方式向用户指定的`PersistentNotifyUrl`发送处理状态。  
+服务端完成所有的数据处理后，会以 HTTP POST 的方式将处理状态`<JsonStatusDescription>`以`application/json`的形式发送给用户指定的`PersistentNotifyUrl`。  
 
     Content-Type: application/json
     Body: <JsonStatusDescription>
 	
-处理状态`<JsonStatusDescription>`的内容及含义参考： [状态内容](#persistentOps-status-description) 
+`<JsonStatusDescription>`的内容及含义参考： [状态内容](#persistentOps-status-description) 
 
 **查询**  
 用户也可以使用`PersistentId`来主动查询数据处理的状态。查询的接口为：  
