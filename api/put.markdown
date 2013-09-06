@@ -14,7 +14,7 @@ title: "上传接口"
         - [参数](#uploadToken-args)
         - [使用上传模型1，App-Client 接收来自 Qiniu-Cloud-Storage 的 Response Body](#uploadToken-returnBody)
         - [使用上传模型2，App-Client 接收来自 App-Server 的 Response Body](#upload-with-callback-appserver)
-        - [音视频上传预转 - asyncOps](#uploadToken-asyncOps)
+        - [音视频上传预转 - PersistentOps](#uploadToken-PersistentOps)
         - [样例代码](#uploadToken-examples)
 - [附录](#dictionary)
     - [魔法变量 - MagicVariables](#MagicVariables)
@@ -182,8 +182,9 @@ uploadToken 算法如下：
         returnUrl: <RedirectURL string>,
         returnBody: <ResponseBodyForAppClient string>,
         callbackBody: <RequestBodyForAppServer string>
-        callbackUrl: <RequestUrlForAppServer string>,
-        asyncOps: <asyncProcessCmds string>
+        callbackUrl: <RequestUrlForAppServer string>,        
+        PersistentOps: <PersistentOpsCmds string>,
+        PersistentNotifyUrl: <RequestUrlForPersistentOpsNotify string>
     }
 
     // 步骤2：将 Flags 进行安全编码
@@ -223,8 +224,8 @@ uploadToken 参数详解：
  returnBody   | 否   | 文件上传成功后，自定义从 Qiniu-Cloud-Server 最终返回給终端 App-Client 的数据。支持 [魔法变量](#MagicVariables)，不可与 callbackBody 同时使用。
  callbackBody | 否   | 文件上传成功后，Qiniu-Cloud-Server 向 App-Server 发送POST请求的数据。支持 [魔法变量](#MagicVariables) 和 [自定义变量](#xVariables)，不可与 returnBody 同时使用。
  callbackUrl  | 否   | 文件上传成功后，Qiniu-Cloud-Server 向 App-Server 发送POST请求的URL，必须是公网上可以正常进行POST请求并能响应 HTTP Status 200 OK 的有效 URL 
- asyncOps     | 否   | 指定文件（图片/音频/视频）上传成功后异步地执行指定的预转操作。每个预转指令是一个API规格字符串，多个预转指令可以使用分号“;”隔开
-
+ PersistentOps| 否   | 指定文件（图片/音频/视频）上传成功后异步地执行指定的持久化预转操作。每个预转指令是一个API规格字符串，多个预转指令可以使用分号“;”隔开
+ PersistentNotifyUrl | 否  | 指定的预转操作完成后，Qiniu-Cloud-Server 将向此URL发送处理结果。必须是公网上可以正常进行POST请求并能响应 HTTP Status 200 OK 的有效 URL。如果设置了PersistentOps，必须设置此字段。
 
 <a name="uploadToken-returnBody"></a>
 
@@ -319,78 +320,49 @@ Qiniu-Cloud-Storage 回调 App-Server 成功后，App-Server 必须返回如下�
 
 如果文件上传成功，但是 Qiniu-Cloud-Storage 回调 App-Server 失败，Qiniu-Cloud-Storage 会将回调失败的信息连同 `callbackBody` 数据本身返回给 App-Client, App-Client 可选自定义策略进行相应的处理。
 
-<a name="uploadToken-asyncOps"></a>
+<a name="uploadToken-PersistentOps"></a>
+### 音视频上传持久化预转 - PersistentOps  
 
-### 音视频上传预转 - asyncOps
+由于音视频文件一般都比较大，转换也是一个比较耗时的操作，故七牛云存储提供上传异步预转功能，即文件上传完毕后执行异步转换处理，并保存在服务器上。这样用户可以直接访问转换好的目标文件。
 
-七牛云存储的云处理API（图像/音视频在线处理）满足如下规格:
+可以在上传时候指定预转选项，只需在生成 uploadToken 时对 **PersistentOps** 赋值相应的 `<fop>` 指令即可。可同时异步执行多个预转指令：
 
-    url?<fop>
+    PersistentOps = <fop>[;<fop2>;<fop3>;…;<fopN>]
 
-即基于文件的 URL 通过问号传参来实现即时云处理，`<fop>` 表示 API 指令及其所需要的参数，是 File Operation 概念的缩写。
-
-例如,
-
-- [http://apitest.b1.qiniudn.com/sample.wav?avthumb/mp3/ar/44100/aq/3](http://apitest.b1.qiniudn.com/sample.wav?avthumb/mp3/ar/44100/aq/3)
-
-其中,
-
-- `url = http://apitest.b1.qiniudn.com/sample.wav`
-- `fop = avthumb/mp3/ar/44100/aq/3`
-
-表示将原 wav 格式的音频转换为 mp3 格式，并指定动态码率（VBR）参数为3，采样频率为 44100 进行输出。
-
-由于音视频文件一般都比较大，转换也是一个比较耗时的操作，故七牛云存储提供上传异步预转功能，即文件上传完毕后执行异步转换处理，这样在访问时即可获取到已经转换好了的目标文件。
-
-可以在上传时候指定预转选项，只需在生成 uploadToken 时对 **asyncOps** 赋值相应的 `<fop>` 指令即可。可同时异步执行多个预转指令：
-
-    asyncOps = <fop>[;<fop2>;<fop3>;…;<fopN>]
-
-**asyncOps** 预转示例参见如下说明。
+**PersistentOps** 预转流程及示例参见如下说明。
 
 **上传**
 
-1. 设定 `asyncOps = "avthumb/mp3/ar/44100/ab/32k;avthumb/mp3/aq/6/ar/16000"`
+1. 设定 `PersistentOps = "avthumb/mp3/ar/44100/ab/32k;avthumb/mp3/aq/6/ar/16000"`
 2. 以此生成带有预转功能的上传授权凭证（UploadToken）
 3. 向七牛云存储上传一个 aac 格式的音频文件
 4. 传成功后，服务器会对这个 aac 音频文件异步地做如下两个预转操作
     - `avthumb/mp3/ar/44100/ab/32k`
     - `avthumb/mp3/aq/6/ar/16000`
 
+**处理状态**  
+
+1. 文件上传成功后服务端会自动分配一个进程ID `PersistentId`并开始预转处理；`PersistentId` 可以通过[魔法变量](#MagicVariables)来获取。
+2. 所有指定的预转命令都完成以后，服务器会向用户指定的	`PersistentNotifyUrl` 发送详细的转换结果。  
+3. 用户也可以主动查询当前的状态。  
+
 **下载**
 
-可以通过 `http://<domain>/<key>` 的形式下载：
+可以通过 `http://<domain>/<key>?p/1/<fop>` 的形式下载：
 
-- `http://<bucket>.qiniudn.com/<key>?avthunm/mp3/ar/44100/ab/32k`
-- `http://<bucket>.qiniudn.com/<key>?avthumb/mp3/aq/6/ar/16000`
+- `http://<bucket>.qiniudn.com/<key>?p/1/avthunm/mp3/ar/44100/ab/32k`
+- `http://<bucket>.qiniudn.com/<key>?p/1/avthumb/mp3/aq/6/ar/16000`
 
-如果有为 `<fop>` 定义 `<style>`, 那么也可以用友好URL风格进行访问。
+访问以上链接，如果之前上传的文件已经成功完成预转，那么此次请求就会直接下载预转后的结果文件。
 
-我们先来熟悉 [qboxrsctl](/tools/qboxrsctl.html) 的两个命令行，
+预转功能详情请参考：
 
-    // 定义 url 和 fop 之间的分隔符为 separator 
-    qboxrsctl separator <bucket> <separator>
-
-    // 定义 fop 的别名为 aliasName
-    qboxrsctl style <bucket> <aliasName> <fop>
-
-例如:
-
-    qboxrsctl separator <bucket> "."
-    qboxrsctl style <bucket> "mp3" "avthumb/mp3/aq/6/ar/16000"
-
-那么，以下两个 URL 则等价:
-
-- `http://<bucket>.qiniudn.com/<key>?avthumb/mp3/aq/6/ar/16000`
-- `http://<bucket>.qiniudn.com/<key>.mp3`
-
-
-访问以上链接，如果之前上传已经成功做完预转，那么此次请求就不需要再转换，将会直接下载预转后的结果文件。
+- [数据处理(持久化)](/api/persistent-ops)
 
 图片、视频预转类似，开发者需要熟悉七牛云存储的更多 `<fop>` 指令，参考:
 
-- [图像处理接口](/api/image-process.html)
-- [音频/视频/流媒体处理](/api/audio-video-hls-process.html) 
+- [数据处理(图片篇)](/api/image-process.html)
+- [数据处理(音频/视频/流媒体篇)](/api/audio-video-hls-process.html) 
 
 
 <a name="uploadToken-examples"></a>
@@ -428,6 +400,7 @@ mimeType  | 无   | 文件的资源类型，比如 .jpg 图片的资源类型为
 imageInfo | 有   | 获取所上传图片的基本信息，支持访问子字段
 exif      | 有   | 获取所上传图片EXIF信息，支持访问子字段
 endUser   | 无   | 获取 uploadToken 中指定的 endUser 选项的值，即终端用户ID
+PersistentId | 无   | 获取上传预转的处理进程Id
 
 MagicVariables 支持同 [JSON](http://json.org/) 对象一样的 `{Object}.{Property}` 访问形式，比如：
 
@@ -448,6 +421,7 @@ MagicVariables 求值示例：
 - `$(imageInfo.height)` - 获取当前上传图片的原始高度
 - `$(imageInfo.format)` -  获取当前上传图片的格式
 - `$(endUser)` - 获取 uploadToken 中指定的 endUser 选项的值，即终端用户ID
+- `$(PersistentId)` - 获取上传预转的处理进程Id
 
 imageInfo 接口返回的 JSON 数据可参考：<http://qiniuphotos.qiniudn.com/gogopher.jpg?imageInfo>
 

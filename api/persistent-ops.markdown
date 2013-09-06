@@ -17,7 +17,7 @@ title: "数据处理(持久化)"
 
 一般的数据处理接口形式是：  
 
-    [GET] http://<Domain>/<Key>?<fop params>
+    [GET] http://<domain>/<key>?<fop>
     
 比如：  
 图片缩略
@@ -50,7 +50,7 @@ title: "数据处理(持久化)"
 ### 下载  
 服务端处理完成之后，用户即可通过  
 
-    [GET] http://<Domain>/<Key>?p/1/<fop params>  
+    [GET] http://<domain>/<key>?p/1/<fop>  
     
 这样形式的url访问处理结果。和普通的数据处理url不同，这里用`p/1`表明访问的是持久化处理的结果，不会出现重新处理耗费大量时间的情况。但需注意，如果访问一个没有在`PersistentOps`中指定的处理结果，会直接返回404。  
 
