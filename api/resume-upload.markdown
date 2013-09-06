@@ -1,7 +1,7 @@
 
 ``` go
 //断点续传流程
-func resume_put(){
+func resume_put(file,scope){
 	
 	// 以4Mb大小为单位，将文件切割成块（blocks）
 	// 是后一个块的大小为 file.size - (n-1)*1 << 22
