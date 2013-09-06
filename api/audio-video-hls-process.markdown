@@ -12,10 +12,6 @@ title: "数据处理(音频/视频/流媒体篇)"
     - [使用七牛提供的 HLS 服务](#hls-usage)
     - [HTTP Live Streaming API](#hls-api)
 - [音视频API参数详解](#args)
-- [音视频持久化处理](#persistentOps)
-    - [简述](#persistentOps-overall)
-    - [使用](#persistentOps-method)
-    - [数据处理状态通知和查询](#persistentOps-status)
 
 
 <a name="audio-convert"></a>
@@ -64,7 +60,7 @@ title: "数据处理(音频/视频/流媒体篇)"
 
 <a name="video-convert"></a>
 
-## 视频转换
+## 视频转码
 
 视频转码是七牛云存储提供的云处理功能。使用视频转码功能，用户可以对存放在七牛云存储的视频资源进行编码和转换处理。视频转码包括两种方式： [视频转换预设集](#video-preset)和[视频自定义转换](#self-def-video-convert)。
 
@@ -288,6 +284,30 @@ HLS 必须使用友好风格的 URL，可以使用命令行工具 `qboxrsctl` �
     Body: <M3U8File>
 
 
+<a name="upload-fop"></a>
+
+**上传预转**
+
+由于在线音视频频转换或将音视频切割成多个小文件并生成 M3U8 播放列表是一个相对耗时的操作，为了保证良好的用户体验，需要配合上传预转机制使用。实际上，七牛官方推荐音视频在线编解码都通过上传预转的方式进行。
+
+上传预转参考文档：[音视频上传预转 - asyncOps](put.html#uploadToken-asyncOps)
+
+接上述示例，已知 `m3u8_audio` 的 API 规格定义，将其作为上传授权凭证（`uploadToken`）预转参数（`asyncOps`）的值即可。
+
+    asyncOps = "http://example.qiniudn.com/$(key)?avthumb/m3u8/preset/audio_32k"
+
+可以设置多个预转指令，用分号“;”隔开即可:
+
+    asyncOps = "http://example.qiniudn.com/$(key)?avthumb/m3u8/preset/audio_32k;
+                http://example.qiniudn.com/$(key)?avthumb/m3u8/preset/audio_48k"
+
+实际情况下，`example.qiniudn.com` 换成存储空间（bucket）绑定的域名即可。
+
+同样，视频预转的操作方式也一样。
+
+设置预转后，当文件上传完毕即可异步执行预转指令操作。第一次访问该资源时，就无需再转换了，访问到的即已经转换好的资源。
+
+
 <a name="hls-api"></a>
 
 ### HTTP Live Streaming API
@@ -359,126 +379,4 @@ video_4x3_640k  | 码率为640K，长宽比为4x3，推荐在 WIFI 环境下使�
 `/segtime/<SegSeconds>` | 用于 HLS 自定义每一小段音/视频流的播放时间长度，取值范围为: 10 - 60 （秒），默认值为 10（单位:秒）。
 
 注意：以上参数若不指定参数值，参数及其值都不必在所调用的 API 规格中出现。
-
-<a name="persistentOps"></a>
-
-## 音视频持久化处理  
-
-<a name="persistentOps-overall"></a>
-### 简述
-
-数据处理接口形式是：  
-
-    [GET] http://<Domain>/<Key>?<fop params>
-    
-比如：  
-图片缩略
-
-    http://cyj.qiniudn.com/22734/1359639667984p17i8ddoi31ara1ccp1njsq319s62.jpg?imageView/1/w/310/h/395/q/80
-
-音频转码
-
-    http://apitest.b1.qiniudn.com/sample.wav?avthumb/mp3/ab/192k
-    
-对于这类请求，服务端会实时对原资源进行处理、建立缓存，然后将结果返回给客户端。  
-然而在实际应用中，用户可能会遇到缓存还未建立或已经失效的情况，这时就需要等待服务端重新处理。如果是音视频文件的处理，耗时会相对较长，甚至可能长达数分钟。毫无疑问，这会影响用户体验。  
-推荐有音视频处理需求的用户使用持久化处理功能：异步进行音视频处理并将结果保存在服务端上，以达到“一次处理，永久使用”的效果。此外，配合处理状态通知和查询功能，还能优化流程、提升用户体验。  
-
-<a name="persistentOps-method"></a>
-### 使用
-
-**上传**  
-用户使用音视频持久化处理，需要在生成uploadToken时增加`PersistentOps`和 `PersistentNotifyUrl` 两个字段。  
-
-字段 | 含义
------ | -------------
-`PersistentOps` | 需要进行的数据处理命令,可以指定多个命令，以`;`分隔。
-`PersistentNotifyUrl` | 用户接收视频处理结果的接口URL。
-
-**服务端处理**  
-用户使用指定了`PersistentOps` 和 `PersistentNotifyUrl` 的uploadToken上传一个音视频文件之后，服务端会生成此次处理的进程ID `PersistentId`，并开始文件处理。`PersistentId`可以用来获取处理的进度和结果。用户可以在`returnBody` 或 `callbackBody` 中使用魔法变量`$(PersistentId)` 来得到该ID。  
-
-**下载**  
-服务端处理完成之后，用户即可通过  
-
-    [GET] http://<Domain>/<Key>?p/1/<fop params>  
-    
-这样形式的url访问处理结果。和普通的数据处理url不同，这里用`p/1`表明访问的是持久化处理的结果，不会出现重新处理耗费大量时间的情况。但需注意，如果访问一个没有在`PersistentOps`中指定的处理结果，会直接返回404。  
-
-
-<a name="persistentOps-status"></a>
-### 数据处理状态通知和查询
-
-**通知**  
-服务端完成所有的数据处理后，会以 HTTP POST 的方式将处理状态`<JsonStatusDescription>`以`application/json`的形式发送给用户指定的`PersistentNotifyUrl`。  
-
-    Content-Type: application/json
-    Body: <JsonStatusDescription>
-	
-`<JsonStatusDescription>`的内容及含义参考： [状态内容](#persistentOps-status-description) 
-
-**查询**  
-用户也可以使用`PersistentId`来主动查询数据处理的状态。查询的接口为：  
-
-    [GET] http://api.qiniu.com/status/get/prefop?id=<PersistentId>  
-
-接口返回的内容及含义参考 [状态内容](#persistentOps-status-description)
-
-<a name="persistentOps-status-description"></a>
-**状态内容**  
-用户获得的数据处理状态是一个JSON字符串，内容范例如下：  
-
-	{
-		"id": "16864pauo1vc9nhp12",
-		"code": 0,
-		"desc": "The fop was completed successfully",
-		"items": [
-			{
-				"cmd": "avthumb/mp4/r/30/vb/256k/vcodec/libx264/ar/22061/ab/64k/acodec/libmp3lame",
-				"code": 0,
-				"desc": "The fop was completed successfully",
-				"error": "",
-				"hash": "FrPNF2qz66Bt14JMdgU8Ya7axZx-",
-				"key": "v-PtT-DzpyCcqv6xNU25neTMkcc=/FjgJQXuH7OresQL4zgRqYG5bZ64x"
-			},
-			{
-				"cmd": "avthumb/iphone_low",
-				"code": 0,
-				"desc": "The fop was completed successfully",
-				"error": "",
-				"hash": "FmZ5PbHMYD5uuP1-kHaLjKbrv-75",
-				"key": "tZ-w8jHlQ0__PYJdiisskrK5h3k=/FjgJQXuH7OresQL4zgRqYG5bZ64x"
-			},
-			{
-				"cmd": "avthumb/m3u8/r/30/vb/256k/vcodec/libx264/ar/22071/ab/64k/acodec/libmp3lame",
-				"code": 0,
-				"desc": "The fop was completed successfully",
-				"error": "",
-				"hash": "Fi4gMX0SvKVvptxfvoiuDfFkCuEG",
-				"key": "8ehryqviSaMIjkVQDGeDcKRZ6qc=/FjgJQXuH7OresQL4zgRqYG5bZ64x"
-			},
-			{
-				"cmd": "avthumb/m3u8/preset/video_16x9_440k",
-				"code": 0,
-				"desc": "The fop was completed successfully",
-				"error": "",
-				"hash": "FtuxnwAY9NVBxAZLcxNUuToR9y97",
-				"key": "s2_PQlcIOz1uP6VVBXk5O9dXYLY=/FjgJQXuH7OresQL4zgRqYG5bZ64x"
-			}
-		]
-	}
-
-
-参数及含义  
-
-参数 | 含义
----- | --------
-`id` | 数据处理的进程ID，即前文中的`PersistentId`。
-`code` | 状态码，0 表示成功，1 表示等待处理，2 表示正在处理，3 表示处理失败，4 表示回调失败。
-`desc` | 状态码对应的详细描述。
-`items` | 列表，包含每个`fop`处理的完成情况。
-`cmd` | 所执行的`fop`处理命令。
-`error` | 如果处理失败，这个字段会给出详细的失败原因。
-`hash` | 数据处理结果保存在服务端的唯一 hash 标识。
-`key` | 数据处理结果的外链key。范例中，`avthumb/iphone_low`的处理结果可以通过`http://domian/tZ-w8jHlQ0__PYJdiisskrK5h3k=/FjgJQXuH7OresQL4zgRqYG5bZ64x`来直接访问。
 
