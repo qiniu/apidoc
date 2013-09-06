@@ -24,6 +24,8 @@ title: "资源上传"
     - [重定向上传](#redirect-upload)
     - [回调上传](#callback-upload)
     - [上传中的云处理（Async-Ops）](#uploadToken-asyncOps)
+- [断点续传](#resumble-up)
+    
 
 
 <a name="upload-basic"></a>
