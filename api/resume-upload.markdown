@@ -1,7 +1,7 @@
 
 ``` go
 //断点续传流程
-func resume_put(file,scope){
+func resume_put(file, scope){
 	
 	// 以4Mb大小为单位，将文件切割成块（blocks）
 	// 是后一个块的大小为 file.size - (n-1)*1 << 22
@@ -38,10 +38,8 @@ func resume_put(file,scope){
 			}(chunks[0]);
 
 			//继续上传余下的chunk,注意i=1,表明跳过了首个chunk,
-			//因为此chunk已经在mkblk时上传了
-			
+			//因为此chunk已经在mkblk时上传了	
 			for(i=1;i<chunks.len;i++){
-
 				//上传chunks
 				//@host, 接收上传的地址，可以从上一次返回结果中获取
 				//@ctx, 用于上传控制，从上一次上传返回结果中获取
@@ -49,19 +47,13 @@ func resume_put(file,scope){
 				//@chunk, 需要上传的chunk
 
 				fun qiniu_bput(host,ctx,offset,chunk){
-
 					//请求地址
 					url = host + "/bput/" + ctx + "/" +offset 
-
 					//blkRet的内容被替换
 					blkRet[blkIdx] = httpClient.send(url,chunk);
-
 				}(blkRet[blkIdx].host,blkRet[blkIdx].ctx,blkRet[blkIdx].offset,chunks[i])
-
 			}
-
 		}(blk)
-
 		blkIdx++
 	}
 
@@ -70,20 +62,16 @@ func resume_put(file,scope){
 	//@scope, bucket + ":" + key
 	//@return ,上传返回结果，默认为{hash:<hash>,key:<key>}
 	return fun mkfile(file,scope){
-		
 		//生成mkfile请求地址
 		url = "http://up.qiniu.com/rs-mkfile/" +
 				base64Safe(scope) +                // 必须
 				"/fsize/" + file.size +            // 必须
 				"/mimeTpye/" + base64Safe(file.type) // 可选
-		
 		foreach(ret in blkRet){
 			body += ret.ctx + ","
 		}
-
 		body.TrimEnd(",")
 		return httpClient.send(url, body)
 	}(file,scope)
-
 }
 ```
