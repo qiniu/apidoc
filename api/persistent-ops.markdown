@@ -132,3 +132,36 @@ title: "数据处理(持久化)"
 `error` | 如果处理失败，这个字段会给出详细的失败原因。
 `hash` | 数据处理结果保存在服务端的唯一 hash 标识。
 `key` | 数据处理结果的外链key。范例中，`avthumb/iphone_low`的处理结果可以通过`http://domian/tZ-w8jHlQ0__PYJdiisskrK5h3k=/FjgJQXuH7OresQL4zgRqYG5bZ64x`来直接访问。
+
+
+
+## 处理实例  
+
+1.  上传一个音频文件 **persistent.mp3** ，并设置处理命令为 `avthumb/mp3/aq/6/ar/16000` 和 `avthumb/mp3/ar/44100/ab/32k`。  
+2.  通知接口收到的处理状态通知内容：  
+
+    {
+        'code': 0, 
+        'id': '168739cd2fn1g76f13', 
+        'desc': 'The fop was completed successfully'
+        'items': [
+                {'code': 0, 'hash': 'FvvxM7gMI6WfiuXlBgKbkzU67Tpa', 'cmd': 'avthumb/mp3/ar/44100/ab/32k', 'key': 'sFhZ4dSjB1zvL3De1UBX2qZ_VR0=/lgxucMCQso_KOW_YDM-_KVIeX6o5', 'error': '', 'desc': 'The fop was completed successfully'}, 
+                {'code': 0, 'hash': 'FpSzDMYJtP_UY_6EMIyaBe4awXp3', 'cmd': 'avthumb/mp3/aq/6/ar/16000', 'key': '1G8-OWwP3jPLvi7O3qOf7yCl4YI=/lgxucMCQso_KOW_YDM-_KVIeX6o5', 'error': '', 'desc': 'The fop was completed successfully'}
+        ], 
+    }
+
+
+3.  访问链接：  
+[原文件](http://t-test.qiniudn.com/persistent.mp3)  
+[处理1(avthumb/mp3/aq/6/ar/16000)结果](http://t-test.qiniudn.com/persistent.mp3?p/1/avthumb/mp3/aq/6/ar/16000)  
+[处理2(avthumb/mp3/ar/44100/ab/32k)结果](http://t-test.qiniudn.com/persistent.mp3?p/1/avthumb/mp3/ar/44100/ab/32k)   
+
+
+4.  用户也可以通过自定义样式来访问处理结果。我们设置样式 `persistent1` 和 `persistent2`，如图中示例。  
+
+![persistent style](http://for-test.qiniudn.com/persistent_style.png)  
+
+这样，用户可以通过带有样式的链接来访问处理结果：  
+[样式'persistent1'](http://t-test.qiniudn.com/persistent.mp3-persistent1)  
+[样式'persistent2'](http://t-test.qiniudn.com/persistent.mp3-persistent2)  
+
