@@ -140,15 +140,15 @@ title: "数据处理(持久化)"
 1.  上传一个音频文件 **persistent.mp3** ，并设置处理命令为 `avthumb/mp3/aq/6/ar/16000` 和 `avthumb/mp3/ar/44100/ab/32k`。  
 2.  通知接口收到的处理状态通知内容：  
 
-    {  
-        'code': 0,   
-        'id': '168739cd2fn1g76f13',   
-        'desc': 'The fop was completed successfully',  
-        'items': [  
-            {'code': 0, 'hash': 'FvvxM7gMI6WfiuXlBgKbkzU67Tpa', 'cmd': 'avthumb/mp3/ar/44100/ab/32k', 'key': 'sFhZ4dSjB1zvL3De1UBX2qZ_VR0=/lgxucMCQso_KOW_YDM-_KVIeX6o5', 'error': '', 'desc': 'The fop was completed successfully'},   
-            {'code': 0, 'hash': 'FpSzDMYJtP_UY_6EMIyaBe4awXp3', 'cmd': 'avthumb/mp3/aq/6/ar/16000', 'key': '1G8-OWwP3jPLvi7O3qOf7yCl4YI=/lgxucMCQso_KOW_YDM-_KVIeX6o5', 'error': '', 'desc': 'The fop was completed successfully'}  
-        ]  
-    }  
+        {  
+            'code': 0,   
+           'id': '168739cd2fn1g76f13',   
+            'desc': 'The fop was completed successfully',  
+            'items': [  
+                {'code': 0, 'hash': 'FvvxM7gMI6WfiuXlBgKbkzU67Tpa', 'cmd': 'avthumb/mp3/ar/44100/ab/32k', 'key': 'sFhZ4dSjB1zvL3De1UBX2qZ_VR0=/lgxucMCQso_KOW_YDM-_KVIeX6o5', 'error': '', 'desc': 'The fop was completed successfully'},   
+                {'code': 0, 'hash': 'FpSzDMYJtP_UY_6EMIyaBe4awXp3', 'cmd': 'avthumb/mp3/aq/6/ar/16000', 'key': '1G8-OWwP3jPLvi7O3qOf7yCl4YI=/lgxucMCQso_KOW_YDM-_KVIeX6o5', 'error': '', 'desc': 'The fop was completed successfully'}  
+            ]  
+        }  
 
 
 3.  访问链接：  
