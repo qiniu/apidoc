@@ -210,7 +210,7 @@ y 为正数时为从源图区域左上角的纵坐标，为负数时，左上角
 - `thumbnail` 和 `crop` 之间的操作可以链式处理，即可以先对图进行缩略再裁剪，或者先裁剪再缩略。
 - `gravity` 只会使其后的裁剪偏移({offset})受到影响，建议放在`crop`选项之前。
 - 当处理多帧gif图片时，可能处理所需的时间较长并且输出的图片体积较大。如果您有许多多帧gif图片需要处理，可在图片上传完成后异步进行预转，这样不必在初次访问时进行图片处理，访问速度更快。
-    - 参考 [uploadToken 之 PersistentOps](put.html#uploadToken-PersistentOps) 。
+    - 参考 [uploadToken 之 persistentOps](put.html#uploadToken-persistentOps) 。
 - 第一版的`imageMogr`对gif图片仅反回原图，不做处理，
 
 第一版的`imageMogr`规格是：
@@ -332,7 +332,7 @@ y 为正数时为从源图区域左上角的纵坐标，为负数时，左上角
 **优化建议**
 
 - 1.图片上传完毕后，可异步进行水印预转，这样不必在初次访问时进行水印处理，访问速度更快。
-    - 参考 [uploadToken 之 PersistentOps](put.html#uploadToken-PersistentOps) 。
+    - 参考 [uploadToken 之 persistentOps](put.html#uploadToken-persistentOps) 。
 
 - 2.给图片链接中的水印规格添加别名，使得URL更加友好。
     - 设置别名，可使用 [qboxrsctl style 命令](/tools/qboxrsctl.html#style)
