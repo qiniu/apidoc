@@ -9,6 +9,7 @@ title: "数据处理(持久化)"
     - [通知](#notify)
     - [查询](#status)
     - [状态内容](#status-description)
+- [处理实例](#persistentOps-sample)
 
 
 <a name="persistentOps-overall"></a>
@@ -135,6 +136,7 @@ title: "数据处理(持久化)"
 
 
 
+<a name="persistentOps-sample"></a>
 ## 处理实例  
 
 1.  上传一个音频文件 **persistent.mp3** ，并设置处理命令为 `avthumb/mp3/aq/6/ar/16000` 和 `avthumb/mp3/ar/44100/ab/32k`。  
