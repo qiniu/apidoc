@@ -630,6 +630,8 @@ MagicVariables 求值示例：
 3. 所有分割快上传完成后，请求服务端将其合成为一个完整的文件。
 4. 跟据上传策略，返回给客户端对应信息。
 
+用伪代码描述如下：
+
 ``` go
 //断点续传流程
 //@file, 待上传的文件
@@ -862,18 +864,5 @@ Authorization: UpToken <uptoken>
 {"hash":"lpIhVPzTA90MyOUJy6Hz6W9pm_vj","key","qiniu.txt"}
 ```
 注：Response Body值与实际上传情况有关，并且，受上传策略影响，其格式也有所有同。
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
