@@ -25,6 +25,7 @@ title: "资源上传"
     - [回调上传](#callback-upload)
     - [上传中的云处理（Async-Ops）](#uploadToken-asyncOps)
 - [断点续传](#resumble-up)
+    - [概述](#resuble-gen)
     
 
 
@@ -603,4 +604,159 @@ MagicVariables 求值示例：
 ```
 
 具体的云处理访问详见[云处理参考](http://docs.qiniu.com/api/v6/gen-use.html#fop)
+
+<a name="resumble-up">
+# 断点续传
+
+<a name="resuble-gen">
+## 概述
+
+断点续传为大文件上传提供了有效的手段，通过断点续传，用户可以上传任意大小的文件。
+
+断点续传的原理:分割文件，将每个`分割块(block)`单独发送至七牛服务端（可并行上传各block），待所有`block`上传完成之后，请求服务端重新合成分割块成为一个完整的文件。对于每个分割快，用户可以继续分割成多个`上传块(chunk)`进行上传。
+
+除最后一个Block外，其余Block的大小为4Mb。chunk的大小由用户指定，默认可设为256Kb，建义在网络环境较差的时候，适当减小此值。
+
+断点续上传流程为：
+
+1. 分割文件成多个`block`
+2. 上传分割快。分割快彼此可并行上传，分割快又被化分为多个上传块，上传快必须串行上传。
+3. 所有分割快上传完成后，请求服务端将其合成为一个完整的文件。
+4. 跟据上传策略，返回给客户端对应信息。
+
+其伪代码为：
+
+``` go
+//断点续传流程
+//@file, 待上传的文件
+//@scope,七牛云存储scope
+fun resume_put(file, scope){
+
+  // 以4Mb大小为单位，将文件切割成块（blocks）
+  // 是后一个块的大小为 file.size - (n-1)*1 << 22
+  blocks[] = file.mkblk(1<<22)
+
+  host = "http://up.qiniu.com"
+
+  //blkRet为上传块时七牛返回的数据结构,格式如下:
+  //{
+  //  "ctx":  "MWZvQbq10x...",
+  //  "crc32":1957222263,
+  //  "offset":2097152,
+  //  "host":"http://upbeta.qiniu.com"
+  //}
+  //blkRet的个数与切割块的数目相同
+  blkRet[blocks.len]
+
+  //当前上传块在数组blocks中的索引号
+  blkIdx = 0
+
+  foreach(blk in blocks){
+
+    //上传块，此逻辑可并发执行
+    //@block, 需要上传的快
+    fun(block){
+
+      //以256Kb为单位，将block切割为chunk数组
+      chunks[] = block.chunk(256)
+
+      //通知Qiniu，开始上传block，同时将block的第一个chunk上传至七牛
+      //@blockSize, 上传块的大小.(除最后一个块，其余为4Mb)
+      //@furstChunk, block切割成的chunk数组的第一个元素
+      fun qiniu_mkblk(blockSize,firstChunk){
+        url = host + blockSize
+        blkRet[blkIdx] = httpClient.send(url,firstChunk)
+        host = blkRet[blkIdx]["host"]
+      }(chunks[0]);
+
+      //继续上传余下的chunk,注意i=1,表明跳过了首个chunk,
+      //因为此chunk已经在mkblk时上传了  
+      for(i=1;i<chunks.len;i++){
+        //上传chunks
+        //@host, 接收上传的地址，可以从上一次返回结果中获取
+        //@ctx, 用于上传控制，从上一次上传返回结果中获取
+        //@offset, chunk在block中的偏移量，以byte为单位，可以从上一次返回结果中获取
+        //@chunk, 需要上传的chunk
+
+        fun qiniu_bput(host,ctx,offset,chunk){
+          //请求地址
+          url = host + "/bput/" + ctx + "/" +offset 
+          //blkRet的内容被替换
+          blkRet[blkIdx] = httpClient.send(url,chunk);
+        }(blkRet[blkIdx].host,blkRet[blkIdx].ctx,blkRet[blkIdx].offset,chunks[i])
+      }
+    }(blk)
+    blkIdx++
+  }
+
+  //所有block上传完成，调用mkfile请求在服务端生成完整文件
+  //@file 上传的文件
+  //@scope, bucket + ":" + key
+  //@return ,上传返回结果，默认为{hash:<hash>,key:<key>}
+  return fun mkfile(file,scope){
+    //生成mkfile请求地址
+    url = "http://up.qiniu.com/rs-mkfile/" +
+        base64Safe(scope) +                // 必须
+        "/fsize/" + file.size +            // 必须
+        "/mimeTpye/" + base64Safe(file.type) // 可选
+    foreach(ret in blkRet){
+      body += ret.ctx + ","
+    }
+    body.TrimEnd(",")
+    return httpClient.send(url, body)
+  }(file,scope)
+}
+```
+
+## 上传快（mkblk）
+
+上传快由两个不同的请求组成。
+
+1. 请求上传block
+
+2. 上传余下的chunk
+
+请求上传block的请求格式如下
+
+Request Header:
+
+``` html
+POST /mkblk/4194304 HTTP/1.1
+Host: up.qiniu.com
+Connection: keep-alive
+Content-Length: 1048576
+Authorization: UpToken <uptoken>
+```
+
+其中，method为post，`mkblk` 说明这是一个上传快的请求，`4194304` 为该块的大小,即4Mb。同时将该block的首个chunk包含在请求body中，`content-Length:1048576`，说明`chunk`的大小为1Mb。此请求需要进行认证，因此需要在请求头中设定`uptoken`。
+
+Post的内容为该block的首个chunk的二进制内容
+
+``` post
+[first-chunk-bin]
+```
+
+下面是七牛服务器对请求生成块作出的回应：
+
+Response Header:
+
+``` html
+HTTP/1.1 200 OK
+
+Content-Length: 326
+Content-Type: application/json
+Pragma: no-cache
+X-Content-Type-Options: nosniff
+X-Log: UP:18
+```
+
+Response Body:
+
+``` json
+{"ctx":"xoQ26KAP5hjfygWppG28CDda6kTr9bDctK7D-wqOpz4AWpVJogxifYbk_Nxrzaz-gczOrxkKDKtrw5ra8Q6Z7gsk0VRKJziVdtZdIvILKTqCIv6Kfwlr831Dvo9YVS4MqLG7ldVQ6072HK2m08ESc8TP06McAAAAAAAAEAAAAAAA8wAAAKNVJVIAAEAAAAAQAAEAAAAAAP____8=","checksum":"LAgiZ_Yx4lAX1VtjSDKWd0mqkbM=","crc32":2205417595,"offset":1048576,"host":"http://up.qiniu.com"}
+```
+
+请求回应body是json格式的字符串,各字段的意义如下：
+  
+  - 
 
