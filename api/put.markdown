@@ -716,7 +716,9 @@ fun resume_put(file, scope){
 
 2. 上传余下的chunk
 
-请求上传block的请求格式如下
+
+### 请求上传block的请求格式如下
+---
 
 Request Header:
 
@@ -760,12 +762,19 @@ Response Body:
   
   - ctx, 服务端上传控制字段,生成文件(mkfile)时用到
 
-  - checksum, 服务端上传控制字段
+  - checksum, 上传块checksum
 
   - crc32, 上传块crc32,客户可通过此字段对上传块的完整性进行较验
 
   - offset, 下一个上传块在切割块中的偏移
 
   - host, 后续上传接收地址
+
+### 上传余下的chunk
+---
+
+
+
+
 
 
