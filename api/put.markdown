@@ -25,9 +25,10 @@ title: "资源上传"
     - [回调上传](#callback-upload)
     - [上传中的云处理（Async-Ops）](#uploadToken-asyncOps)
 - [断点续传](#resumble-up)
-    - [概述](#resuble-gen)
-    
-
+    - [概述](#resumble-gen)
+    - [上传流程](#resumble-alg)
+    - [上传快](#mkblk)
+    - [生成文件](#rs-mkfile)
 
 <a name="upload-basic"></a>
 
@@ -608,14 +609,19 @@ MagicVariables 求值示例：
 <a name="resumble-up">
 # 断点续传
 
-<a name="resuble-gen">
+<a name="resumble-gen">
 ## 概述
+---------------------
 
 断点续传为大文件上传提供了有效的手段，通过断点续传，用户可以上传任意大小的文件。
 
 断点续传的原理:分割文件，将每个`分割块(block)`单独发送至七牛服务端（可并行上传各block），待所有`block`上传完成之后，请求服务端重新合成分割块成为一个完整的文件。对于每个分割快，用户可以继续分割成多个`上传块(chunk)`进行上传。
 
 除最后一个Block外，其余Block的大小为4Mb。chunk的大小由用户指定，默认可设为256Kb，建义在网络环境较差的时候，适当减小此值。
+
+<a name="resumble-alg">
+## 上传流程
+-------------------
 
 断点续上传流程为：
 
@@ -624,14 +630,12 @@ MagicVariables 求值示例：
 3. 所有分割快上传完成后，请求服务端将其合成为一个完整的文件。
 4. 跟据上传策略，返回给客户端对应信息。
 
-其伪代码为：
-
 ``` go
 //断点续传流程
 //@file, 待上传的文件
 //@scope,七牛云存储scope
 fun resume_put(file, scope){
-
+  // 1. 分割文件成多个block
   // 以4Mb大小为单位，将文件切割成块（blocks）
   // 是后一个块的大小为 file.size - (n-1)*1 << 22
   blocks[] = file.mkblk(1<<22)
@@ -653,7 +657,7 @@ fun resume_put(file, scope){
 
   foreach(blk in blocks){
 
-    //上传块，此逻辑可并发执行
+    //上传分割快，此逻辑可并发执行
     //@block, 需要上传的快
     fun(block){
 
@@ -707,8 +711,9 @@ fun resume_put(file, scope){
   }(file,scope)
 }
 ```
-
+<a name="mkblk">
 ## 上传快（mkblk）
+-----------------------
 
 上传快由两个不同的请求组成。
 
@@ -717,9 +722,9 @@ fun resume_put(file, scope){
 2. 上传余下的chunk
 
 
-### 请求上传block的请求格式如下
----
+### 1.请求上传block
 
+请求格式如下
 Request Header:
 
 ``` html
@@ -738,7 +743,7 @@ Post的内容为该block的首个chunk的二进制内容
 [first-chunk-bin]
 ```
 
-下面是七牛服务器对请求生成块作出的回应：
+七牛服务器对请求生成块作出的回应如下：
 
 Response Header:
 
@@ -755,8 +760,15 @@ X-Log: UP:18
 Response Body:
 
 ``` json
-{"ctx":"xoQ26KAP5hjfygWppG28CDda6kTr9bDctK7D-wqOpz4AWpVJogxifYbk_Nxrzaz-gczOrxkKDKtrw5ra8Q6Z7gsk0VRKJziVdtZdIvILKTqCIv6Kfwlr831Dvo9YVS4MqLG7ldVQ6072HK2m08ESc8TP06McAAAAAAAAEAAAAAAA8wAAAKNVJVIAAEAAAAAQAAEAAAAAAP____8=","checksum":"LAgiZ_Yx4lAX1VtjSDKWd0mqkbM=","crc32":2205417595,"offset":1048576,"host":"http://up.qiniu.com"}
+{
+  "ctx":"xoQ26KAP5hjfygWppG28CDda6",
+  "checksum":"LAgiZ_Yx4lAX1VtjSDKWd0mqkbM=",
+  "crc32":2205417595,
+  "offset":1048576,
+  "host":"http://up.qiniu.com"
+}
 ```
+注：为排版方面，对Response Body作出了一定的格式调整,各字段的具体值也与实际上传情况有关
 
 请求回应body是json格式的字符串,各字段的意义如下：
   
@@ -770,8 +782,95 @@ Response Body:
 
   - host, 后续上传接收地址
 
-### 上传余下的chunk
----
+<a name="bput">
+### 2.上传余下的chunk
+
+请求mkblk时仅上传首个chunk，余下的chunk需要采用不同的格式进行请求。这样做至少有以下两点好处：
+1. 在网络环境较差时可以通过减小chunk的大小，提高上传成功率
+2. 客户端通过crc32较验值发现上传失败时，可重试上传chunk
+
+上传chunk的请求格式如下：
+
+``` html
+POST /bput/<ctx>/1048576 HTTP/1.1
+Host: up-nb-5.qbox.me
+Connection: keep-alive
+Content-Length: 1048576
+Authorization: UpToken <uptoken>
+Content-Type:
+```
+
+其中，method为post，`bput` 说明这是一个上传chunk的请求，`1048576` 为该chunk的大小,即1Mb。`content-Length:1048576`，说明`chunk`的大小为1Mb。此请求需要进行认证，因此需要在请求头中设定`uptoken`。
+
+Post的内容为chunk的二进制内容
+
+``` post
+[chunk-bin]
+```
+七牛服务器对上传chunk作出的回应内容如下：
+
+``` json
+{
+  "ctx":"-PT8ZkrNffcERw0KSpAEAAAAAgAAMAAAAPAP____8=",
+  "checksum":"WNp4uCHbbK_iPCt9X7P6PU5cj6o=",
+  "crc32":4077864011,
+  "offset":2097152,
+  "host":"http://up-nb-5.qbox.me"
+}
+```
+
+注：为排版方面，对Response Body作出了一定的格式调整,各字段的具体值也与实际上传情况有关
+
+同一block中的chunk必须串行上传，待所有的chunk上传完成，表明此快已完成，记录最后一个回应数据
+
+<a name="rs-mkfile">
+## 生成文件(rs-mkfile)
+--------------------------
+所有block上传完成后，请求服务端将其合成为一个完整的文件。
+
+请求头格式如下:
+
+``` html
+POST /rs-mkfile/cXRlc3RidWNrZXQ6cWluaXUudHh0/fsize/5628074/mimeType/dGV4dC9wbGFpbg== HTTP/1.1
+Host: up.qiniu.com
+Connection: keep-alive
+Content-Length: 417
+Authorization: UpToken <uptoken>
+```
+
+其中:
+
+- method为post，`rs-mkfile` 说明这是一个生成文件的请求
+
+- `cXRlc3RidWNrZXQ6cWluaXUudHh0` 是经过base64urlsafe编码的scope,原文是`qtestbucket:qiniu.txt`,qtestbucket是七牛空间名，qiniu.txt为上传文件的key。
+
+- `fsize/5628074`指定了文件的大小为5628074，单位byte。
+
+- `mimeType`为可选项，其值需要经过base64Urlsafe编码。
+
+- 此请求需要进行认证，因此需要在请求头中设定`uptoken`。
+
+请求body的生成如下：
+
+以`,`连接上传各block时最后一个chunk返回的数据结构中的ctx字段
+
+可参考伪代码中mkfile函数
+
+七牛服务器对生成文件请求作出的回应内容如下：
+
+``` json
+{"hash":"lpIhVPzTA90MyOUJy6Hz6W9pm_vj","key","qiniu.txt"}
+```
+注：Response Body值与实际上传情况有关，并且，受上传策略影响，其格式也有所有同。
+
+
+
+
+
+
+
+
+
 
 
 
