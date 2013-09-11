@@ -30,7 +30,7 @@ title: "资源上传"
     - [分割文件](#file-blob)
     - [上传快](#mkblk)
     - [生成文件](#rs-mkfile)
-    - [在线示例](#online-demo)
+    - [示例](#resumble-demo)
 
 <a name="upload-basic"></a>
 
@@ -955,4 +955,4 @@ mkfile各语言的实现可参考：
 
 <a name="resumble-demo">
 ## 示例
-[断点续上传在线示例](http://www.qiniu.com)，需要HTML5支持
+[断点续上传在线示例](http://7niu.sinaapp.com)，需要浏览器支持HTML5，开发人员可通过firebug等工具查看断点续上传的请求、回应格式。
