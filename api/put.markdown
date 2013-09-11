@@ -765,7 +765,7 @@ var file = document.getElementById("fileselect").files[0];
 
 一个文件由多个block组成，除最后一个block，其余block大小为4Mb:
 
-|block 1(4Mb)|block 2(4Mb)| ... | block n(filesize - (n-1)*4Mb|
+|block 1 (4Mb)|block 2 (4Mb)| ... | block n (filesize - (n-1)*4Mb)|
 |-------|-------|-----|--------|
 
 一个block由多个chunk组成,chunk的大小由用户自已设定，必须小于块的大小，默认可取256kb。
