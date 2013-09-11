@@ -763,19 +763,22 @@ var file = document.getElementById("fileselect").files[0];
 ## 上传快（mkblk）
 -----------------------
 
-一个文件由多个block组成：
+一个文件由多个block组成，除最后一个block，其余block大小为4Mb:
 
-|files                         |
---------|-------|-----|--------|
-|block 1|block 2| ... | block n|
+|block 1(4Mb)|block 2(4Mb)| ... | block n(filesize - (n-1)*4Mb|
 |-------|-------|-----|--------|
 
-上传快由两个不同的请求组成。
+一个block由多个chunk组成,chunk的大小由用户自已设定，必须小于块的大小，默认可取256kb。
+
+|chunk 1|chunk 2| ... | chunk n|
+|-------|-------|-----|--------|
+
+断点续上传文件是通过单独上传各block后再组成完整文件。因此，上传block是断点续上传的基础。
+上传block由两个不同的步骤组成:
 
 1. 请求上传block
 
 2. 上传余下的chunk
-
 
 ### 1.请求上传block
 
@@ -794,7 +797,8 @@ Authorization: UpToken <uptoken>
   - method为post
   - `mkblk` 说明这是一个上传快的请求
   - `4194304` 为该块的大小,即4Mb。
-  - 同时将该block的首个chunk包含在请求body中，`content-Length:1048576`，说明`chunk`的大小为1Mb。此请求需要进行认证，因此需要在请求头中设定`uptoken`。
+  - 同时将该block的首个chunk包含在请求body中，`content-Length:1048576`，说明`chunk`的大小为1Mb。
+  - 此请求需要进行认证，因此需要在请求头中设定`uptoken`。
 
 Post的内容为该block的首个chunk的二进制内容
 
