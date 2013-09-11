@@ -608,10 +608,10 @@ MagicVariables 求值示例：
 
 具体的云处理访问详见[云处理参考](http://docs.qiniu.com/api/v6/gen-use.html#fop)
 
-<a name="resumble-up">
+<a name="resumble-up"></a>
 # 断点续传
 
-<a name="resumble-gen">
+<a name="resumble-gen"></a>
 ## 概述
 ---------------------
 
@@ -624,7 +624,7 @@ MagicVariables 求值示例：
 断点续传的文档结构组织如下：
 首先介绍断点续上传的一般流程，并通过伪代码的方式对其描述。然后分别详细讨论流程中各步骤的详细内容并结合示例代码对其进行描述，包含分割快、上传分割快、生成文件、返回结果。
 
-<a name="resumble-alg">
+<a name="resumble-alg"></a>
 ## 上传流程
 -------------------
 
@@ -709,7 +709,7 @@ function resume_put(file, scope){
 }
 ```
 
-<a name="file-blob">
+<a name="file-blob"></a>
 ## 分割文件
 
 分割文件的方式受具体语言的影响而有所不同，但一般需要两个参数:
@@ -759,7 +759,7 @@ var file = document.getElementById("fileselect").files[0];
 ```
 
 
-<a name="mkblk">
+<a name="mkblk"></a>
 ## 上传快（mkblk）
 -----------------------
 
@@ -852,7 +852,7 @@ mkblk各语言的实现可参考：
 3. [go mkblk](https://github.com/qiniu/api/blob/master/resumable/io/up_api.go#L58)
 4. [c# mkblk](https://github.com/qiniu/csharp-sdk/blob/master/Qiniu/IO/Resumable/ResumablePut.cs#L175)
 
-<a name="bput">
+<a name="bput"></a>
 ### 2.上传余下的chunk
 
 请求mkblk时仅上传首个chunk，余下的chunk需要采用不同的格式进行请求。这样做至少有以下两点好处：
@@ -871,12 +871,17 @@ Content-Type:
 ```
 
 其中：
-  - method为post
-  - `bput` 说明这是一个上传chunk的请求
-  - `ctx`为上传前一个chunk返回的结果中ctx的值
-  - `1048576` 为该chunk的大小,即1Mb
-  - `content-Length:1048576`，说明`chunk`的大小为1Mb
-  - 此请求需要进行认证，因此需要在请求头中设定`uptoken`。
+- method为post
+
+- `bput` 说明这是一个上传chunk的请求
+
+- `ctx`为上传前一个chunk返回的结果中ctx的值
+
+- `1048576` 为该chunk的大小,即1Mb
+
+- `content-Length:1048576`，说明`chunk`的大小为1Mb
+
+- 此请求需要进行认证，因此需要在请求头中设定`uptoken`
 
 Post的内容为chunk的二进制内容
 
@@ -906,8 +911,7 @@ Post的内容为chunk的二进制内容
 3. [go bput](https://github.com/qiniu/api/blob/master/resumable/io/up_api.go#L64)
 3. [c# bput](https://github.com/qiniu/csharp-sdk/blob/master/Qiniu/IO/Resumable/ResumablePut.cs#L185)
 
-
-<a name="rs-mkfile">
+<a name="rs-mkfile"></a>
 ## 生成文件(rs-mkfile)
 --------------------------
 所有block上传完成后，请求服务端将其合成为一个完整的文件。
@@ -953,6 +957,6 @@ mkfile各语言的实现可参考：
 ```
 注：Response Body值与实际上传情况有关，并且，受上传策略影响，其格式也有所不同。
 
-<a name="resumble-demo">
+<a name="resumble-demo"></a>
 ## 示例
 [断点续上传在线示例](http://7niu.sinaapp.com)，需要浏览器支持HTML5，开发人员可通过firebug等工具查看断点续上传的请求、回应格式。
