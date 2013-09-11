@@ -719,11 +719,11 @@ function resume_put(file, scope){
 python
 
 ``` python
-//打开文件
+# 打开文件
 fo = open("<file path>", "r+")
-//移动当前位置
+# 移动当前位置
 fo.seek(offset, 0);
-//读取block
+# 读取block
 blockbuf = fo.read(size);
 ```
 
