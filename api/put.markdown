@@ -763,6 +763,11 @@ var file = document.getElementById("fileselect").files[0];
 ## 上传快（mkblk）
 -----------------------
 
+一个文件由多个block组成：
+
+block 1|block 2| ... | block n
+-------------------------------
+
 上传快由两个不同的请求组成。
 
 1. 请求上传block
