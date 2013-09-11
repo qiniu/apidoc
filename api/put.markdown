@@ -615,9 +615,12 @@ MagicVariables 求值示例：
 
 断点续传为大文件上传提供了有效的手段，通过断点续传，用户可以上传任意大小的文件。
 
-断点续传的原理:分割文件，将每个`分割块(block)`单独发送至七牛服务端（可并行上传各block），待所有`block`上传完成之后，请求服务端重新合成分割块成为一个完整的文件。对于每个分割快，用户可以继续分割成多个`上传块(chunk)`进行上传。
+断点续传的原理:分割文件，将每个分割块`block`单独发送至七牛服务端（可并行上传各block），待所有`block`上传完成之后，请求服务端重新合成分割块成为一个完整的文件。对于每个分割快，用户可以继续分割成多个上传块`chunk`进行上传。
 
 除最后一个Block外，其余Block的大小为4Mb。chunk的大小由用户指定，默认可设为256Kb，建义在网络环境较差的时候，适当减小此值。
+
+断点续传的文档结构组织如下：
+首先介绍断点续上传的一般流程，并通过伪代码的方式对其描述。然后分别详细讨论流程中各步骤的详细内容并结合示例代码对其进行描述，包含分割快、上传分割快、生成文件、返回结果。
 
 <a name="resumble-alg">
 ## 上传流程
@@ -636,14 +639,12 @@ MagicVariables 求值示例：
 //断点续传流程
 //@file, 待上传的文件
 //@scope,七牛云存储scope
-fun resume_put(file, scope){
+function resume_put(file, scope){
   // 1. 分割文件成多个block
   // 以4Mb大小为单位，将文件切割成块（blocks）
   // 是后一个块的大小为 file.size - (n-1)*1 << 22
   blocks[] = file.mkblk(1<<22)
-
   host = "http://up.qiniu.com"
-
   //blkRet为上传块时七牛返回的数据结构,格式如下:
   //{
   //  "ctx":  "MWZvQbq10x...",
@@ -653,28 +654,22 @@ fun resume_put(file, scope){
   //}
   //blkRet的个数与切割块的数目相同
   blkRet[blocks.len]
-
   //当前上传块在数组blocks中的索引号
   blkIdx = 0
-
   foreach(blk in blocks){
-
     //上传分割快，此逻辑可并发执行
     //@block, 需要上传的快
-    fun(block){
-
+    function(block){
       //以256Kb为单位，将block切割为chunk数组
       chunks[] = block.chunk(256)
-
       //通知Qiniu，开始上传block，同时将block的第一个chunk上传至七牛
       //@blockSize, 上传块的大小.(除最后一个块，其余为4Mb)
       //@furstChunk, block切割成的chunk数组的第一个元素
-      fun qiniu_mkblk(blockSize,firstChunk){
+      function qiniu_mkblk(blockSize,firstChunk){
         url = host + blockSize
         blkRet[blkIdx] = httpClient.send(url,firstChunk)
         host = blkRet[blkIdx]["host"]
       }(chunks[0]);
-
       //继续上传余下的chunk,注意i=1,表明跳过了首个chunk,
       //因为此chunk已经在mkblk时上传了  
       for(i=1;i<chunks.len;i++){
@@ -683,8 +678,7 @@ fun resume_put(file, scope){
         //@ctx, 用于上传控制，从上一次上传返回结果中获取
         //@offset, chunk在block中的偏移量，以byte为单位，可以从上一次返回结果中获取
         //@chunk, 需要上传的chunk
-
-        fun qiniu_bput(host,ctx,offset,chunk){
+        function qiniu_bput(host,ctx,offset,chunk){
           //请求地址
           url = host + "/bput/" + ctx + "/" +offset 
           //blkRet的内容被替换
@@ -694,12 +688,11 @@ fun resume_put(file, scope){
     }(blk)
     blkIdx++
   }
-
   //所有block上传完成，调用mkfile请求在服务端生成完整文件
   //@file 上传的文件
   //@scope, bucket + ":" + key
   //@return ,上传返回结果，默认为{hash:<hash>,key:<key>}
-  return fun mkfile(file,scope){
+  return function mkfile(file,scope){
     //生成mkfile请求地址
     url = "http://up.qiniu.com/rs-mkfile/" +
         base64Safe(scope) +                // 必须
@@ -713,6 +706,57 @@ fun resume_put(file, scope){
   }(file,scope)
 }
 ```
+
+<a name="file-blob">
+## 分割文件
+
+分割文件的方式受具体语言的影响而有所不同，但一般需要两个参数:
+  `offset` 分割块在文件中的偏移量，单位为byte
+  `size`  分割块的大小，单位为byte
+
+下文以python、c# 、javascript 为示例，介绍具体的切割方法，其它语言请参考对应的文档
+
+python
+
+``` python
+//打开文件
+fo = open("<file path>", "r+")
+//移动当前位置
+fo.seek(offset, 0);
+//读取block
+blockbuf = fo.read(size);
+```
+
+C# 
+
+``` c#
+//文件路径
+string localFile = "<file path>"
+//打开文件
+FileStream fs = File.OpenRead(localFile)
+//开辟空间
+byte[] blockBuf = new byte[4*1024*1024];
+//移动当前位置
+fs.seek(offset,SeekOrigin.Begin);
+//读取block
+fs.Read(blockBuf,0,size)
+```
+
+javascript
+
+``` javascript
+//需要HTML5文件系统支持
+//<input type="files" id="fileselect" />
+
+//获取文件
+var file = document.getElementById("fileselect").files[0];
+(function(f, start, size) {
+  //文件分割
+  f.slice(start,start + size);
+})(file, offset, size);
+```
+
+
 <a name="mkblk">
 ## 上传快（mkblk）
 -----------------------
@@ -737,7 +781,11 @@ Content-Length: 1048576
 Authorization: UpToken <uptoken>
 ```
 
-其中，method为post，`mkblk` 说明这是一个上传快的请求，`4194304` 为该块的大小,即4Mb。同时将该block的首个chunk包含在请求body中，`content-Length:1048576`，说明`chunk`的大小为1Mb。此请求需要进行认证，因此需要在请求头中设定`uptoken`。
+其中，
+  - method为post
+  - `mkblk` 说明这是一个上传快的请求
+  - `4194304` 为该块的大小,即4Mb。
+  - 同时将该block的首个chunk包含在请求body中，`content-Length:1048576`，说明`chunk`的大小为1Mb。此请求需要进行认证，因此需要在请求头中设定`uptoken`。
 
 Post的内容为该block的首个chunk的二进制内容
 
@@ -784,6 +832,13 @@ Response Body:
 
   - host, 后续上传接收地址
 
+mkblk各语言的实现可参考：
+
+1. [python mkblk](https://github.com/qiniu/python-sdk/blob/master/qiniu/resumable_io.py#L145)
+2. [c/c++ mkblk](https://github.com/qiniu/c-sdk/blob/master/qiniu/resumable_io.c#L272)
+3. [go mkblk](https://github.com/qiniu/api/blob/master/resumable/io/up_api.go#L58)
+4. [c# mkblk](https://github.com/qiniu/csharp-sdk/blob/master/Qiniu/IO/Resumable/ResumablePut.cs#L175)
+
 <a name="bput">
 ### 2.上传余下的chunk
 
@@ -802,7 +857,13 @@ Authorization: UpToken <uptoken>
 Content-Type:
 ```
 
-其中，method为post，`bput` 说明这是一个上传chunk的请求，`1048576` 为该chunk的大小,即1Mb。`content-Length:1048576`，说明`chunk`的大小为1Mb。此请求需要进行认证，因此需要在请求头中设定`uptoken`。
+其中：
+  - method为post
+  - `bput` 说明这是一个上传chunk的请求
+  - `ctx`为上传前一个chunk返回的结果中ctx的值
+  - `1048576` 为该chunk的大小,即1Mb
+  - `content-Length:1048576`，说明`chunk`的大小为1Mb
+  - 此请求需要进行认证，因此需要在请求头中设定`uptoken`。
 
 Post的内容为chunk的二进制内容
 
@@ -824,6 +885,14 @@ Post的内容为chunk的二进制内容
 注：为排版方面，对Response Body作出了一定的格式调整,各字段的具体值也与实际上传情况有关
 
 同一block中的chunk必须串行上传，待所有的chunk上传完成，表明此快已完成，记录最后一个回应数据
+
+各语言上传chunk的实现可参考：
+
+1. [python bput](https://github.com/qiniu/python-sdk/blob/master/qiniu/resumable_io.py#L150)
+2. [c/c++ bput](https://github.com/qiniu/c-sdk/blob/master/qiniu/resumable_io.c#L253)
+3. [go bput](https://github.com/qiniu/api/blob/master/resumable/io/up_api.go#L64)
+3. [c# bput](https://github.com/qiniu/csharp-sdk/blob/master/Qiniu/IO/Resumable/ResumablePut.cs#L185)
+
 
 <a name="rs-mkfile">
 ## 生成文件(rs-mkfile)
@@ -856,13 +925,26 @@ Authorization: UpToken <uptoken>
 
 以`,`连接上传各block时最后一个chunk返回的数据结构中的ctx字段
 
-可参考伪代码中mkfile函数
+
+mkfile各语言的实现可参考：
+
+1. [python mkfile](https://github.com/qiniu/python-sdk/blob/master/qiniu/resumable_io.py#L155)
+2. [c/c++ mkfile](https://github.com/qiniu/c-sdk/blob/master/qiniu/resumable_io.c#L253)
+3. [go mkfile](https://github.com/qiniu/api/blob/master/resumable/io/up_api.go#L147)
+3. [c# mkfile](https://github.com/qiniu/csharp-sdk/blob/master/Qiniu/IO/Resumable/ResumablePut.cs#L195)
 
 七牛服务器对生成文件请求作出的回应内容如下：
 
 ``` json
 {"hash":"lpIhVPzTA90MyOUJy6Hz6W9pm_vj","key","qiniu.txt"}
 ```
-注：Response Body值与实际上传情况有关，并且，受上传策略影响，其格式也有所有同。
+注：Response Body值与实际上传情况有关，并且，受上传策略影响，其格式也有所不同。
+
+<a name="resumble-demo">
+## 示例
+
+[断点续上传在线示例](http://www.qiniu.com)，需要HTML5支持
+
+
 
 
