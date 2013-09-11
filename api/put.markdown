@@ -631,7 +631,7 @@ MagicVariables 求值示例：
 断点续上传流程为：
 
 1. 分割文件成多个`block`
-2. 上传分割快。分割快彼此可并行上传，分割快又被化分为多个上传块，上传快必须串行上传。
+2. 上传分割快。分割快彼此可并行上传，分割快又被化分为多个上传块(chunk)，上传快必须串行上传。
 3. 所有分割快上传完成后，请求服务端将其合成为一个完整的文件。
 4. 跟据上传策略，返回给客户端对应信息。
 
@@ -930,11 +930,11 @@ Authorization: UpToken <uptoken>
 
 - method为post，`rs-mkfile` 说明这是一个生成文件的请求
 
-- `cXRlc3RidWNrZXQ6cWluaXUudHh0` 是经过base64urlsafe编码的scope,原文是`qtestbucket:qiniu.txt`,qtestbucket是七牛空间名，qiniu.txt为上传文件的key。
+- `cXRlc3RidWNrZXQ6cWluaXUudHh0` 是经过[base64urlsafe](http://docs.qiniu.com/api/v6/terminology.html#URLSafeBase64)编码的scope,原文是`qtestbucket:qiniu.txt`,qtestbucket是七牛空间名，qiniu.txt为上传文件的key。
 
 - `fsize/5628074`指定了文件的大小为5628074，单位byte。
 
-- `mimeType`为可选项，其值需要经过base64Urlsafe编码。
+- `mimeType`为可选项，其值需要经过[base64urlsafe](http://docs.qiniu.com/api/v6/terminology.html#URLSafeBase64)编码。
 
 - 此请求需要进行认证，因此需要在请求头中设定`uptoken`。
 
@@ -959,4 +959,5 @@ mkfile各语言的实现可参考：
 
 <a name="resumble-demo"></a>
 ## 示例
+-------------------
 [断点续上传在线示例](http://7niu.sinaapp.com)，需要浏览器支持HTML5，开发人员可通过firebug等工具查看断点续上传的请求、回应格式。
