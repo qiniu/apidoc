@@ -765,6 +765,8 @@ var file = document.getElementById("fileselect").files[0];
 
 一个文件由多个block组成：
 
+|files                         |
+--------|-------|-----|--------|
 |block 1|block 2| ... | block n|
 |-------|-------|-----|--------|
 
