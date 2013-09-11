@@ -27,8 +27,10 @@ title: "资源上传"
 - [断点续传](#resumble-up)
     - [概述](#resumble-gen)
     - [上传流程](#resumble-alg)
+    - [分割文件](#file-blob)
     - [上传快](#mkblk)
     - [生成文件](#rs-mkfile)
+    - [在线示例](#online-demo)
 
 <a name="upload-basic"></a>
 
@@ -640,7 +642,7 @@ MagicVariables 求值示例：
 //@file, 待上传的文件
 //@scope,七牛云存储scope
 function resume_put(file, scope){
-  // 1. 分割文件成多个block
+  // 第一步: 分割文件成多个block
   // 以4Mb大小为单位，将文件切割成块（blocks）
   // 是后一个块的大小为 file.size - (n-1)*1 << 22
   blocks[] = file.mkblk(1<<22)
@@ -657,7 +659,7 @@ function resume_put(file, scope){
   //当前上传块在数组blocks中的索引号
   blkIdx = 0
   foreach(blk in blocks){
-    //上传分割快，此逻辑可并发执行
+    //第二步: 上传分割快，此逻辑可并发执行
     //@block, 需要上传的快
     function(block){
       //以256Kb为单位，将block切割为chunk数组
@@ -688,7 +690,7 @@ function resume_put(file, scope){
     }(blk)
     blkIdx++
   }
-  //所有block上传完成，调用mkfile请求在服务端生成完整文件
+  //第三步: 所有block上传完成，调用mkfile请求在服务端生成完整文件
   //@file 上传的文件
   //@scope, bucket + ":" + key
   //@return ,上传返回结果，默认为{hash:<hash>,key:<key>}
@@ -942,9 +944,4 @@ mkfile各语言的实现可参考：
 
 <a name="resumble-demo">
 ## 示例
-
 [断点续上传在线示例](http://www.qiniu.com)，需要HTML5支持
-
-
-
-
