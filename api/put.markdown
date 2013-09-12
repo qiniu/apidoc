@@ -793,7 +793,8 @@ Content-Length: 1048576
 Authorization: UpToken <uptoken>
 ```
 
-其中，
+其中:
+
   - method为post
   - `mkblk` 说明这是一个上传快的请求
   - `4194304` 为该块的大小,即4Mb。
@@ -845,6 +846,8 @@ Response Body:
 
   - host, 后续上传接收地址
 
+注：如果请求上传block，可单独重试上传此block。
+
 mkblk各语言的实现可参考：
 
 1. [python mkblk](https://github.com/qiniu/python-sdk/blob/master/qiniu/resumable_io.py#L145)
@@ -855,9 +858,7 @@ mkblk各语言的实现可参考：
 <a name="bput"></a>
 ### 2.上传余下的chunk
 
-请求mkblk时仅上传首个chunk，余下的chunk需要采用不同的格式进行请求。这样做至少有以下两点好处：
-1. 在网络环境较差时可以通过减小chunk的大小，提高上传成功率
-2. 客户端通过crc32较验值发现上传失败时，可重试上传chunk
+请求mkblk时仅上传首个chunk，余下的chunk需要采用不同的格式进行请求。
 
 上传chunk的请求格式如下：
 
@@ -870,7 +871,8 @@ Authorization: UpToken <uptoken>
 Content-Type:
 ```
 
-其中：
+其中:
+
 - method为post
 
 - `bput` 说明这是一个上传chunk的请求
@@ -888,6 +890,7 @@ Post的内容为chunk的二进制内容
 ``` post
 [chunk-bin]
 ```
+
 七牛服务器对上传chunk作出的回应内容如下：
 
 ``` json
@@ -902,7 +905,9 @@ Post的内容为chunk的二进制内容
 
 注：为排版方面，对Response Body作出了一定的格式调整,各字段的具体值也与实际上传情况有关
 
-同一block中的chunk必须串行上传，待所有的chunk上传完成，表明此快已完成，记录最后一个回应数据
+同一block中的chunk必须串行上传，待所有的chunk上传完成，表明此快已完成，记录最后一个回应数据，此数据在合成文件时将作为请求body的一部分。
+
+注：如果chunk上传失败，可重传此chunk，直至此chunk上传成功，方可继续上传下一个chunk。
 
 各语言上传chunk的实现可参考：
 
