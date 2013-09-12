@@ -836,7 +836,7 @@ Response Body:
 
 请求回应body是json格式的字符串,各字段的意义如下：
   
-  - ctx, 服务端上传控制字段,生成文件(mkfile)时用到
+  - ctx, 服务端上传控制字段,后继上传及生成文件(mkfile)时用到
 
   - checksum, 上传块checksum
 
