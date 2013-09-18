@@ -10,6 +10,7 @@ title: "资源下载"
 - [断点续下载](#download-by-range)
 - [自定义 404 Not Found](#define-404-not-found)
 - [自定义资源下载时所保存的名称](#define-download-friendly-name)
+- [特殊key资源下载](#unusual-key-download)
 
 
 用户在七牛云存储的[空间](http://docs.qiniu.com/api/v6/terminology.html#Bucket)有两种保护状态：公开（public）和私有（private）。当用户下载资源的时候，需要对这两种状态采用不同的访问方式。公开资源可以使用[资源名](http://docs.qiniu.com/api/v6/terminology.html#Key)和空间名构造出URL，直接下载，无需签名授权。私有资源则需要用户对资源访问URL做认证签名，向资源下载方授权。
@@ -181,3 +182,9 @@ title: "资源下载"
 当收到此指令时，七牛云存储会在反馈中增加一个 `Content-Disposition: attachment;filename="<file name>"` Header。此Header将促使浏览器对资源进行下载。下面的例子演示了 `download` 指令的使用：
 
   [http://qiniuphotos.qiniudn.com/gogopher.jpg?download/test.jpg](http://qiniuphotos.qiniudn.com/gogopher.jpg?download/test.jpg)
+
+<a name="unusual-key-download"></a>
+
+## 特殊key资源下载
+
+特殊key指key中包含了url保留，如'?'、首字符为'/'、以及多个连续的'/'等。关于此类资源的访问，请参考：[特殊key资源的访问](http://kb.qiniu.com/52slk76w)
