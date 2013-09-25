@@ -115,7 +115,7 @@ Content-Type: <MimeType>
 
 ## 上传参数
 
-上传参数包括两类，一类是服务参数，有三个，分别是：key、token和file。三者具体的含义参考以下表格。另一类是用户[自定义变量](#xVariables)，即xVariable。用户可以通过 `x:<custom_field_name>` 参数将其传递到七牛云存储。七牛云存储根据[callbackUrl](#put-policy)的设置，构造出回调结果。
+上传参数包括两类，一类是服务参数，有三个，分别是：key、token和file。三者具体的含义参考以下表格。另一类是用户[自定义变量](#xVariables)，即xVariable。用户可以通过 `x:<custom_field_name>` 参数将其传递到七牛云存储。七牛云存储根据[returnBody 或 callbackBody](#put-policy)的设置，构造出回调结果。
 
 名称        | 类型   | 必须 | 说明
 ------------|--------|------|-------------------------------------
@@ -604,9 +604,7 @@ MagicVariables 求值示例：
 
 上传完成后，用户可以通过标准的云处理方式访问： `http://<domain>/<key>?<fop>` 。这里的 `<fop>` 是在 `asyncOps` 中设定的云处理指令中的任何一个。比如，如果要获取规格1的转换结果，只需使用以下的URL即可：
 
-```
   [http://apitest.b1.qiniudn.com/sample.wav?avthumb/mp3/ar/44100/ab/32k](http://apitest.b1.qiniudn.com/sample.wav?avthumb/mp3/ar/44100/ab/32k)
-```
 
 具体的云处理访问详见[云处理参考](http://docs.qiniu.com/api/v6/gen-use.html#fop)
 
