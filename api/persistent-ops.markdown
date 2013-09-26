@@ -9,7 +9,7 @@ title: "数据处理(持久化)"
     - [通知](#notify)
     - [查询](#status)
     - [状态内容](#status-description)
-- [处理实例](#persistentOps-sample)
+- [对历史数据进行持久化](#persistentOps-p2)
 
 
 <a name="persistentOps-overall"></a>
@@ -37,7 +37,7 @@ title: "数据处理(持久化)"
 ## 持久化处理机制  
 
 ### 上传  
-用户使用持久化处理，需要在生成uploadToken时增加`persistentOps`和 `persistentNotifyUrl` 两个字段。  
+用户使用持久化处理，需要在生成uploadToken时增加`persistentOps`和 `persistentNotifyUrl` 两个字段。注意：如果设置了 `persistentOps`，则一定要同时指定 `persistentNotifyUrl`。  
 
 字段 | 含义
 ----- | -------------
@@ -46,7 +46,14 @@ title: "数据处理(持久化)"
 
 ### 服务端处理  
 用户使用指定了`persistentOps` 和 `persistentNotifyUrl` 的uploadToken上传一个音视频文件之后，服务端会生成此次处理的进程ID `persistentId`，并开始数据处理。  
-`persistentId`可以用来获取处理的进度和结果。用户可以在`returnBody` 或 `callbackBody` 中使用魔法变量`$(persistentId)` 来得到该ID。  
+`persistentId`可以用来获取处理的进度和结果。  
+针对用户上传策略的不同，获得`persistentId`的方式不同：  
+
+1.  uploadToken参数中没有设置returnUrl或callbackUrl，上传成功后服务器返回的结果中默认带有`persistentId`字段；  
+2.  uploadToken参数中设置了returnUrl，但没有设置returnBody，跳转过程附带的upload_ret参数解码后获得的结果中默认带有`persistentId`字段；  
+3.  uploadToken参数中设置了callbackUrl，但没有设置callbackBody，和之前一样，这种情况下上传会失败；  
+4.  uploadToken参数中设置了returnUrl或callbackUrl，且根据需求自定义了相应的Body（`returnBody` 或 `callbackBody`），要在Body中使用魔法变量`$(persistentId)` 来得到， 如`key=$(etag)&size=$(fsize)&uid=$(endUser)&persistentId=$(persistentId)`。  
+
 
 ### 下载  
 服务端处理完成之后，用户即可通过  
@@ -136,7 +143,6 @@ title: "数据处理(持久化)"
 
 
 
-<a name="persistentOps-sample"></a>
 ## 处理实例  
 
 1.  上传一个音频文件 **persistent.mp3** ，并设置处理命令为 `avthumb/mp3/aq/6/ar/16000` 和 `avthumb/mp3/ar/44100/ab/32k`。  
@@ -181,3 +187,11 @@ title: "数据处理(持久化)"
 [样式'persistent1'](http://t-test.qiniudn.com/persistent.mp3-persistent1)  
 [样式'persistent2'](http://t-test.qiniudn.com/persistent.mp3-persistent2)  
 
+
+<a name="persistentOps-p2"></a>
+## 对历史数据进行持久化  
+如果需要对以前上传的文件进行转码并持久化处理，需要使用我们的处理接口：  
+
+    [POST] http://<domain>/<key>?p/2/<fop>  
+
+todo
