@@ -696,10 +696,11 @@ function resume_put(file, scope){
   //@return ,上传返回结果，默认为{hash:<hash>,key:<key>}
   return function mkfile(file,scope){
     //生成mkfile请求地址
-    url = "http://up.qiniu.com/mkfile/" +
-        "/fsize/" + file.size +            // 必须
-        base64Safe(scope) +                // 必须
+    url = blkRet[lastIdx].host +
+        "/" + file.size +            // 必须
+        "/" + base64Safe(scope) +                // 必须
         "/mimeTpye/" + base64Safe(file.type) // 可选
+        "/" + parameters                    //可选，parameters格式见下文 
     foreach(ret in blkRet){
       body += ret.ctx + ","
     }
@@ -782,7 +783,8 @@ var file = document.getElementById("fileselect").files[0];
 
 ### 1.请求上传block
 
-请求格式如下
+请求格式如下：
+
 Request Header:
 
 ``` html
