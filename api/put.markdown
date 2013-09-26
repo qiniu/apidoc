@@ -619,7 +619,7 @@ MagicVariables 求值示例：
 
 断点续传的原理:分割文件，将每个分割块`block`单独发送至七牛服务端（可并行上传各block），待所有`block`上传完成之后，请求服务端重新合成分割块成为一个完整的文件。对于每个分割块，用户可以继续分割成多个上传块`chunk`进行上传。
 
-除最后一个Block外，其余Block的大小为4Mb。chunk的大小由用户指定，默认可设为256Kb，建义在网络环境较差的时候，适当减小此值。
+除最后一个Block外，其余Block的大小为4MB。chunk的大小由用户指定，默认可设为256KB，建义在网络环境较差的时候，适当减小此值。
 
 断点续传的文档结构组织如下：
 首先介绍断点续上传的一般流程，并通过伪代码的方式对其描述。然后分别详细讨论流程中各步骤的详细内容并结合示例代码对其进行描述，包含分割块、上传分割块、生成文件、返回结果。
@@ -643,7 +643,7 @@ MagicVariables 求值示例：
 //@scope,七牛云存储scope
 function resume_put(file, scope){
   // 第一步: 分割文件成多个block
-  // 以4Mb大小为单位，将文件切割成块（blocks）
+  // 以4MB大小为单位，将文件切割成块（blocks）
   // 是后一个块的大小为 file.size - (n-1)*1 << 22
   blocks[] = file.mkblk(1<<22)
   host = "http://up.qiniu.com"
@@ -662,10 +662,10 @@ function resume_put(file, scope){
     //第二步: 上传分割块，此逻辑可并发执行
     //@block, 需要上传的块
     function(block){
-      //以256Kb为单位，将block切割为chunk数组
+      //以256KB为单位，将block切割为chunk数组
       chunks[] = block.chunk(256)
       //通知Qiniu，开始上传block，同时将block的第一个chunk上传至七牛
-      //@blockSize, 上传块的大小.(除最后一个块，其余为4Mb)
+      //@blockSize, 上传块的大小.(除最后一个块，其余为4MB)
       //@furstChunk, block切割成的chunk数组的第一个元素
       function qiniu_mkblk(blockSize,firstChunk){
         url = host + blockSize
@@ -696,10 +696,11 @@ function resume_put(file, scope){
   //@return ,上传返回结果，默认为{hash:<hash>,key:<key>}
   return function mkfile(file,scope){
     //生成mkfile请求地址
-    url = "http://up.qiniu.com/rs-mkfile/" +
-        base64Safe(scope) +                // 必须
-        "/fsize/" + file.size +            // 必须
+    url = blkRet[lastIdx].host +
+        "/" + file.size +            // 必须
+        "/" + base64Safe(scope) +                // 必须
         "/mimeTpye/" + base64Safe(file.type) // 可选
+        "/" + parameters                    //可选，parameters格式见下文 
     foreach(ret in blkRet){
       body += ret.ctx + ","
     }
@@ -763,12 +764,12 @@ var file = document.getElementById("fileselect").files[0];
 ## 上传块（mkblk）
 -----------------------
 
-一个文件由多个block组成，除最后一个block，其余block大小为4Mb:
+一个文件由多个block组成，除最后一个block，其余block大小为4MB:
 
-|block 1 (4Mb)|block 2 (4Mb)| ... | block n (filesize - (n-1)*4Mb)|
+|block 1 (4MB)|block 2 (4MB)| ... | block n (filesize - (n-1)*4MB)|
 |-------|-------|-----|--------|
 
-一个block由多个chunk组成,chunk的大小由用户自已设定，必须小于块的大小，默认可取256kb。
+一个block由多个chunk组成,chunk的大小由用户自已设定，必须小于块的大小，默认可取256KB。
 
 |chunk 1|chunk 2| ... | chunk n|
 |-------|-------|-----|--------|
@@ -782,23 +783,30 @@ var file = document.getElementById("fileselect").files[0];
 
 ### 1.请求上传block
 
-请求格式如下
+请求格式如下：
+
 Request Header:
 
 ``` html
-POST /mkblk/4194304 HTTP/1.1
+POST /mkblk/<blockSize> HTTP/1.1
+Content-Length: <first-chunk-size>
 Host: up.qiniu.com
 Connection: keep-alive
-Content-Length: 1048576
 Authorization: UpToken <uptoken>
 ```
 
 其中:
 
   - method为post
+
   - `mkblk` 说明这是一个上传块的请求
-  - `4194304` 为该块的大小,即4Mb。
-  - 同时将该block的首个chunk包含在请求body中，`content-Length:1048576`，说明`chunk`的大小为1Mb。
+
+  - `<blockSize>` 为该块的大小,除最后一个块，其余大小为4MB。
+
+  - 同时将该block的首个chunk包含在请求body中，`content-Length:<first-chunk-size>`，指定首个`chunk`的大小。
+
+  - `up.qiniu.com`为首次上传地址，后续上传采用服务器分配的地址
+
   - 此请求需要进行认证，因此需要在请求头中设定`uptoken`。
 
 Post的内容为该block的首个chunk的二进制内容
@@ -814,7 +822,6 @@ Response Header:
 ``` html
 HTTP/1.1 200 OK
 
-Content-Length: 326
 Content-Type: application/json
 Pragma: no-cache
 X-Content-Type-Options: nosniff
@@ -825,11 +832,11 @@ Response Body:
 
 ``` json
 {
-  "ctx":"xoQ26KAP5hjfygWppG28CDda6",
-  "checksum":"LAgiZ_Yx4lAX1VtjSDKWd0mqkbM=",
-  "crc32":2205417595,
-  "offset":1048576,
-  "host":"http://up.qiniu.com"
+  "ctx":"<ctx>",
+  "checksum":"<checksum>",
+  "crc32":<crc32>,
+  "offset":<offset>,
+  "host":"<selectUpHost>"
 }
 ```
 注：为排版方面，对Response Body作出了一定的格式调整,各字段的具体值也与实际上传情况有关
@@ -844,9 +851,9 @@ Response Body:
 
   - offset, 下一个上传块在切割块中的偏移
 
-  - host, 后续上传接收地址
+  - selectUpHost, 后续上传接收地址
 
-注：如果请求上传block，可单独重试上传此block。
+注：如果请求上传block失败，可单独重试上传此block。
 
 mkblk各语言的实现可参考：
 
@@ -863,10 +870,10 @@ mkblk各语言的实现可参考：
 上传chunk的请求格式如下：
 
 ``` html
-POST /bput/<ctx>/1048576 HTTP/1.1
-Host: up-nb-5.qbox.me
+POST /bput/<ctx>/<chunksize> HTTP/1.1
+Host: <selectUpHost>
 Connection: keep-alive
-Content-Length: 1048576
+Content-Length: <chunksize>
 Authorization: UpToken <uptoken>
 Content-Type:
 ```
@@ -877,11 +884,11 @@ Content-Type:
 
 - `bput` 说明这是一个上传chunk的请求
 
-- `ctx`为上传前一个chunk返回的结果中ctx的值
+- `<ctx>`为上传前一个chunk返回的结果中ctx的值
 
-- `1048576` 为该chunk的大小,即1Mb
+- `<chunksize>` 为该chunk的大小
 
-- `content-Length:1048576`，说明`chunk`的大小为1Mb
+- `<selectHost>` 上传地址,从上一次返回结果中获取 
 
 - 此请求需要进行认证，因此需要在请求头中设定`uptoken`
 
@@ -895,11 +902,11 @@ Post的内容为chunk的二进制内容
 
 ``` json
 {
-  "ctx":"-PT8ZkrNffcERw0KSpAEAAAAAgAAMAAAAPAP____8=",
-  "checksum":"WNp4uCHbbK_iPCt9X7P6PU5cj6o=",
-  "crc32":4077864011,
-  "offset":2097152,
-  "host":"http://up-nb-5.qbox.me"
+  "ctx":"<ctx>",
+  "checksum":"<checksum>",
+  "crc32":<crc32>,
+  "offset":<offset>,
+  "host":"<selectUpHost>"
 }
 ```
 
@@ -907,7 +914,7 @@ Post的内容为chunk的二进制内容
 
 同一block中的chunk必须串行上传，待所有的chunk上传完成，表明此块已完成，记录最后一个回应数据，此数据在合成文件时将作为请求body的一部分。
 
-注：如果chunk上传失败，可重传此chunk，直至此chunk上传成功，方可继续上传下一个chunk。
+注：如果chunk上传失败，需要重传此chunk，直至此chunk上传成功，方可继续上传下一个chunk。
 
 各语言上传chunk的实现可参考：
 
@@ -917,29 +924,30 @@ Post的内容为chunk的二进制内容
 3. [c# bput](https://github.com/qiniu/csharp-sdk/blob/master/Qiniu/IO/Resumable/ResumablePut.cs#L185)
 
 <a name="rs-mkfile"></a>
-## 生成文件(rs-mkfile)
+## 生成文件(mkfile)
 --------------------------
 所有block上传完成后，请求服务端将其合成为一个完整的文件。
 
 请求头格式如下:
 
 ``` html
-POST /rs-mkfile/cXRlc3RidWNrZXQ6cWluaXUudHh0/fsize/5628074/mimeType/dGV4dC9wbGFpbg== HTTP/1.1
-Host: up.qiniu.com
+POST /mkfile/<fsize>/key/<EncodedKey>/mimeType/<EncodedMimeType>/x:userVar/EncodedUserVar/ HTTP/1.1
+Host: <selectUpHost>
 Connection: keep-alive
-Content-Length: 417
 Authorization: UpToken <uptoken>
 ```
 
 其中:
 
-- method为post，`rs-mkfile` 说明这是一个生成文件的请求
+- method为post，`mkfile` 说明这是一个生成文件的请求
 
-- `cXRlc3RidWNrZXQ6cWluaXUudHh0` 是经过[base64urlsafe](http://docs.qiniu.com/api/v6/terminology.html#URLSafeBase64)编码的scope,原文是`qtestbucket:qiniu.txt`,qtestbucket是七牛空间名，qiniu.txt为上传文件的key。
+- `<EncodedKey>` 是经过[base64urlsafe](http://docs.qiniu.com/api/v6/terminology.html#URLSafeBase64)编码的scope,原文由<bucketName>:<key>组成
 
-- `fsize/5628074`指定了文件的大小为5628074，单位byte。
+- `<fsize>`指定了文件的大小，单位byte。
 
-- `mimeType`为可选项，其值需要经过[base64urlsafe](http://docs.qiniu.com/api/v6/terminology.html#URLSafeBase64)编码。
+- `<EncodedMimeType>`为可选项，其值需要经过[base64urlsafe](http://docs.qiniu.com/api/v6/terminology.html#URLSafeBase64)编码。
+
+- `x:userVar`，用户自定义变量，以`x:`开始，后面的`userVar`可自定义，其值需要经过[base64urlsafe](http://docs.qiniu.com/api/v6/terminology.html#URLSafeBase64)编码，多个自定义变量可继续追加。例如：/x:username/base64urlsafe("qiniu")/x:email/base64urlsafe("example@example.com")
 
 - 此请求需要进行认证，因此需要在请求头中设定`uptoken`。
 
@@ -958,7 +966,7 @@ mkfile各语言的实现可参考：
 七牛服务器对生成文件请求作出的回应内容如下：
 
 ``` json
-{"hash":"lpIhVPzTA90MyOUJy6Hz6W9pm_vj","key","qiniu.txt"}
+{"hash":"<hash>","key","<key>"}
 ```
 注：Response Body值与实际上传情况有关，并且，受上传策略影响，其格式也有所不同。
 
