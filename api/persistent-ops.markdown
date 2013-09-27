@@ -9,7 +9,7 @@ title: "数据处理(持久化)"
     - [通知](#notify)
     - [查询](#status)
     - [状态内容](#status-description)
-- [对历史数据进行持久化](#persistentOps-p2)
+- [对历史数据进行持久化](#persistentOps-pfop)
 
 
 <a name="persistentOps-overall"></a>
@@ -188,10 +188,31 @@ title: "数据处理(持久化)"
 [样式'persistent2'](http://t-test.qiniudn.com/persistent.mp3-persistent2)  
 
 
-<a name="persistentOps-p2"></a>
+<a name="persistentOps-pfop"></a>
 ## 对历史数据进行持久化  
-如果需要对以前上传的文件进行转码并持久化处理，需要使用我们的处理接口：  
+如果需要对以前上传的文件进行转码并持久化处理，可以按以下方式使用我们的异步处理接口：  
 
-    [POST] http://<domain>/<key>?p/2/<fop>  
 
-todo
+    Request URL: http://api.qiniu.com/pfop  
+    Request Method: POST  
+    Request Headers:  
+        Content-Type: application/x-www-form-urlencoded  
+        Authorization: QBox <access token>  
+    Form Data: 
+        bucket: <bucket>  
+        key: <file Key>  
+        fops: <fop1>;<fop2>...<fopN>
+        notifyURL: <persistentNotifyUrl>          
+
+
+正常情况下获得的返回：
+
+
+    Status Code: 200 OK  
+    Response:  
+        {"persistentId": <persistentId>}
+
+
+处理完成后会向用户指定的`notifyURL`发送处理结果，用户也可以根据`persistentId`来主动查询。详情可以参考：[处理状态通知和查询](#persistentOps-status)
+
+    
