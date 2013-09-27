@@ -9,7 +9,7 @@ title: "资源上传"
     - [在HTML页面中上传资源](#html-form-post)
     - [非HTML客户端上传](#multipart)
     - [上传参数](#parameters)
-    - [上传策略（PutPolicy）](#put-policy）)
+    - [上传策略（PutPolicy）](#put-policy)
     - [上传凭证（Upload Token）](#upload-token)
     - [上传请求的反馈](#response)
         - [基本反馈](#basic-resp)
