@@ -1,5 +1,13 @@
 ## CHANGE LOG
 
+### v6.1.4 issue [#63](https://github.com/qiniu/apidoc/pull/63)
+
+- 增加api使用概述
+- 更新上传文件文档
+- 更新下载文件文档
+- 添加视频水印文档
+- 添加断点续传文档
+
 ### v6.1.4 issue [#51](https://github.com/qiniu/apidoc/pull/51)
 
 - 增加视频转换预设集
