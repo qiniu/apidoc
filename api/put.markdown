@@ -644,7 +644,7 @@ MagicVariables 求值示例：
 function resume_put(file, scope){
   // 第一步: 分割文件成多个block
   // 以4MB大小为单位，将文件切割成块（blocks）
-  // 是后一个块的大小为 file.size - (n-1)*1 << 22
+  // 最后一个块的大小为 file.size - (n-1)*1 << 22
   blocks[] = file.mkblk(1<<22)
   host = "http://up.qiniu.com"
   //blkRet为上传块时七牛返回的数据结构,格式如下:
@@ -666,14 +666,13 @@ function resume_put(file, scope){
       chunks[] = block.chunk(256)
       //通知Qiniu，开始上传block，同时将block的第一个chunk上传至七牛
       //@blockSize, 上传块的大小.(除最后一个块，其余为4MB)
-      //@furstChunk, block切割成的chunk数组的第一个元素
+      //@firstChunk, block切割成的chunk数组的第一个元素
       function qiniu_mkblk(blockSize,firstChunk){
         url = host + blockSize
         blkRet[blkIdx] = httpClient.send(url,firstChunk)
         host = blkRet[blkIdx]["host"]
       }(chunks[0]);
-      //继续上传余下的chunk,注意i=1,表明跳过了首个chunk,
-      //因为此chunk已经在mkblk时上传了  
+      //继续上传余下的chunk,注意i=1,表明跳过了首个chunk,因为此chunk已经在mkblk时上传了  
       for(i=1;i<chunks.len;i++){
         //上传chunks
         //@host, 接收上传的地址，可以从上一次返回结果中获取
@@ -692,13 +691,13 @@ function resume_put(file, scope){
   }
   //第三步: 所有block上传完成，调用mkfile请求在服务端生成完整文件
   //@file 上传的文件
-  //@scope, bucket + ":" + key
+  //@key 需要在七牛服务端保存的文件key
   //@return ,上传返回结果，默认为{hash:<hash>,key:<key>}
-  return function mkfile(file,scope){
+  return function mkfile(file,key){
     //生成mkfile请求地址
     url = blkRet[lastIdx].host +
         "/" + file.size +            // 必须
-        "/" + base64Safe(scope) +                // 必须
+        "/" + base64Safe(key) +                // 必须
         "/mimeTpye/" + base64Safe(file.type) // 可选
         "/" + parameters                    //可选，parameters格式见下文 
     foreach(ret in blkRet){
@@ -706,7 +705,7 @@ function resume_put(file, scope){
     }
     body.TrimEnd(",")
     return httpClient.send(url, body)
-  }(file,scope)
+  }(file,key)
 }
 ```
 
@@ -941,7 +940,7 @@ Authorization: UpToken <uptoken>
 
 - method为post，`mkfile` 说明这是一个生成文件的请求
 
-- `<EncodedKey>` 是经过[base64urlsafe](http://docs.qiniu.com/api/v6/terminology.html#URLSafeBase64)编码的scope,原文由<bucketName>:<key>组成
+- `<EncodedKey>` 是经过[base64urlsafe](http://docs.qiniu.com/api/v6/terminology.html#URLSafeBase64)编码的key
 
 - `<fsize>`指定了文件的大小，单位byte。
 
@@ -968,6 +967,14 @@ mkfile各语言的实现可参考：
 ``` json
 {"hash":"<hash>","key","<key>"}
 ```
+
+请求回应body是json格式的字符串,各字段的意义如下：
+
+- `hash`，文件hash值
+
+- `key`，文件在服务端对应的key
+
+
 注：Response Body值与实际上传情况有关，并且，受上传策略影响，其格式也有所不同。
 
 <a name="resumble-demo"></a>
