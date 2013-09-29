@@ -121,7 +121,7 @@ Content-Type: <MimeType>
 ------------|--------|------|-------------------------------------
 token       | string | 是   | 上传授权凭证 - [UploadToken](#uploadtoken)
 file        | file   | 是   | 文件本身
-key         | string | 否   | 资源名，所在的资源空间内唯一。key可包含`/`，但不以`/`开头。若不指定 key，七牛云存储将使用文件的 etag（即上传成功后返回的hash值）作为key，并在返回结果中传递给客户端。资源名必须采用 **utf8编码** ，非utf8编码的资源名在访问七牛云存储将会反馈错误。
+key         | string | 否   | 资源名，所在的资源空间内唯一。key可包含`/`。若不指定 key，七牛云存储将使用文件的 etag（即上传成功后返回的hash值）作为key，并在返回结果中传递给客户端。资源名必须采用 **utf8编码** ，非utf8编码的资源名在访问七牛云存储将会反馈错误。
 x:\<custom_field_name\> | string | 否 | [自定义变量](#xVariables)，必须以 `x:` 开头命名，不限个数。里面的内容将在 `callbackBody` 参数中的 `$(x:custom_field_name)` 求值时使用。
 
 
