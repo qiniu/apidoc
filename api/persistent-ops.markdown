@@ -205,6 +205,7 @@ title: "数据处理(持久化)"
         notifyURL: <persistentNotifyUrl>          
 
 
+其中，`access token`是资源管理的授权认证，生成的算法可以参考 [资源管理操作-授权认证](http://docs.qiniu.com/api/v6/rs.html#digest-auth)。  
 正常情况下获得的返回：
 
 
