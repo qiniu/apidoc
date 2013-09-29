@@ -121,7 +121,7 @@ Content-Type: <MimeType>
 ------------|--------|------|-------------------------------------
 token       | string | 是   | 上传授权凭证 - [UploadToken](#uploadtoken)
 file        | file   | 是   | 文件本身
-key         | string | 否   | 标识文件的索引，所在的资源空间内唯一。key可包含`/`，但不以`/`开头。若不指定 key，七牛云存储将使用文件的 etag（即上传成功后返回的hash值）作为key，并在返回结果中传递给客户端。
+key         | string | 否   | 资源名，所在的资源空间内唯一。key可包含`/`，但不以`/`开头。若不指定 key，七牛云存储将使用文件的 etag（即上传成功后返回的hash值）作为key，并在返回结果中传递给客户端。资源名必须采用 **utf8编码** ，非utf8编码的资源名在访问七牛云存储将会反馈错误。
 x:\<custom_field_name\> | string | 否 | [自定义变量](#xVariables)，必须以 `x:` 开头命名，不限个数。里面的内容将在 `callbackBody` 参数中的 `$(x:custom_field_name)` 求值时使用。
 
 
@@ -152,7 +152,7 @@ x:\<custom_field_name\> | string | 否 | [自定义变量](#xVariables)，必须
 
  字段名       | 必须 | 说明
 --------------|------|-----------------------------------------------------------------------
- scope        | 是   | 用于指定文件所上传的目标Bucket和Key。格式为：\<bucket name\>\[:\<key\>\]。若只指定Bucket名，表示文件上传至该Bucket。若同时指定了Bucket和Key（\<bucket name\>:\<key\>），表示上传文件限制在指定的Key上。两种形式的差别在于，前者是“新增”操作：如果所上传文件的Key在Bucket中已存在，上传操作将失败。而后者则是“新增或覆盖”操作：如果Key在Bucket中已经存在，将会被覆盖；如不存在，则将文件新增至Bucket中。
+ scope        | 是   | 用于指定文件所上传的目标资源空间（Bucket）和资源名（Key）。格式为：\<bucket name\>\[:\<key\>\]。若只指定Bucket名，表示文件上传至该Bucket。若同时指定了Bucket和Key（\<bucket name\>:\<key\>），表示上传文件限制在指定的Key上。两种形式的差别在于，前者是“新增”操作：如果所上传文件的Key在Bucket中已存在，上传操作将失败。而后者则是“新增或覆盖”操作：如果Key在Bucket中已经存在，将会被覆盖；如不存在，则将文件新增至Bucket中。**注意：资源名必须采用utf8编码，非utf8编码的资源名在访问七牛云存储将会反馈错误。**
  deadline     | 是   | 定义上传请求的失效时间，[Unix时间戳](http://en.wikipedia.org/wiki/Unix_time)，单位为秒。
  endUser      | 否   | 给上传的文件添加唯一属主标识，特殊场景下非常有用，比如根据App-Client标识给图片或视频打水印
  returnUrl    | 否   | 设置用于浏览器端文件上传成功后，浏览器执行301跳转的URL，一般为`HTML Form`上传时使用。文件上传成功后会跳转到`returnUrl?query_string`, `query_string`会包含 `returnBody` 内容。
