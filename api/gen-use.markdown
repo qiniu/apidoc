@@ -247,7 +247,7 @@ Access Token用于[资源管理](http://docs.qiniu.com/api/v6/rs.html)的请求�
 
 其中 `<domain>` 是资源下载的域名，有两种形式：
 
-1. 七牛二级域名： `<bucket>.qiniudn.com`。以用户的空间名为二级域名，构成资源下载的域名。比如：my-bucket.qiniudn.com；
+1. 七牛二级域名： 以用户的空间名为二级域名，构成资源下载的域名。比如：my-bucket.qiniudn.com。具体的域名可以在[开发者平台](https://portal.qiniu.com/)的空间设置的“域名设置”小节中获得；
 1. 自定义域名： 用户自有的域名。通过资源空间基本设置中的[域名绑定](https://portal.qiniu.com/bucket/setting/basic?bucket=longshanks001)将自己的域名绑定到用户空间。比如：files.my-domain.com。
 
 `<key>` 是需要下载的[资源名(Key)](http://docs.qiniu.com/api/v6/terminology.html#Key)。
