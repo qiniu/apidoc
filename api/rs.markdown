@@ -28,7 +28,7 @@ title: "资源管理操作"
 名称                | 说明
 --------------------|------------------------------------------------------------------------
 AccessToken         | 令牌，API请求的访问凭证，参考 [授权认证 - AccessToken](#digest-auth)
-EncodedEntryURI     | 代指要操作的资源，`EncodedEntryURI = urlsafe_base64_encode(bucket:key)`
+EncodedEntryURI     | 代指要操作的资源，将资源空间（Bucket）和资源名（Key）用“:”连接起来，进行[URL安全的Base64编码](http://docs.qiniu.com/api/v6/terminology.html#URLSafeBase64)： `EncodedEntryURI = urlsafe_base64_encode(\<bucket\>:\<key\>)`。其中\<bucket\>是资源空间名，\<key\>是资源名。**注意： 资源名必须是utf8编码，使用非utf8的资源名访问七牛云存储将会失败。**
 EncodedEntryURISrc  | 源 EncodedEntryURI
 EncodedEntryURIDest | 目标 EncodedEntryURI
 
@@ -43,6 +43,7 @@ EncodedEntryURIDest | 目标 EncodedEntryURI
 <a name="stat"></a>
 
 ### 查看
+
 查看一个文件的相关信息，只需提交一个符合如下条件的HTTP POST请求：
 
 - 请求URL格式为：http://rs.qbox.me/stat/`<EncodedEntryURI>`
@@ -80,6 +81,7 @@ EncodedEntryURIDest | 目标 EncodedEntryURI
 <a name="move"></a>
 
 ### 移动
+
 移动一个文件，只需提交一个符合如下条件的HTTP POST请求：
 
 - 请求URL格式为：http://rs.qbox.me/move/`<EncodedEntryURISrc>`/`<EncodedEntryURIDest>`
@@ -102,6 +104,7 @@ EncodedEntryURIDest | 目标 EncodedEntryURI
 <a name="copy"></a>
 
 ### 复制
+
 复制一个文件，和[移动](#move)操作十分类似，需提交一个符合如下条件的HTTP POST请求：
 
 - 请求URL格式为：http://rs.qbox.me/copy/`<EncodedEntryURISrc>`/`<EncodedEntryURIDest>`
@@ -124,6 +127,7 @@ EncodedEntryURIDest | 目标 EncodedEntryURI
 <a name="delete"></a>
 
 ### 删除
+
 删除一个文件也很简单，提交一个符合如下条件的HTTP POST请求即可：
 
 - 请求URL格式为：http://rs.qbox.me/delete/`<EncodedEntryURI>`
@@ -220,6 +224,7 @@ EncodedEntryURIDest | 目标 EncodedEntryURI
 <a name="batch-delete"></a>
 
 ### 批量删除
+
 批量删除可用来一次删除多个文件，请求格式如下：
 
     POST http://rs.qbox.me/batch
