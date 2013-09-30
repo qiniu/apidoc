@@ -61,7 +61,7 @@ title: "资源下载"
 
 `<domain>` 有两种形态：七牛二级域名和用户自定义域名。
 
-七牛二级域名是一个空间默认的域名，格式为：`<bucket>.qiniudn.com` 。 `<bucket>` 为空间名。比如，名为 `my-bucket` 空间，其域名为： `my-bucket.qiniudn.com` 。用户可以通过 `http://my-bucket.qiniu.com/sunflower.jpg` 下载名为 `sunflower.jpg` 的资源。
+七牛二级域名是一个空间默认的域名，用户可以在[开发者平台](https://portal.qiniu.com)中的空间设置的“域名设置”一节中获得空间对应的域名。假设用户的域名为： `my-bucket.qiniudn.com` 。用户可以通过 `http://my-bucket.qiniu.com/sunflower.jpg` 下载名为 `sunflower.jpg` 的资源。
 
 用户可以将一个自己的域名绑定到一个资源空间，一旦绑定成功，便可以通过这个域名访问空间内的资源。比如，用户将 `www.my-blog-base.com` 同 `my-bucket` 空间绑定，之后便可以通过此域名访问： `http://www.my-blog-base.com/sunflower.jpg` 。
 
@@ -175,7 +175,7 @@ title: "资源下载"
 
 ## 自定义资源下载时所保存的名称
 
-    [GET] url?download/<file name>
+    [GET] \<url\>?download/\<file name\>
 
 如上 API 规格，`download` 是一个指令，通知七牛云存储资源下载时，触发浏览器进行文件下载，而不是作为页面展示。`<file name>` 是该 fop 指令的参数，表示下载资源保存在本地的文件名称。
 
