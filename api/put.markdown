@@ -150,6 +150,36 @@ x:\<custom_field_name\> | string | 否 | [自定义变量](#xVariables)，必须
 
 **参数详解** ：
 
+<<<<<<< HEAD
+### 算法
+
+uploadToken 算法如下：
+
+    // 步骤1：组织元数据（JSONString）
+    Flags = {
+        scope: <Bucket string>,
+        deadline: <UnixTimestamp int64>,
+        endUser: <EndUserId string>,
+        returnUrl: <RedirectURL string>,
+        returnBody: <ResponseBodyForAppClient string>,
+        callbackBody: <RequestBodyForAppServer string>
+        callbackUrl: <RequestUrlForAppServer string>,        
+        persistentOps: <PersistentOpsCmds string>,
+        persistentNotifyUrl: <RequestUrlForPersistentOpsNotify string>
+    }
+
+    // 步骤2：将 Flags 进行安全编码
+    EncodedFlags = urlsafe_base64_encode(JSONString(Flags))
+
+    // 步骤3：将编码后的元数据混入私钥进行签名
+    Signature = hmac_sha1(EncodedFlags, SecretKey)
+
+    // 步骤4：将签名摘要值进行安全编码
+    EncodedSign = urlsafe_base64_encode(Signature)
+
+    // 步骤5：连接各字符串，生成上传授权凭证
+    uploadToken = AccessKey:EncodedSign:EncodedFlags
+=======
  字段名       | 必须 | 说明
 --------------|------|-----------------------------------------------------------------------
  scope        | 是   | 用于指定文件所上传的目标资源空间（Bucket）和资源名（Key）。格式为：\<bucket name\>\[:\<key\>\]。若只指定Bucket名，表示文件上传至该Bucket。若同时指定了Bucket和Key（\<bucket name\>:\<key\>），表示上传文件限制在指定的Key上。两种形式的差别在于，前者是“新增”操作：如果所上传文件的Key在Bucket中已存在，上传操作将失败。而后者则是“新增或覆盖”操作：如果Key在Bucket中已经存在，将会被覆盖；如不存在，则将文件新增至Bucket中。**注意：资源名必须采用utf8编码，非utf8编码的资源名在访问七牛云存储将会反馈错误。**
@@ -160,6 +190,7 @@ x:\<custom_field_name\> | string | 否 | [自定义变量](#xVariables)，必须
  callbackBody | 否   | 文件上传成功后，七牛云存储向 App-Server 发送POST请求的数据。支持 [魔法变量](#) 和 [自定义变量](#)。
  callbackUrl  | 否   | 文件上传成功后，七牛云存储向 App-Server 发送POST请求的URL，必须是公网上可以正常进行POST请求并能响应 HTTP Status 200 OK 的有效 URL 
  asyncOps     | 否   | 指定文件（图片/音频/视频）上传成功后异步地执行指定的预转操作。每个预转指令是一个API规格字符串，多个预转指令可以使用分号`;`隔开。详细操作见[fop](#)
+>>>>>>> mid/develop
 
 **注意**
 
@@ -174,7 +205,60 @@ x:\<custom_field_name\> | string | 否 | [自定义变量](#xVariables)，必须
 
 上传凭证算法如下：
 
+<<<<<<< HEAD
+ 字段名       | 必须 | 说明
+--------------|------|-----------------------------------------------------------------------
+ scope        | 是   | 一般指文件要上传到的目标存储空间（Bucket）。若为"Bucket"，表示限定只能传到该Bucket（仅限于新增文件）；若为"Bucket:Key"，表示限定特定的文件，可修改该文件。
+ deadline     | 否   | 定义 uploadToken 的失效时间，Unix时间戳，精确到秒，缺省为 3600 秒
+ endUser      | 否   | 给上传的文件添加唯一属主标识，特殊场景下非常有用，比如根据终端用户标识给图片或视频打水印
+ returnUrl    | 否   | 设置用于浏览器端文件上传成功后，浏览器执行301跳转的URL，一般为 HTML Form 上传时使用。文件上传成功后会跳转到 returnUrl?query_string, query_string 会包含 returnBody 内容。returnUrl 不可与 callbackUrl 同时使用。
+ returnBody   | 否   | 文件上传成功后，自定义从 Qiniu-Cloud-Server 最终返回給终端 App-Client 的数据。支持 [魔法变量](#MagicVariables)，不可与 callbackBody 同时使用。
+ callbackBody | 否   | 文件上传成功后，Qiniu-Cloud-Server 向 App-Server 发送POST请求的数据。支持 [魔法变量](#MagicVariables) 和 [自定义变量](#xVariables)，不可与 returnBody 同时使用。
+ callbackUrl  | 否   | 文件上传成功后，Qiniu-Cloud-Server 向 App-Server 发送POST请求的URL，必须是公网上可以正常进行POST请求并能响应 HTTP Status 200 OK 的有效 URL 
+ persistentOps| 否   | 指定文件（图片/音频/视频）上传成功后异步地执行指定的持久化预转操作。每个预转指令是一个API规格字符串，多个预转指令可以使用分号“;”隔开
+ persistentNotifyUrl | 否  | 指定的预转操作完成后，Qiniu-Cloud-Server 将向此URL发送处理结果。必须是公网上可以正常进行POST请求并能响应 HTTP Status 200 OK 的有效 URL。如果设置了persistentOps，必须设置此字段。
+
+<a name="uploadToken-returnBody"></a>
+
+### 使用上传模型1，App-Client 接收来自 Qiniu-Cloud-Storage 的 Response Body
+
+如果开发者使用上传模型1，App-Client 上传一张图片到 Qiniu-Cloud-Storage 后，App-Client 想知道该图片的一些信息比如 Etag, EXIF 等信息，那么此时即可在 uploadToken 中使用 **`returnBody`** 参数。 
+
+App-Client 想求值得到的这些 Etag, EXIF 等信息我们称之为魔法变量（[MagicVariables](#MagicVariables)）。
+
+returnBody 赋值可以把 魔法变量（[MagicVariables](#MagicVariables)）的求值结果以 `Content-Type: application/json` 形式返回給 App-Client。
+
+一个典型的包含 MagicVariables 的 returnBody 字段声明如下（returnBody 必须是一个JSON字符串）：
+
+    Flags["returnBody"] = `{
+        "foo": "bar",
+        "name": $(fname),
+        "size": $(fsize),
+        "type": $(mimeType),
+        "hash": $(etag),
+        "w": $(imageInfo.width),
+        "h": $(imageInfo.height),
+        "color": $(exif.ColorSpace.val)
+    }`
+
+假使如上，当一个用户在 iOS 端用包含该 returnBody 字段的 uploadToken 成功上传一张图片，那么该 iOS 端程序将收到如下一段 HTTP Response 应答：
+
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+    Cache-Control: no-store
+    Response Body: {
+        "foo": "bar",
+        "name": "gogopher.jpg",
+        "size": 214513,
+        "type": "image/jpg",
+        "hash": "Fh8xVqod2MQ1mocfI4S4KpRL6D98",
+        "w": 640,
+        "h": 480,
+        "color": "sRGB"
+    }
+=======
 1. 构造[上传策略](#put-policy)。用户根据业务需求，确定上传策略的要素，构造出具体的上传策略。比如，有用户需要向空间 `my-bucket` 上传一个名为 `sunflower.jpg` 的图片，有效期是到 `2015-12-31 00:00:00`，并且希望得到图片的名称、大小、宽、高和校验值。那么相应的上传策略的字段分别为：
+>>>>>>> mid/develop
 
     ```
     scope = "my-bucket:sunflower.jpg"
@@ -244,6 +328,18 @@ x:\<custom_field_name\> | string | 否 | [自定义变量](#xVariables)，必须
 
 当用户的资源上传请求得到正确执行，七牛云存储会反馈成功，Status Code 200。Response Body中携带两个值：
 
+<<<<<<< HEAD
+<a name="uploadToken-persistentOps"></a>
+### 音视频上传持久化预转 - persistentOps  
+
+由于音视频文件一般都比较大，转换也是一个比较耗时的操作，故七牛云存储提供上传异步预转功能，即文件上传完毕后执行异步转换处理，并保存在服务器上。这样用户可以直接访问转换好的目标文件。
+
+可以在上传时候指定预转选项，只需在生成 uploadToken 时对 **persistentOps** 赋值相应的 `<fop>` 指令即可。可同时异步执行多个预转指令：
+
+    persistentOps = <fop>[;<fop2>;<fop3>;…;<fopN>]
+
+**persistentOps** 预转流程及示例参见如下说明。
+=======
 - `name`：已成功上传的资源名，即Key；
 - `hash`：已上传资源的校验码，供用户核对使用。
 
@@ -296,6 +392,7 @@ x:\<custom_field_name\> | string | 否 | [自定义变量](#xVariables)，必须
 基本的上传反馈只会包含资源最基本的信息。很多情况下，用户希望得到更多有关资源的信息。用户可以通过七牛云存储提供管理操作（Status）操作，和云处理操作，获得这些扩展信息。但需要用户另外发起请求，查询这些资源。为了方便用户的使用，七牛云存储可以在上传请求中直接向用户反馈这些额外的信息。
 
 用户可以通过 `returnBody` 参数指定需要返回的信息，比如资源的大小、类型，图片的尺寸等等。`returenBody` 实际上是一个用户定义的反馈信息模板。下面是一个returnBody的案例：
+>>>>>>> mid/develop
 
 ```
   {
@@ -310,6 +407,33 @@ x:\<custom_field_name\> | string | 否 | [自定义变量](#xVariables)，必须
   }
 ```
 
+<<<<<<< HEAD
+1. 设定 `persistentOps = "avthumb/mp3/ar/44100/ab/32k;avthumb/mp3/aq/6/ar/16000"`
+2. 以此生成带有预转功能的上传授权凭证（UploadToken）
+3. 向七牛云存储上传一个 aac 格式的音频文件
+4. 传成功后，服务器会对这个 aac 音频文件异步地做如下两个预转操作
+    - `avthumb/mp3/ar/44100/ab/32k`
+    - `avthumb/mp3/aq/6/ar/16000`
+
+**处理状态**  
+
+1. 文件上传成功后服务端会自动分配一个进程ID `persistentId`并开始预转处理；`persistentId` 可以通过[魔法变量](#MagicVariables)来获取。
+2. 所有指定的预转命令都完成以后，服务器会向用户指定的	`persistentNotifyUrl` 发送详细的转换结果。  
+3. 用户也可以主动查询当前的状态。  
+
+**下载**
+
+可以通过 `http://<domain>/<key>?p/1/<fop>` 的形式下载：
+
+- `http://<bucket>.qiniudn.com/<key>?p/1/avthunm/mp3/ar/44100/ab/32k`
+- `http://<bucket>.qiniudn.com/<key>?p/1/avthumb/mp3/aq/6/ar/16000`
+
+访问以上链接，如果之前上传的文件已经成功完成预转，那么此次请求就会直接下载预转后的结果文件。
+
+预转功能详情请参考：
+
+- [数据处理(持久化)](/api/persistent-ops)
+=======
 `returnBody` 同真正的返回信息一样，也是json格式。在 `returnBody` 中，用户通过设定所谓[魔法变量（MagicVariable）](#MagicVariables)，通知七牛云存储反馈哪些信息。“魔法变量”采用 `$(<variable-name>)` 的形式，在反馈信息中占位。七牛云存储会根据变量名，将相应的数据替换“魔法变量”，反馈给用户：
 
 ```
@@ -366,12 +490,18 @@ x:\<custom_field_name\> | string | 否 | [自定义变量](#xVariables)，必须
 ```
   name=sunflower.jpg&hash=Fn6qeQi4VDLQ347NiRm-RlQx_4O2&location=Shanghai&prise=1500.00
 ```
+>>>>>>> mid/develop
 
 之后，再对其进行[URL安全的Base64编码](http://en.wikipedia.org/wiki/Base64)：
 
+<<<<<<< HEAD
+- [数据处理(图片篇)](/api/image-process.html)
+- [数据处理(音频/视频/流媒体篇)](/api/audio-video-hls-process.html) 
+=======
 ```
   bmFtZT1zdW5mbG93ZXIuanBnJmhhc2g9Rm42cWVRaTRWRExRMzQ3TmlSbS1SbFF4XzRPMiZsb2NhdGlvbj1TaGFuZ2hhaSZwcmlzZT0xNTAwLjAw
 ```
+>>>>>>> mid/develop
 
 这组信息将放置在请求体中，随回调请求发往用户指定的回调服务器。
 
@@ -411,6 +541,7 @@ mimeType  | 无   | 文件的资源类型，比如 .jpg 图片的资源类型为
 imageInfo | 有   | 获取所上传图片的基本信息，支持访问子字段
 exif      | 有   | 获取所上传图片EXIF信息，支持访问子字段
 endUser   | 无   | 获取 uploadToken 中指定的 endUser 选项的值，即终端用户ID
+persistentId | 无   | 获取上传预转的处理进程Id
 
 魔法变量支持同 [JSON](http://json.org/) 对象一样的 `<Object>.<Property>` 访问形式，比如：
 
@@ -430,6 +561,13 @@ MagicVariables 求值示例：
 - `$(imageInfo.height)` - 获取当前上传图片的原始高度
 - `$(imageInfo.format)` -  获取当前上传图片的格式
 - `$(endUser)` - 获取 uploadToken 中指定的 endUser 选项的值，即终端用户ID
+<<<<<<< HEAD
+- `$(persistentId)` - 获取上传预转的处理进程Id
+
+imageInfo 接口返回的 JSON 数据可参考：<http://qiniuphotos.qiniudn.com/gogopher.jpg?imageInfo>
+
+=======
+>>>>>>> mid/develop
 - `$(exif)` - 获取当前上传图片的 EXIF 信息
 - `$(exif.ApertureValue)` - 获取当前上传图片所拍照时的光圈信息
 - `$(exif.ApertureValue.val)` - 获取当前上传图片拍照时的具体光圈值
