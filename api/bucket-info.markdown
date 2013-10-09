@@ -86,7 +86,7 @@ title: "空间信息查询"
     1. month。粒度为月。
 1. Authorization：用户验证的AccessToken。AccessToken的生成方法详见[授权认证](http://docs.qiniu.com/api/v6/rs.html#digest-auth)
 
-查询反馈结果是json格式，距体结构如下：
+查询反馈结果是json格式，具体结构如下：
 
 ```
 {
@@ -129,7 +129,7 @@ title: "空间信息查询"
     1. month。粒度为月。
 1. Authorization：用户验证的AccessToken。AccessToken的生成方法详见[授权认证](http://docs.qiniu.com/api/v6/rs.html#digest-auth)
 
-查询反馈结果是json格式，距体结构如下：
+查询反馈结果是json格式，具体结构如下：
 
 ```
 {
@@ -173,7 +173,7 @@ title: "空间信息查询"
     1. month。粒度为月。
 1. Authorization：用户验证的AccessToken。AccessToken的生成方法详见[授权认证](http://docs.qiniu.com/api/v6/rs.html#digest-auth)
 
-查询反馈结果是json格式，距体结构如下：
+查询反馈结果是json格式，具体结构如下：
 
 ```
 {
