@@ -38,7 +38,7 @@ title: "空间信息查询"
 具体请求格式如下：
 
 ```
-    GET /info?uid=<number>&bucket=<string>&month=<string> HTTP/1.1
+    GET /stat/info?uid=<number>&bucket=<string>&month=<string> HTTP/1.1
     Authorization: <Authorization>
 ```
 
@@ -71,7 +71,7 @@ title: "空间信息查询"
 其请求格式如下
 
 ```
-    GET /select/apicall?uid=<number>&bucket=<string>&from=<string>&to=<string>&p=<string> HTTP/1.1
+    GET /stat/select/space?uid=<number>&bucket=<string>&from=<string>&to=<string>&p=<string> HTTP/1.1
     Authorization: <Authorization>
 ```
 
@@ -114,7 +114,7 @@ title: "空间信息查询"
 其请求格式如下
 
 ```
-    GET /select/apicall?uid=<number>&bucket=<string>&from=<string>&to=<string>&p=<string> HTTP/1.1
+    GET /stat/select/transfer?uid=<number>&bucket=<string>&from=<string>&to=<string>&p=<string> HTTP/1.1
     Authorization: <Authorization>
 ```
 
@@ -157,7 +157,7 @@ title: "空间信息查询"
 其请求格式如下
 
 ```
-    GET /select/apicall?uid=<number>&bucket=<string>&type=<string>&from=<string>&to=<string>&p=<string> HTTP/1.1
+    GET /stat/select/apicall?uid=<number>&bucket=<string>&type=<string>&from=<string>&to=<string>&p=<string> HTTP/1.1
     Authorization: <Authorization>
 ```
 
