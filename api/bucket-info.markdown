@@ -21,7 +21,7 @@ title: "空间信息查询"
 1. 流量使用情况信息
 1. 请求数使用情况信息
 
-资源空间信息查询接口使用HTTP协议，入口是 `http://api.qiniu.com` 。
+资源空间信息查询接口使用HTTP协议，接口域名是 `http://api.qiniu.com` 。
 
 
 <a name="info"></a>
@@ -39,13 +39,12 @@ title: "空间信息查询"
 具体请求格式如下：
 
 ```
-    GET /stat/info?uid=<number>&bucket=<string>&month=<string> HTTP/1.1
+    GET /stat/info?bucket=<string>&month=<string> HTTP/1.1
     Authorization: <Authorization>
 ```
 
 其中：
 
-1. uid：用户ID。
 1. bucket：被查询的空间名。可选。如不指定，则返回该用户所有资源空间的总量。
 1. month：查询的月份。格式为：201309。
 1. Authorization：用户验证的AccessToken。AccessToken的生成方法详见[授权认证](http://docs.qiniu.com/api/v6/rs.html#digest-auth)
@@ -72,12 +71,11 @@ title: "空间信息查询"
 其请求格式如下
 
 ```
-    GET /stat/select/space?uid=<number>&bucket=<string>&from=<string>&to=<string>&p=<string> HTTP/1.1
+    GET /stat/select/space?bucket=<string>&from=<string>&to=<string>&p=<string> HTTP/1.1
     Authorization: <Authorization>
 ```
 
 其中：
-1. uid：用户ID。
 1. bucket：被查询的空间名。可选。如不指定，则返回该用户所有资源空间的总量。
 1. from：查询起始日期。格式为20130912
 1. to：查询结束时间。格式为20130912
@@ -115,12 +113,11 @@ title: "空间信息查询"
 其请求格式如下
 
 ```
-    GET /stat/select/transfer?uid=<number>&bucket=<string>&from=<string>&to=<string>&p=<string> HTTP/1.1
+    GET /stat/select/transfer?bucket=<string>&from=<string>&to=<string>&p=<string> HTTP/1.1
     Authorization: <Authorization>
 ```
 
 其中：
-1. uid：用户ID。
 1. bucket：被查询的空间名。可选。如不指定，则返回该用户所有资源空间的总量。
 1. from：查询起始日期。格式为20130912
 1. to：查询结束时间。格式为20130912
@@ -158,12 +155,11 @@ title: "空间信息查询"
 其请求格式如下
 
 ```
-    GET /stat/select/apicall?uid=<number>&bucket=<string>&type=<string>&from=<string>&to=<string>&p=<string> HTTP/1.1
+    GET /stat/select/apicall?bucket=<string>&type=<string>&from=<string>&to=<string>&p=<string> HTTP/1.1
     Authorization: <Authorization>
 ```
 
 其中：
-1. uid：用户ID。
 1. bucket：被查询的空间名。可选。如不指定，则返回该用户所有资源空间的总量。
 1. type：用户请求的类型。取值为：get和put。
 1. from：查询起始日期。格式为20130912
