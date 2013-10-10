@@ -1,5 +1,9 @@
 ## CHANGE LOG
 
+### v6.1.5 issues [#77](https://github.com/qiniu/apidoc/pull/77)
+
+- 增加空间统计信息查询文档
+
 ### v6.1.4 issue [#63](https://github.com/qiniu/apidoc/pull/63)
 
 - 增加api使用概述
