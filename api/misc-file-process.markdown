@@ -114,7 +114,7 @@ sign            | string | 是   | 生成的签名部分，算法见下方。
  - entryURI：`t-test:Ship-thumb.jpg`,那么encodedEntryURI结果为：`dC10ZXN0OlNoaXAtdGh1bWItMjAwLmpwZw==`
  - 需要签名的内容是:`t-test.qiniudn.com/Ship.jpg?imageView/2/w/200/h/200|saveas/dC10ZXN0OlNoaXAtdGh1bWItMjAwLmpwZw==`, 签名方法`urlsafe_base64_encode(hmac_sha1(secretKey,<signContent>))`
 4. 完整的请求URL
- - `http://t-test.qiniudn.com/Ship.jpg?imageView/2/w/200/h/200|saveas/dC10ZXN0OlNoaXAtdGh1bWItMjAwLmpwZw==/sign/iguImegxd6hbwF8J6ij2dlLIgycyU4thjg-xmu9q:38kMkgw3We96NWSgUHJz9C72noQ=`
+ - http://t-test.qiniudn.com/Ship.jpg?imageView/2/w/200/h/200|saveas/dC10ZXN0OlNoaXAtdGh1bWItMjAwLmpwZw==/sign/iguImegxd6hbwF8J6ij2dlLIgycyU4thjg-xmu9q:38kMkgw3We96NWSgUHJz9C72noQ=
 5. 保存的转码后的资源可通过如下访问
  - http://t-test.qiniudn.com/Ship-thumb-200.jpg
 
