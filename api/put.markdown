@@ -86,19 +86,19 @@ title: "资源上传"
 ```
 POST http://up.qiniu.com/
 Content-Type: multipart/form-data; boundary=<Boundary>
-<Boundary>
+--<Boundary>
 
 Content-Disposition: form-data; name="key"
 <FileID>
-<Boundary>
+--<Boundary>
 
 Content-Disposition: form-data; name="x:custom_field_name"
 <SomeVal>
-<Boundary>
+--<Boundary>
 
 Content-Disposition: form-data; name="token"
 <UploadToken>
-<Boundary>
+--<Boundary>
 
 ...
 
@@ -106,7 +106,7 @@ Content-Disposition: form-data; name="file"; filename="<FileName>"
 Content-Type: <MimeType>
 
 <FileContent>
-
+--<Boundary>--
 ```
 
 用户可以手工地构造出 `multipart/form-data` 数据。但更好的方式是使用七牛云存储提供的多种[SDK](http://docs.qiniu.com/sdk/index.html)，简单快速地完成上传操作。此外，也有很多HTTP客户端组件、库和工具可以帮助用户快速构造 `multipart/form-data` 数据，在用户需要直接访问七牛云存储API的时候使用。
