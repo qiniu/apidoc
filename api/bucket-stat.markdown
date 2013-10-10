@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "空间信息查询"
+title: "资源空间统计信息查询"
 ---
 
 - [简介](#introduction)
