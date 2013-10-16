@@ -343,7 +343,7 @@ Access Token用于[资源管理](http://docs.qiniu.com/api/v6/rs.html)的请求�
 七牛云存储不仅仅提供优质的数据存储服务，还提供了多种让用户直接对存储的数据进行云端处理的能力，包括：
 
 1. [图片处理](#image-process)
-2. [音视频处理](#vedio-process)
+2. [音视频处理](#video-process)
 3. [文档转换](#doc-process)
 4. [管道](#pipeline)
 5. [杂项](#misc)
@@ -388,7 +388,7 @@ Access Token用于[资源管理](http://docs.qiniu.com/api/v6/rs.html)的请求�
 这里只是少量的示范，关于图片处理接口详细的说明和使用方法请参考这里：[图片处理API文档](/api/v6/image-process)
 
 
-<a name="vedio-process"></a>
+<a name="video-process"></a>
 
 ### 音视频/流媒体在线处理
 
@@ -396,10 +396,10 @@ Access Token用于[资源管理](http://docs.qiniu.com/api/v6/rs.html)的请求�
 
 七牛音视频/流媒体处理支持：
 
-1. [音频转换](/api/v6/audio-vedio-hls-process.html#audio-convert)
-2. [视频转换](/api/v6/audio-vedio-hls-process.html#vedio-convert)
-3. [视频帧缩略图](/api/v6/audio-vedio-hls-process.html#vedio-thumbnail)
-4. [HTTP Live Streaming](/api/v6/audio-vedio-hls-process.html#hls)
+1. [音频转换](/api/v6/audio-video-hls-process.html#audio-convert)
+2. [视频转换](/api/v6/audio-video-hls-process.html#video-convert)
+3. [视频帧缩略图](/api/v6/audio-video-hls-process.html#video-thumbnail)
+4. [HTTP Live Streaming](/api/v6/audio-video-hls-process.html#hls)
 
 
 例如：
@@ -408,7 +408,7 @@ Access Token用于[资源管理](http://docs.qiniu.com/api/v6/rs.html)的请求�
 2. <http://open.qiniudn.com/thinking-in-go.mp4?avthumb/avi/ab/64k/acodec/libmp3lame> （将 mp4 视频格式转换为 avi 格式，使用 mp3 进行音频编码，且音频比特率为64k）
 3. <http://open.qiniudn.com/thinking-in-go.mp4?vframe/jpg/offset/7/w/480/h/360> （取视频第 7 秒的截图，图片格式为 jpg，宽度为 480px，高度为 360px，点击查看视频帧）
 
-同样，这里只是一小部分功能的实例，更多参数和详细的接口说明，请参考：[音视频/流媒体在线处理API文档](/api/v6/audio-vedio-hls-process.html)
+同样，这里只是一小部分功能的实例，更多参数和详细的接口说明，请参考：[音视频/流媒体在线处理API文档](/api/v6/audio-video-hls-process.html)
 
 <a name="doc-process"></a>
 
