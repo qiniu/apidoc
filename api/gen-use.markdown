@@ -385,7 +385,7 @@ Access Token用于[资源管理](http://docs.qiniu.com/api/v6/rs.html)的请求�
 ![图片水印实例](http://qiniuphotos.qiniudn.com/gogopher.jpg?watermark/1/image/aHR0cDovL3d3dy5iMS5xaW5pdWRuLmNvbS9pbWFnZXMvbG9nby0yLnBuZw==/dissolve/50/gravity/SouthEast/dx/20/dy/20)
 
 
-这里只是少量的示范，关于图片处理接口详细的说明和使用方法请参考这里：[图片处理API文档](/api/v6/image-process)
+这里只是少量的示范，关于图片处理接口详细的说明和使用方法请参考这里：[图片处理API文档](/api/v6/image-process.html)
 
 
 <a name="video-process"></a>
