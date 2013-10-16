@@ -150,7 +150,7 @@ Access Token用于[资源管理](http://docs.qiniu.com/api/v6/rs.html)的请求�
 | [qrsync](/tools/qrsync.html) | 命令行 | Linux,Windows,MacOSX,FreeBSD | 手动同步文件/文件夹到七牛云存储 |
 | [qiniu-autosync](/tools/qiniu-autosync.html) | 命令行 | Linux | 自动同步指定文件夹内的新增或改动文件 |
 
-当然，本地上传工具只是七牛云存储提供给您所有工具的一部分，更多工具，您可以到[这里](tools/index.html)查看。
+当然，本地上传工具只是七牛云存储提供给您所有工具的一部分，更多工具，您可以到[这里](/tools/index.html)查看。
 
 <a name="normal-upload"></a>
 
@@ -167,8 +167,8 @@ Access Token用于[资源管理](http://docs.qiniu.com/api/v6/rs.html)的请求�
 流程简述：
 
 1. 应用客户端向应用服务器 请求上传文件
-2. 应用服务器使用相应的[算法](#upload-token)或者使用七牛提供的 SDK 生成上传凭证（UploadToken），并颁发给应用客户端
-3. 应用客户端 取得上传许可（UploadToken）后，使用七牛提供的 SDK 或者直接使用[上传 API](api/put.html) 直传文件到最近的存储节点
+2. 应用服务器使用相应的[算法](#upload-token)或者使用七牛提供的[SDK](http://docs.qiniu.com/sdk/index.html)生成上传凭证（UploadToken），并颁发给应用客户端
+3. 应用客户端 取得上传许可（UploadToken）后，使用七牛提供的 SDK 或者直接使用[上传 API](/api/put.html) 直传文件到最近的存储节点
 4. 文件上传成功后，七牛云存储向应用客户端返回上传结果（可包含相应的资源信息）
 5. 应用客户端将文件上传结果及相关信息汇报给应用服务器，应用服务器可据此执行后续业务逻辑。
 
@@ -189,7 +189,7 @@ Access Token用于[资源管理](http://docs.qiniu.com/api/v6/rs.html)的请求�
 
 1. 应用客户端向应用服务器请求上传文件；
 2. 应用服务器使用相应的[算法](#upload-token)或者使用七牛提供的[SDK](http://docs.qiniu.com/sdk/index.html)生成上传凭证（UploadToken），并颁发给应用客户端；
-3. 应用客户端取得上传许可（UploadToken）后，使用七牛提供的SDK或者直接使用[上传 API](api/put.html) 直传文件到最近的存储节点；
+3. 应用客户端取得上传许可（UploadToken）后，使用七牛提供的SDK或者直接使用[上传 API](/api/put.html) 直传文件到最近的存储节点；
 4. 文件上传成功后，七牛云存储将状态码为301的重定向HTTP Response返回给上传者应用客户端（可包含相应的资源信息）；
 5. 应用客户端 访问跳转到重定向页面。
 
@@ -210,7 +210,7 @@ Access Token用于[资源管理](http://docs.qiniu.com/api/v6/rs.html)的请求�
 
 1. 应用客户端向应用服务器请求上传文件
 2. 应用服务器使用相应的[算法](#upload-token)或者使用七牛提供的SDK生成上传凭证（UploadToken），并颁发给 应用客户端
-3. 应用客户端取得上传许可（UploadToken）后，使用七牛提供的SDK或者直接使用[上传 API](api/put.html) 直传文件到最近的存储节点
+3. 应用客户端取得上传许可（UploadToken）后，使用七牛提供的SDK或者直接使用[上传 API](/api/put.html) 直传文件到最近的存储节点
 4. 文件上传成功后，七牛云存储以HTTP POST方式告知应用服务器上传结果（可包含相应的文件信息）
 5. 应用服务器处理完回调的请求后返回相应的结果信息，经七牛云存储中转返回给应用客户端
 6. 七牛云存储作为代理，原封不动地将回调应用服务器的返回结果回传给应用客户端
@@ -303,7 +303,7 @@ Access Token用于[资源管理](http://docs.qiniu.com/api/v6/rs.html)的请求�
 
 ### 查看 (stat)
 
-查看操作用于查看资源的基本信息，包含：文件哈希值、文件大小、媒体类型及上传时间。具体参考 [API 资源管理操作-查看](/api/rs.html#stat)
+查看操作用于查看资源的基本信息，包含：文件哈希值、文件大小、媒体类型及上传时间。具体参考 [API 资源管理操作-查看](/api/v6/rs.html#stat)
 
 <a name="move"></a>
 
@@ -315,25 +315,25 @@ Access Token用于[资源管理](http://docs.qiniu.com/api/v6/rs.html)的请求�
 
 ### 复制 (copy)
 
-复制操作允许在同一个bucket进行，也可以在两个不同的bucket之间进行。与资源的移动操作相比，复制操作保留原文件，因此会增加用户的存储空间。具体参考 [API 资源管理操作-复制](/api/rs.html#copy)
+复制操作允许在同一个bucket进行，也可以在两个不同的bucket之间进行。与资源的移动操作相比，复制操作保留原文件，因此会增加用户的存储空间。具体参考 [API 资源管理操作-复制](/api/v6/rs.html#copy)
 
 <a name="delete"></a>
 
 ### 删除 (delete)
 
-删除资源与删除文件类似，但是七牛云存储不提供回收站的功能，因此在删除前请确认待删除的资源确实已经不需要了。具体参考 [API 资源管理-删除](/api/rs.html#delete)
+删除资源与删除文件类似，但是七牛云存储不提供回收站的功能，因此在删除前请确认待删除的资源确实已经不需要了。具体参考 [API 资源管理-删除](/api/v6/rs.html#delete)
 
 <a name="batch"></a>
 
 ### 批量操作 (batch)
 
-除了对单一资源进行操作，还可以对多个资源进行 <b>批量的查看、移动、复制及删除操作</b>。具体参考 [API 资源管理-批量操作](/api/rs.html#batch)
+除了对单一资源进行操作，还可以对多个资源进行 <b>批量的查看、移动、复制及删除操作</b>。具体参考 [API 资源管理-批量操作](/api/v6/rs.html#batch)
 
 <a name="list"></a>
 
 ### 列出文件(list)
 
-列出文件操作可以查看bucket里面的所有资源列表，遍历资源。具体参考 [API 资源管理-列出文件](/api/rs.html#list)
+列出文件操作可以查看bucket里面的所有资源列表，遍历资源。具体参考 [API 资源管理-列出文件](/api/v6/rs.html#list)
 
 
 <a name="fop"></a>
