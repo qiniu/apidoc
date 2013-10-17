@@ -3,10 +3,12 @@ layout: default
 title: "资源下载"
 ---
 
+- [霞在协议](#download-proto)
+- [下载反馈](#download-response)
 - [公有资源下载](#public-download)
 - [私有资源下载](#private-download)
-    - [下载授权凭证 - downloadToken](#download-token)
-- [断点续下载](#download-by-range)
+    - [下载授权凭证](#download-token)
+    - [私有资源下载流程](#private-download-proc)
 - [自定义 404 Not Found](#define-404-not-found)
 - [自定义资源下载时所保存的名称](#define-download-friendly-name)
 - [特殊key资源下载](#unusual-key-download)
