@@ -367,7 +367,7 @@ x:\<custom_field_name\> | string | 否 | [自定义变量](#xVariables)，必须
   name=sunflower.jpg&hash=Fn6qeQi4VDLQ347NiRm-RlQx_4O2&location=Shanghai&prise=1500.00
 ```
 
-之后，再对其进行[URL安全的Base64编码](http://en.wikipedia.org/wiki/Base64)：
+之后，再对其进行[URL安全的Base64编码](http://docs.qiniu.com/api/v6/terminology.html#URLSafeBase64)：
 
 ```
   bmFtZT1zdW5mbG93ZXIuanBnJmhhc2g9Rm42cWVRaTRWRExRMzQ3TmlSbS1SbFF4XzRPMiZsb2NhdGlvbj1TaGFuZ2hhaSZwcmlzZT0xNTAwLjAw
