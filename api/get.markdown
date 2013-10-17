@@ -6,7 +6,6 @@ title: "资源下载"
 - [公有资源下载](#public-download)
 - [私有资源下载](#private-download)
     - [下载授权凭证 - downloadToken](#download-token)
-        - [算法](#download-token-algorithm)
 - [断点续下载](#download-by-range)
 - [自定义 404 Not Found](#define-404-not-found)
 - [自定义资源下载时所保存的名称](#define-download-friendly-name)
