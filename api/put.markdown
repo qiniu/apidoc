@@ -119,7 +119,7 @@ Content-Type: <MimeType>
 
 名称        | 类型   | 必须 | 说明
 ------------|--------|------|-------------------------------------
-token       | string | 是   | 上传授权凭证 - [UploadToken](#uploadtoken)
+token       | string | 是   | 上传授权凭证 - [UploadToken](#upload-token)
 file        | file   | 是   | 文件本身
 key         | string | 否   | 资源名，所在的资源空间内唯一。key可包含`/`。若不指定 key，七牛云存储将使用文件的 etag（即上传成功后返回的hash值）作为key，并在返回结果中传递给客户端。资源名必须采用 **utf8编码** ，非utf8编码的资源名在访问七牛云存储将会反馈错误。
 x:\<custom_field_name\> | string | 否 | [自定义变量](#xVariables)，必须以 `x:` 开头命名，不限个数。里面的内容将在 `callbackBody` 参数中的 `$(x:custom_field_name)` 求值时使用。
@@ -156,10 +156,10 @@ x:\<custom_field_name\> | string | 否 | [自定义变量](#xVariables)，必须
  deadline     | 是   | 定义上传请求的失效时间，[Unix时间戳](http://en.wikipedia.org/wiki/Unix_time)，单位为秒。
  endUser      | 否   | 给上传的文件添加唯一属主标识，特殊场景下非常有用，比如根据App-Client标识给图片或视频打水印
  returnUrl    | 否   | 设置用于浏览器端文件上传成功后，浏览器执行301跳转的URL，一般为`HTML Form`上传时使用。文件上传成功后会跳转到`returnUrl?query_string`, `query_string`会包含 `returnBody` 内容。
- returnBody   | 否   | 文件上传成功后，自定义从七牛云存储最终返回給终端 App-Client 的数据。支持 [魔法变量](#)和[自定义变量](#)。
- callbackBody | 否   | 文件上传成功后，七牛云存储向 App-Server 发送POST请求的数据。支持 [魔法变量](#) 和 [自定义变量](#)。
+ returnBody   | 否   | 文件上传成功后，自定义从七牛云存储最终返回給终端 App-Client 的数据。支持 [魔法变量](#MagicVariables)和[自定义变量](#xVariables)。
+ callbackBody | 否   | 文件上传成功后，七牛云存储向 App-Server 发送POST请求的数据。支持 [魔法变量](#MagicVariables) 和 [自定义变量](#xVariables)。
  callbackUrl  | 否   | 文件上传成功后，七牛云存储向 App-Server 发送POST请求的URL，必须是公网上可以正常进行POST请求并能响应 HTTP Status 200 OK 的有效 URL 
- asyncOps     | 否   | 指定文件（图片/音频/视频）上传成功后异步地执行指定的预转操作。每个预转指令是一个API规格字符串，多个预转指令可以使用分号`;`隔开。详细操作见[fop](#)
+ asyncOps     | 否   | 指定文件（图片/音频/视频）上传成功后异步地执行指定的预转操作。每个预转指令是一个API规格字符串，多个预转指令可以使用分号`;`隔开。具体云处理指令请参考[fop](http://docs.qiniu.com/api/v6/gen-use.html#fop)
 
 **注意**
 
@@ -367,7 +367,7 @@ x:\<custom_field_name\> | string | 否 | [自定义变量](#xVariables)，必须
   name=sunflower.jpg&hash=Fn6qeQi4VDLQ347NiRm-RlQx_4O2&location=Shanghai&prise=1500.00
 ```
 
-之后，再对其进行[URL安全的Base64编码](http://en.wikipedia.org/wiki/Base64)：
+之后，再对其进行[URL安全的Base64编码](http://docs.qiniu.com/api/v6/terminology.html#URLSafeBase64)：
 
 ```
   bmFtZT1zdW5mbG93ZXIuanBnJmhhc2g9Rm42cWVRaTRWRExRMzQ3TmlSbS1SbFF4XzRPMiZsb2NhdGlvbj1TaGFuZ2hhaSZwcmlzZT0xNTAwLjAw
