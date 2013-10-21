@@ -24,7 +24,7 @@ title: "资源上传"
     - [重定向上传](#redirect-upload)
     - [回调上传](#callback-upload)
     - [上传中的云处理（Async-Ops）](#uploadToken-asyncOps)
-    - [转码结果持久化（Async-Ops）](#uploadToken-persistentOps)
+    - [转码结果持久化（Persistent-Ops）](#uploadToken-persistentOps)
 - [断点续传](#resumble-up)
     - [概述](#resumble-gen)
     - [上传流程](#resumble-alg)
