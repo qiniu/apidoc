@@ -144,7 +144,9 @@ x:\<custom_field_name\> | string | 否 | [自定义变量](#xVariables)，必须
     returnBody: <ResponseBodyForAppClient string>,
     callbackBody: <RequestBodyForAppServer string>
     callbackUrl: <RequestUrlForAppServer string>,
-    asyncOps: <asyncProcessCmds string>
+    asyncOps: <asyncProcessCmds string>,
+    persistentOps: <persistentOpsCmds string>,
+    persistentNotifyUrl: <persistentNotifyUrl string>
 }
 ```
 
@@ -159,7 +161,9 @@ x:\<custom_field_name\> | string | 否 | [自定义变量](#xVariables)，必须
  returnBody   | 否   | 文件上传成功后，自定义从七牛云存储最终返回給终端 App-Client 的数据。支持 [魔法变量](#MagicVariables)和[自定义变量](#xVariables)。
  callbackBody | 否   | 文件上传成功后，七牛云存储向 App-Server 发送POST请求的数据。支持 [魔法变量](#MagicVariables) 和 [自定义变量](#xVariables)。
  callbackUrl  | 否   | 文件上传成功后，七牛云存储向 App-Server 发送POST请求的URL，必须是公网上可以正常进行POST请求并能响应 HTTP Status 200 OK 的有效 URL 
- asyncOps     | 否   | 指定文件（图片/音频/视频）上传成功后异步地执行指定的预转操作。每个预转指令是一个API规格字符串，多个预转指令可以使用分号`;`隔开。具体云处理指令请参考[fop](http://docs.qiniu.com/api/v6/gen-use.html#fop)
+ asyncOps     | 否   | 指定文件（图片/音频/视频）上传成功后异步地执行指定的预转操作。每个预转指令是一个API规格字符串，多个预转指令可以使用分号`;`隔开。具体云处理指令请参考[fop](http://docs.qiniu.com/api/v6/gen-use.html#fop)  
+ persistentOps | 否 | 音/视频文件上传成功后异步地执行的转码持久化的操作。与`asyncOps`不同的是，持久化的结果以文件形式保存在空间中，不会出现缓存失效导致访问缓慢的情况。  
+ persistentNotifyUrl | 否 | 七牛云存储向 App-Server 发送转码持久化结果的URL，必须是公网上可以正常进行POST请求并能响应 HTTP Status 200 OK 的有效 URL。如果设置了`persistentOps`，则必须同时设置 `persistentNotifyUrl`
 
 **注意**
 
@@ -411,6 +415,7 @@ mimeType  | 无   | 文件的资源类型，比如 .jpg 图片的资源类型为
 imageInfo | 有   | 获取所上传图片的基本信息，支持访问子字段
 exif      | 有   | 获取所上传图片EXIF信息，支持访问子字段
 endUser   | 无   | 获取 uploadToken 中指定的 endUser 选项的值，即终端用户ID
+persistentId | 无  | 获取音视频转码持久化的进度查询id
 
 魔法变量支持同 [JSON](http://json.org/) 对象一样的 `<Object>.<Property>` 访问形式，比如：
 
@@ -606,7 +611,21 @@ MagicVariables 求值示例：
 
   [http://apitest.b1.qiniudn.com/sample.wav?avthumb/mp3/ar/44100/ab/32k](http://apitest.b1.qiniudn.com/sample.wav?avthumb/mp3/ar/44100/ab/32k)
 
-具体的云处理访问详见[云处理参考](http://docs.qiniu.com/api/v6/gen-use.html#fop)
+具体的云处理访问详见[云处理参考](http://docs.qiniu.com/api/v6/gen-use.html#fop)  
+
+<a name="uploadToken-persistentOps"></a>
+
+## 转码结果持久化（Persistent-Ops）
+
+转码结果持久化是为了提升音视频云处理体验而提出的解决方案。与`云处理（Async-Ops）`相比，持久化的结果保存在空间中，从而避免了缓存失效后访问响应缓慢的情况。  
+
+要使用转码持久化功能，用户需在构造 `上传策略` 时，设置 `persistentOps` 和 `persistentNotifyUrl` 参数，格式如下：
+
+
+    persistentOps = <fop>[;<fop2>;<fop3>;…;<fopN>]
+    persistentNotifyUrl = <Url For PersistentNotify>
+    
+具体的持久化使用文档详见[数据处理(持久化)](persistent-ops.html)
 
 <a name="resumble-up"></a>
 # 断点续传
