@@ -25,6 +25,6 @@ EncodedCSSURL | string | 否   | CSS 样式的URL，`EncodedCSSURL = urlsafe_bas
 
 office文档转PDF规格如下
 
-    [GET] url?odconv/pdf/
+    [GET] url?odconv/pdf
 
 `url` 获取可以参考 [下载接口](get.html)
