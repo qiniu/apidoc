@@ -28,3 +28,5 @@ office文档转PDF规格如下
     [GET] url?odconv/pdf
 
 `url` 获取可以参考 [下载接口](get.html)
+
+支持的输入文件类型：`doc`，`docx`,`ppt`,`pps`,`xls`,`xlsx`,`wps`,`纯文本`等
