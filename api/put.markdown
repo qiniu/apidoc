@@ -578,6 +578,8 @@ MagicVariables 求值示例：
     persistentOps = <fop>[;<fop2>;<fop3>;…;<fopN>]
     persistentNotifyUrl = <Url For PersistentNotify>
     
+
+`<fop>`格式及参数详见[数据处理(音频/视频/流媒体篇)](/api/v6/audio-video-hls-process.html)  
 具体的持久化使用文档详见[数据处理(持久化)](persistent-ops.html)
 
 <a name="resumble-up"></a>
