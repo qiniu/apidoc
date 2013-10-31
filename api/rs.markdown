@@ -46,7 +46,7 @@ EncodedEntryURIDest | 目标 EncodedEntryURI
 
 查看一个文件的相关信息，只需提交一个符合如下条件的HTTP POST请求：
 
-- 请求URL格式为：http://rs.qbox.me/stat/`<EncodedEntryURI>`
+- 请求URL格式为：http://rs.qiniu.com/stat/`<EncodedEntryURI>`
 - HTTP头部中包含一个如下键值对用于认证： `Authorization: QBox <AccessToken>`
 - Content-Type为application/x-www-form-urlencoded
 
@@ -62,7 +62,7 @@ EncodedEntryURIDest | 目标 EncodedEntryURI
 一个完整的HTTP请求和应答格式如下：
 
     HTTP/1.1
-    POST http://rs.qbox.me/stat/<EncodedEntryURI>
+    POST http://rs.qiniu.com/stat/<EncodedEntryURI>
     Content-Type: application/x-www-form-urlencoded
     Request Headers: {
         Authorization: QBox <AccessToken>
@@ -84,14 +84,14 @@ EncodedEntryURIDest | 目标 EncodedEntryURI
 
 移动一个文件，只需提交一个符合如下条件的HTTP POST请求：
 
-- 请求URL格式为：http://rs.qbox.me/move/`<EncodedEntryURISrc>`/`<EncodedEntryURIDest>`
+- 请求URL格式为：http://rs.qiniu.com/move/`<EncodedEntryURISrc>`/`<EncodedEntryURIDest>`
 - HTTP头部中包含一个用于认证的键值对： `Authorization: QBox <AccessToken>`
 - Content-Type为application/x-www-form-urlencoded
 
 服务器将会以HTTP Status Code的方式返回操作结果，如果返回200，则说明操作成功，其余状态码请参考[错误码](#error-code)。
 
     HTTP/1.1
-    POST http://rs.qbox.me/move/<EncodedEntryURISrc>/<EncodedEntryURIDest>
+    POST http://rs.qiniu.com/move/<EncodedEntryURISrc>/<EncodedEntryURIDest>
     Content-Type: application/x-www-form-urlencoded
     Request Headers: {
         Authorization: QBox <AccessToken>
@@ -107,14 +107,14 @@ EncodedEntryURIDest | 目标 EncodedEntryURI
 
 复制一个文件，和[移动](#move)操作十分类似，需提交一个符合如下条件的HTTP POST请求：
 
-- 请求URL格式为：http://rs.qbox.me/copy/`<EncodedEntryURISrc>`/`<EncodedEntryURIDest>`
+- 请求URL格式为：http://rs.qiniu.com/copy/`<EncodedEntryURISrc>`/`<EncodedEntryURIDest>`
 - HTTP头部中包含一个用于认证的键值对： `Authorization: QBox <AccessToken>`
 - Content-Type为application/x-www-form-urlencoded
 
 服务器将会以HTTP Status Code的方式返回操作结果，如果返回200，则说明操作成功，其余状态码请参考[错误码](#error-code)。
 
     HTTP/1.1
-    POST http://rs.qbox.me/copy/<EncodedEntryURISrc>/<EncodedEntryURIDest>
+    POST http://rs.qiniu.com/copy/<EncodedEntryURISrc>/<EncodedEntryURIDest>
     Content-Type: application/x-www-form-urlencoded
     Request Headers: {
         Authorization: QBox <AccessToken>
@@ -130,14 +130,14 @@ EncodedEntryURIDest | 目标 EncodedEntryURI
 
 删除一个文件也很简单，提交一个符合如下条件的HTTP POST请求即可：
 
-- 请求URL格式为：http://rs.qbox.me/delete/`<EncodedEntryURI>`
+- 请求URL格式为：http://rs.qiniu.com/delete/`<EncodedEntryURI>`
 - HTTP头部中包含一个用于认证的键值对： `Authorization: QBox <AccessToken>`
 - Content-Type为application/x-www-form-urlencoded
 
 服务器将会以HTTP Status Code的方式返回操作结果，如果返回200，则说明操作成功，其余状态码请参考[错误码](#error-code)。
 
     HTTP/1.1
-    POST http://rs.qbox.me/delete/<EncodedEntryURI>
+    POST http://rs.qiniu.com/delete/<EncodedEntryURI>
     Content-Type: application/x-www-form-urlencoded
     Request Headers: {
         Authorization: QBox <AccessToken>
@@ -157,7 +157,7 @@ EncodedEntryURIDest | 目标 EncodedEntryURI
 
 批量操作的请求是由多个单文件操作指令组成的，请求格式统一为：
 
-    POST http://rs.qbox.me/batch
+    POST http://rs.qiniu.com/batch
     Content-Type: application/x-www-form-urlencoded
     RequestBody: op=<Operation>&op=<Operation>&...
 
@@ -191,7 +191,7 @@ EncodedEntryURIDest | 目标 EncodedEntryURI
 
 批量查看可用来一次查看多个文件的文件信息，请求格式如下：
 
-    POST http://rs.qbox.me/batch
+    POST http://rs.qiniu.com/batch
     Content-Type: application/x-www-form-urlencoded
     RequestBody: op=/stat/<EncodedEntryURI>&
                  op=/stat/<EncodedEntryURI>&
@@ -203,7 +203,7 @@ EncodedEntryURIDest | 目标 EncodedEntryURI
 
 批量移动可用来一次移动多个文件，请求格式如下：
 
-    POST http://rs.qbox.me/batch
+    POST http://rs.qiniu.com/batch
     Content-Type: application/x-www-form-urlencoded
     RequestBody: op=/move/<EncodedEntryURISrc>/<EncodedEntryURIDest>&
                  op=/move/<EncodedEntryURISrc>/<EncodedEntryURIDest>&
@@ -215,7 +215,7 @@ EncodedEntryURIDest | 目标 EncodedEntryURI
 
 批量复制可用来一次复制多个文件，请求格式如下：
 
-    POST http://rs.qbox.me/batch
+    POST http://rs.qiniu.com/batch
     Content-Type: application/x-www-form-urlencoded
     RequestBody: op=/copy/<EncodedEntryURISrc>/<EncodedEntryURIDest>&
                  op=/copy/<EncodedEntryURISrc>/<EncodedEntryURIDest>&
@@ -227,7 +227,7 @@ EncodedEntryURIDest | 目标 EncodedEntryURI
 
 批量删除可用来一次删除多个文件，请求格式如下：
 
-    POST http://rs.qbox.me/batch
+    POST http://rs.qiniu.com/batch
     Content-Type: application/x-www-form-urlencoded
     RequestBody: op=/delete/<EncodedEntryURI>&
                  op=/delete/<EncodedEntryURI>&
@@ -240,7 +240,7 @@ EncodedEntryURIDest | 目标 EncodedEntryURI
 请求某个存储空间（bucket）下的文件列表，如果有前缀，可以按前缀（`prefix`）进行过滤；如果前一次返回`marker`就表示还有资源，下一步请求需要将`marker`参数填上。
 
     HTTP/1.1
-    POST http://rsf.qbox.me/list?bucket=<BucketName>&
+    POST http://rsf.qiniu.com/list?bucket=<BucketName>&
                                  marker=<Marker>&
                                  limit=<Limit>&
                                  prefix=<Prefix>
@@ -358,7 +358,7 @@ AccessToken的计算公式： `<ACCESS_KEY>`:`urlsafe_base64_encode(hmac_sha1(<S
      */
     $access_key = 'YOUR_ACCESS_KEY';
     $secret_key = 'YOUR_SECRET_KEY';
-    $url = 'http://rsf.qbox.me/list';
+    $url = 'http://rsf.qiniu.com/list';
     $query = 'bucket=myTestBucket&marker=200&limit=100&prefix='
     $url .= "?" . $query
     $body = null
@@ -395,7 +395,7 @@ AccessToken的计算公式： `<ACCESS_KEY>`:`urlsafe_base64_encode(hmac_sha1(<S
 
     access_key = 'YOUR_ACCESS_KEY_HERE'
     secret_key = 'YOUR_SECRET_KEY_HERE'
-    url = 'http://rsf.qbox.me/list'
+    url = 'http://rsf.qiniu.com/list'
     query = 'bucket=myTestBucket&marker=200&limit=100&prefix='
     url += '?' + query
     body = nil
