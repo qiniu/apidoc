@@ -5,46 +5,36 @@ title: "数据处理(持久化)"
 
 - [持久化处理说明](#persistentOps-overall)
 - [持久化处理机制](#persistentOps-method)
+    - [上传预转码处理](#persistentOps-upload)
+    - [对已有文件处理](#persistentOps-pfop)
+    - [访问和下载](#persistentOps-download)
 - [处理状态通知和查询](#persistentOps-status)
     - [通知](#notify)
     - [查询](#status)
     - [状态内容](#status-description)
-- [对历史数据进行持久化](#persistentOps-pfop)
+- [处理实例](#persistentOps-example)
 
 
 <a name="persistentOps-overall"></a>
 
 ## 持久化处理说明  
 
-一般的数据处理接口形式是：  
+音视频用户可以使用持久化功能将转码结果保存在空间中，以提升访问时的体验。配合处理状态通知和查询功能，还能了解转码进度、优化交互流程。  
 
-    [GET] http://<domain>/<key>?<fop>
-    
-比如：  
-图片缩略
 
-    http://cyj.qiniudn.com/22734/1359639667984p17i8ddoi31ara1ccp1njsq319s62.jpg?imageView/1/w/310/h/395/q/80
-
-音频转码
-
-    http://apitest.b1.qiniudn.com/sample.wav?avthumb/mp3/ab/192k
-    
-对于这类请求，服务端会实时对原资源进行处理、建立缓存，然后将结果返回给客户端。  
-然而在实际应用中，用户可能会遇到缓存还未建立或已经失效的情况，需要等待服务端重新处理。如果是音视频文件的处理，耗时会相对较长，甚至可能长达数分钟。毫无疑问，这会影响用户体验。  
-有音视频处理需求的用户可以使用数据持久化处理功能来避免上面提到的情况。此外，配合处理状态通知和查询功能，还能优化上传流程、提升用户体验。  
 
 <a name="persistentOps-method"></a>
 ## 持久化处理机制  
 
-### 上传  
-用户使用持久化处理，需要在生成uploadToken时增加`persistentOps`和 `persistentNotifyUrl` 两个字段。注意：如果设置了 `persistentOps`，则一定要同时指定 `persistentNotifyUrl`。  
+<a name="persistentOps-upload"></a>
+### 上传预转码处理  
+用户要在上传音视频文件后自动进行预转码处理，需要在上传策略(PutPolicy)中增加`persistentOps`和 `persistentNotifyUrl` 两个字段。  
 
 字段 | 含义
 ----- | -------------
 `persistentOps` | 需要进行的数据处理命令,可以指定多个命令，以`;`分隔。
 `persistentNotifyUrl` | 用户接收视频处理结果的接口URL。
 
-### 服务端处理  
 用户使用指定了`persistentOps` 和 `persistentNotifyUrl` 的uploadToken上传一个音视频文件之后，服务端会生成此次处理的进程ID `persistentId`，并开始数据处理。  
 `persistentId`可以用来获取处理的进度和结果。  
 针对用户上传策略的不同，获得`persistentId`的方式不同：  
@@ -52,15 +42,44 @@ title: "数据处理(持久化)"
 1.  uploadToken参数中没有设置returnUrl或callbackUrl，上传成功后服务器返回的结果中默认带有`persistentId`字段；  
 2.  uploadToken参数中设置了returnUrl，但没有设置returnBody，跳转过程附带的upload_ret参数解码后获得的结果中默认带有`persistentId`字段；  
 3.  uploadToken参数中设置了callbackUrl，但没有设置callbackBody，和之前一样，这种情况下上传会失败；  
-4.  uploadToken参数中设置了returnUrl或callbackUrl，且根据需求自定义了相应的Body（`returnBody` 或 `callbackBody`），要在Body中使用魔法变量`$(persistentId)` 来得到， 如`key=$(etag)&size=$(fsize)&uid=$(endUser)&persistentId=$(persistentId)`。  
+4.  uploadToken参数中设置了returnUrl或callbackUrl，且根据需求自定义了相应的Body（`returnBody` 或 `callbackBody`），要在Body中使用魔法变量`$(persistentId)` 来得到。  
 
 
+<a name="persistentOps-pfop"></a>
+### 对已有文件处理  
+如果需要对空间中的文件进行转码并持久化处理，可以按以下方式使用我们的异步处理接口：  
+
+
+    Request URL: http://api.qiniu.com/pfop  
+    Request Method: POST  
+    Request Headers:  
+        Content-Type: application/x-www-form-urlencoded  
+        Authorization: QBox <access token>  
+    Form Data: 
+        bucket: <bucket>  
+        key: <file Key>  
+        fops: <fop1>;<fop2>...<fopN>
+        notifyURL: <persistentNotifyUrl>          
+
+
+其中，`access token`是资源管理的授权认证，生成的算法可以参考 [资源管理操作-授权认证](http://docs.qiniu.com/api/v6/rs.html#digest-auth)。  
+正常情况下获得的返回：
+
+
+    Status Code: 200 OK  
+    Response:  
+        {"persistentId": <persistentId>}
+
+
+处理完成后会向用户指定的`notifyURL`发送处理结果，用户也可以根据`persistentId`来主动查询。详情可以参考：[处理状态通知和查询](#persistentOps-status)
+
+<a name="persistentOps-download"></a>
 ### 下载  
 服务端处理完成之后，用户即可通过  
 
     [GET] http://<domain>/<key>?p/1/<fop>  
     
-这样形式的url访问处理结果。和普通的数据处理url不同，这里用`p/1`表明访问的是持久化处理的结果，不会出现重新处理耗费大量时间的情况。但需注意，如果访问一个没有在`persistentOps`中指定的处理结果，会直接返回404。  
+这样形式的url访问处理结果。和普通的数据处理url不同，这里用`p/1`表明访问的是持久化处理的结果，不会出现重新处理耗费大量时间的情况。但需注意，如果访问一个没有进行过的转码处理结果，会直接返回404。  
 
 
 <a name="persistentOps-status"></a>
@@ -143,6 +162,7 @@ title: "数据处理(持久化)"
 
 
 
+<a name="persistentOps-example"></a>
 ## 处理实例  
 
 1.  上传一个音频文件 **persistent.mp3** ，并设置处理命令为 `avthumb/mp3/aq/6/ar/16000` 和 `avthumb/mp3/ar/44100/ab/32k`。  
@@ -186,34 +206,3 @@ title: "数据处理(持久化)"
 这样，用户可以通过带有样式的链接来访问处理结果：  
 [样式'persistent1'](http://t-test.qiniudn.com/persistent.mp3-persistent1)  
 [样式'persistent2'](http://t-test.qiniudn.com/persistent.mp3-persistent2)  
-
-
-<a name="persistentOps-pfop"></a>
-## 对历史数据进行持久化  
-如果需要对以前上传的文件进行转码并持久化处理，可以按以下方式使用我们的异步处理接口：  
-
-
-    Request URL: http://api.qiniu.com/pfop  
-    Request Method: POST  
-    Request Headers:  
-        Content-Type: application/x-www-form-urlencoded  
-        Authorization: QBox <access token>  
-    Form Data: 
-        bucket: <bucket>  
-        key: <file Key>  
-        fops: <fop1>;<fop2>...<fopN>
-        notifyURL: <persistentNotifyUrl>          
-
-
-其中，`access token`是资源管理的授权认证，生成的算法可以参考 [资源管理操作-授权认证](http://docs.qiniu.com/api/v6/rs.html#digest-auth)。  
-正常情况下获得的返回：
-
-
-    Status Code: 200 OK  
-    Response:  
-        {"persistentId": <persistentId>}
-
-
-处理完成后会向用户指定的`notifyURL`发送处理结果，用户也可以根据`persistentId`来主动查询。详情可以参考：[处理状态通知和查询](#persistentOps-status)
-
-    
