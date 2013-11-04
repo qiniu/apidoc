@@ -1,5 +1,9 @@
 ## CHANGE LOG
 
+### v6.2.0 issue [#92](https://github.com/qiniu/apidoc/pull/92)
+
+- 增加Persistent Op文档
+
 ### v6.1.5 issues [#77](https://github.com/qiniu/apidoc/pull/77)
 
 - 增加空间统计信息查询文档
