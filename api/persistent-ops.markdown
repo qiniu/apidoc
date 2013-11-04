@@ -198,11 +198,3 @@ title: "数据处理(持久化)"
 [处理1(avthumb/mp3/aq/6/ar/16000)结果](http://t-test.qiniudn.com/persistent.mp3?p/1/avthumb/mp3/aq/6/ar/16000)  
 [处理2(avthumb/mp3/ar/44100/ab/32k)结果](http://t-test.qiniudn.com/persistent.mp3?p/1/avthumb/mp3/ar/44100/ab/32k)   
 
-
-4.  用户也可以通过自定义样式来访问处理结果。我们设置样式 `persistent1` 和 `persistent2`，如图中示例。  
-
-![persistent style](http://for-test.qiniudn.com/persistent_style.png)  
-
-这样，用户可以通过带有样式的链接来访问处理结果：  
-[样式'persistent1'](http://t-test.qiniudn.com/persistent.mp3-persistent1)  
-[样式'persistent2'](http://t-test.qiniudn.com/persistent.mp3-persistent2)  
