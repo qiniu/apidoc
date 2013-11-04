@@ -390,25 +390,20 @@ Access Token用于[资源管理](http://docs.qiniu.com/api/v6/rs.html)的请求�
 
 <a name="video-process"></a>
 
-### 音视频/流媒体在线处理
+### 音视频/流媒体转码及持久化
 
-七牛云存储国内首创了在线音视频/流媒体处理服务，并提供优质的音视频分发网络。
+七牛云存储国内首创了自由度极高的音视频/流媒体转码处理服务，并提供优质的音视频分发网络。  
 
-七牛音视频/流媒体处理支持：
+
+七牛音视频/流媒体处理支持及处理结果持久化：
 
 1. [音频转换](/api/v6/audio-video-hls-process.html#audio-convert)
 2. [视频转换](/api/v6/audio-video-hls-process.html#video-convert)
 3. [视频帧缩略图](/api/v6/audio-video-hls-process.html#video-thumbnail)
 4. [HTTP Live Streaming](/api/v6/audio-video-hls-process.html#hls)
+5. [数据处理(持久化)](persistent-ops.html)   
 
 
-例如：
-
-1. <http://apitest.qiniudn.com/sample.wav?avthumb/mp3/ar/44100/aq/3> （将 wav 音频格式转换为 mp3 格式，并指定 VBR 参数为3，采样频率为 44100，点击试听转换后的音频）
-2. <http://open.qiniudn.com/thinking-in-go.mp4?avthumb/avi/ab/64k/acodec/libmp3lame> （将 mp4 视频格式转换为 avi 格式，使用 mp3 进行音频编码，且音频比特率为64k）
-3. <http://open.qiniudn.com/thinking-in-go.mp4?vframe/jpg/offset/7/w/480/h/360> （取视频第 7 秒的截图，图片格式为 jpg，宽度为 480px，高度为 360px，点击查看视频帧）
-
-同样，这里只是一小部分功能的实例，更多参数和详细的接口说明，请参考：[音视频/流媒体在线处理API文档](/api/v6/audio-video-hls-process.html)
 
 <a name="doc-process"></a>
 

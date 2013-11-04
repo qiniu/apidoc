@@ -12,6 +12,7 @@ title: "数据处理(音频/视频/流媒体篇)"
     - [使用七牛提供的 HLS 服务](#hls-usage)
     - [HTTP Live Streaming API](#hls-api)
 - [音视频API参数详解](#args)
+- [音视频转码体验优化](#persistent-ops)
 
 
 <a name="audio-convert"></a>
@@ -53,10 +54,6 @@ title: "数据处理(音频/视频/流媒体篇)"
 支持转换的音频格式详见：<http://ffmpeg.org/general.html#Audio-Codecs>
 
 支持的音频 Codec 有：libmp3lame，libfaac，libvorbis 。
-
-**优化建议**
-
-为了保证良好的用户体验，请配合上传预转机制使用。参考: [上传预转](#upload-fop)
 
 <a name="video-convert"></a>
 
@@ -165,10 +162,6 @@ webm | libvpx | webm | | 700k | libvorbis | 128k | 48k
 支持的视频 Codec 有：libx264，libvpx，libtheora，libxvid 。
 
 支持的音频 Codec 有：libmp3lame，libfaac，libvorbis 。
-
-**优化建议**
-
-为了保证良好的用户体验，请配合上传预转机制使用。参考: [上传预转](#upload-fop)
 
 
 <a name="video-thumbnail"></a>
@@ -284,30 +277,6 @@ HLS 必须使用友好风格的 URL，可以使用命令行工具 `qboxrsctl` �
     Body: <M3U8File>
 
 
-<a name="upload-fop"></a>
-
-**上传预转**
-
-由于在线音视频频转换或将音视频切割成多个小文件并生成 M3U8 播放列表是一个相对耗时的操作，为了保证良好的用户体验，需要配合上传预转机制使用。实际上，七牛官方推荐音视频在线编解码都通过上传预转的方式进行。
-
-上传预转参考文档：[音视频上传预转 - asyncOps](put.html#uploadToken-asyncOps)
-
-接上述示例，已知 `m3u8_audio` 的 API 规格定义，将其作为上传授权凭证（`uploadToken`）预转参数（`asyncOps`）的值即可。
-
-    asyncOps = "http://example.qiniudn.com/$(key)?avthumb/m3u8/preset/audio_32k"
-
-可以设置多个预转指令，用分号“;”隔开即可:
-
-    asyncOps = "http://example.qiniudn.com/$(key)?avthumb/m3u8/preset/audio_32k;
-                http://example.qiniudn.com/$(key)?avthumb/m3u8/preset/audio_48k"
-
-实际情况下，`example.qiniudn.com` 换成存储空间（bucket）绑定的域名即可。
-
-同样，视频预转的操作方式也一样。
-
-设置预转后，当文件上传完毕即可异步执行预转指令操作。第一次访问该资源时，就无需再转换了，访问到的即已经转换好的资源。
-
-
 <a name="hls-api"></a>
 
 ### HTTP Live Streaming API
@@ -378,5 +347,12 @@ video_4x3_640k  | 码率为640K，长宽比为4x3，推荐在 WIFI 环境下使�
 `/acodec/<AudioCodec>` | 音频编码方案，支持方案：libmp3lame，libfaac，libvorbis。
 `/segtime/<SegSeconds>` | 用于 HLS 自定义每一小段音/视频流的播放时间长度，取值范围为: 10 - 60 （秒），默认值为 10（单位:秒）。
 
-注意：以上参数若不指定参数值，参数及其值都不必在所调用的 API 规格中出现。
+注意：以上参数若不指定参数值，参数及其值都不必在所调用的 API 规格中出现。  
+
+<a name="persistent-ops"></a>
+## 音视频转码体验优化  
+
+音视频文件的处理，耗时会相对较长，甚至可能长达数十分钟。毫无疑问，这会影响用户体验。  
+有大量音视频处理需求的用户可以使用数据持久化处理功能来避免上面提到的情况。此外，配合处理状态通知和查询功能，还能优化上传流程、提升用户体验。参考: [数据处理(持久化)](persistent-ops.html)
+
 

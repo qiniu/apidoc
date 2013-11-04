@@ -23,7 +23,7 @@ title: "资源上传"
     - [普通客户端直传](#direct-upload)
     - [重定向上传](#redirect-upload)
     - [回调上传](#callback-upload)
-    - [上传中的云处理（Async-Ops）](#uploadToken-asyncOps)
+    - [转码结果持久化（Persistent-Ops）](#uploadToken-persistentOps)
 - [断点续传](#resumble-up)
     - [概述](#resumble-gen)
     - [上传流程](#resumble-alg)
@@ -45,7 +45,7 @@ title: "资源上传"
 1. [用户定义返回值](#return-body)；
 1. [客户端重定向](#redirect-upload)；
 1. [回调](#callback-upload)；
-1. [异步云处理](#uploadToken-asyncOps)；
+1. [音视频转码结果持久化](#uploadToken-persistentOps)；
 
 这些功能极大地方便了用户对上传资源的处理，使得用户可以在一次资源操作中完成较为复杂的业务处理。
 
@@ -144,7 +144,8 @@ x:\<custom_field_name\> | string | 否 | [自定义变量](#xVariables)，必须
     returnBody: <ResponseBodyForAppClient string>,
     callbackBody: <RequestBodyForAppServer string>
     callbackUrl: <RequestUrlForAppServer string>,
-    asyncOps: <asyncProcessCmds string>
+    persistentOps: <persistentOpsCmds string>,
+    persistentNotifyUrl: <persistentNotifyUrl string>
 }
 ```
 
@@ -159,7 +160,8 @@ x:\<custom_field_name\> | string | 否 | [自定义变量](#xVariables)，必须
  returnBody   | 否   | 文件上传成功后，自定义从七牛云存储最终返回給终端 App-Client 的数据。支持 [魔法变量](#MagicVariables)和[自定义变量](#xVariables)。
  callbackBody | 否   | 文件上传成功后，七牛云存储向 App-Server 发送POST请求的数据。支持 [魔法变量](#MagicVariables) 和 [自定义变量](#xVariables)。
  callbackUrl  | 否   | 文件上传成功后，七牛云存储向 App-Server 发送POST请求的URL，必须是公网上可以正常进行POST请求并能响应 HTTP Status 200 OK 的有效 URL 
- asyncOps     | 否   | 指定文件（图片/音频/视频）上传成功后异步地执行指定的预转操作。每个预转指令是一个API规格字符串，多个预转指令可以使用分号`;`隔开。具体云处理指令请参考[fop](http://docs.qiniu.com/api/v6/gen-use.html#fop)
+ persistentOps | 否 | 音/视频文件上传成功后异步地执行的预转码持久化指令。每个预转指令是一个API规格字符串，多个预转指令可以使用分号`;`隔开。具体指令请参考[fop](http://docs.qiniu.com/api/v6/gen-use.html#fop) 
+ persistentNotifyUrl | 否 | 七牛云存储向 App-Server 发送转码持久化结果的URL，必须是公网上可以正常进行POST请求并能响应 HTTP Status 200 OK 的有效 URL。
 
 **注意**
 
@@ -411,6 +413,7 @@ mimeType  | 无   | 文件的资源类型，比如 .jpg 图片的资源类型为
 imageInfo | 有   | 获取所上传图片的基本信息，支持访问子字段
 exif      | 有   | 获取所上传图片EXIF信息，支持访问子字段
 endUser   | 无   | 获取 uploadToken 中指定的 endUser 选项的值，即终端用户ID
+persistentId | 无  | 获取音视频转码持久化的进度查询id
 
 魔法变量支持同 [JSON](http://json.org/) 对象一样的 `<Object>.<Property>` 访问形式，比如：
 
@@ -563,50 +566,21 @@ MagicVariables 求值示例：
 1. 回调服务器反馈回调执行结果。回调服务器接收到回调数据后，可以执行后续的业务逻辑。而且，用户可以利用此机会，将一些处理结果反馈给七牛云存储，委托七牛云存储传递给应用客户端。如果回调执行失败，七牛云存储会将错误信息反馈应用客户端；
 1. 七牛云存储完成回调后，将获得的回调返回信息，原封不动地反馈给应用客户端。
 
+<a name="uploadToken-persistentOps"></a>
 
-<a name="uploadToken-asyncOps"></a>
+## 转码结果持久化（Persistent-Ops）
 
-## 上传中的云处理（Async-Ops）
+转码结果持久化是为了提升音视频体验而提出的解决方案，持久化的结果保存在空间中。  
 
-七牛云存储提供一系列[云处理（fop）](http://docs.qiniu.com/api/v6/gen-use.html#fop)操作，用于对存放在七牛云存储的资源进行再处理。有时用户需要上传一个文件，然后随即对其进行某种处理。一个典型的例子就是：用户上传了一张图片，然后立刻生成几个不同格式的缩略图，用于不同的客户端。通常，用户可以上传完成之后，调用云处理功能，执行对资源的处理。但七牛云存储提供了更简洁的方式，允许在一次上传中，指定上传完成后对资源进行云处理操作。
+要使用转码持久化功能，用户需在构造 `上传策略` 时，设置 `persistentOps` 和 `persistentNotifyUrl` 参数，格式如下：
 
-用户只需在构造 `上传策略` 时，设置 `asyncOps` 参数，即可触发附加的云处理。正如该参数名称所指，附加的云处理是异步执行，即资源上传操作完成后，七牛云存储会触发云处理，但不等处理完成，便返回上传请求的响应。七牛云存储的云处理系统会继续完成相应的操作。
 
-`asyncOps` 参数的格式如下：
+    persistentOps = <fop>[;<fop2>;<fop3>;…;<fopN>]
+    persistentNotifyUrl = <Url For PersistentNotify>
+    
 
-```
-    asyncOps = <fop>[;<fop2>;<fop3>;…;<fopN>]
-```
-
-其中， `<fop>` 是云处理的指令。用户可以一次设置多个云处理指令，在一次上传中执行多种资源的操作。云处理指令间以“;”分割。关于云处理指令，详见[云处理参考](http://docs.qiniu.com/api/v6/gen-use.html#fop)。
-
-下面以一个音频文件为例，演示如何在上传中实现云处理。
-
-假设需要向空间 `apitest.b1` 上传一个名为 `sample.wav` ，并将其转换成两种不同规格的 `mp3` 文件。
-
-首先，用户需要根据规格要求确定云处理指令：
-
-- 规格1：`avthumb/mp3/ar/44100/ab/32k`。将生成采样率为44k，码率为32k的mp3音频。
-- 规格2：`avthumb/mp3/aq/6/ar/16000`。将生成质量为6，码率为16000的mp3音频
-
-然后，用户在构造 `上传策略` 的时候，将云处理指令放入 `asyncOp` 参数中：
-
-```
-  put_policy = '{
-    "scope" : "apitest.b1:sample.wave",
-    "deadline" : 1451491200,
-      ...
-    "asyncOps" : "avthumb/mp3/ar/44100/ab/32k;avthumb/mp3/aq/6/ar/16000"
-  }'
-```
-
-最后，用户构造资源上传请求，上传文件。
-
-上传完成后，用户可以通过标准的云处理方式访问： `http://<domain>/<key>?<fop>` 。这里的 `<fop>` 是在 `asyncOps` 中设定的云处理指令中的任何一个。比如，如果要获取规格1的转换结果，只需使用以下的URL即可：
-
-  [http://apitest.b1.qiniudn.com/sample.wav?avthumb/mp3/ar/44100/ab/32k](http://apitest.b1.qiniudn.com/sample.wav?avthumb/mp3/ar/44100/ab/32k)
-
-具体的云处理访问详见[云处理参考](http://docs.qiniu.com/api/v6/gen-use.html#fop)
+`<fop>`格式及参数详见[数据处理(音频/视频/流媒体篇)](/api/v6/audio-video-hls-process.html)  
+具体的持久化使用文档详见[数据处理(持久化)](persistent-ops.html)
 
 <a name="resumble-up"></a>
 # 断点续传
