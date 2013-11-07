@@ -50,7 +50,7 @@ title: "数据处理(持久化)"
 如果需要对空间中的文件进行转码并持久化处理，可以按以下方式使用我们的异步处理接口：  
 
 
-    Request URL: http://api.qiniu.com/pfop  
+    Request URL: http://api.qiniu.com/pfop/  
     Request Method: POST  
     Request Headers:  
         Content-Type: application/x-www-form-urlencoded  
