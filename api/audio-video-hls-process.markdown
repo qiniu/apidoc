@@ -7,7 +7,7 @@ title: "数据处理(音频/视频/流媒体篇)"
 - [视频转换](#video-convert)
     - [视频转换预设集](#video-preset)
     - [视频自定义转码](#self-def-video-convert)
-- [视频帧缩略图](#video-thumbnail)
+- [视频截图](#video-thumbnail)
 - [HTTP Live Streaming](#hls)
     - [使用七牛提供的 HLS 服务](#hls-usage)
     - [HTTP Live Streaming API](#hls-api)
