@@ -166,14 +166,12 @@ webm | libvpx | webm | | 700k | libvorbis | 128k | 48k
 
 <a name="video-thumbnail"></a>
 
-## 视频帧缩略图
+## 视频截图
 
 **请求**
 
     GET <VideoDownloadURL>?vframe/<Format>
                            /offset/<Second>
-                           /w/<Width>
-                           /h/<Height>
 
 **响应**
 
@@ -186,21 +184,18 @@ webm | libvpx | webm | | 700k | libvorbis | 128k | 48k
 -------|--------------------------------------
 Format | 要输出的目标缩略图格式，支持 jpg，png
 Second | 取视频的第几秒
-Width  | 缩略图宽度，范围为 1 ~ 1920
-Height | 缩略图高度，范围为 1 ~ 1080
+
+注意：视频截图返回的图片尺寸是原视频的大小，如果需要改变视频截图的尺寸，请使用[管道](http://docs.qiniu.com/api/v6/pipeline.html)连接[缩略图](http://docs.qiniu.com/api/v6/image-process.html#imageView)操作实现。
 
 **示例**
 
 示例：取视频第 7 秒的截图，图片格式为 jpg，宽度为 480px，高度为 360px：
 
-    [GET] http://open.qiniudn.com/thinking-in-go.mp4?vframe/jpg
-                                                     /offset/7
-                                                     /w/480
-                                                     /h/360
+    [GET] http://open.qiniudn.com/thinking-in-go.mp4?vframe/jpg/offset/7|imageView/2/w/640/h/480
 
 上述示例效果如下：
 
-![Go——基于连接与组合的语言](http://open.qiniudn.com/thinking-in-go.mp4?vframe/jpg/offset/7/w/480/h/360)
+![Go——基于连接与组合的语言](http://open.qiniudn.com/thinking-in-go.mp4?vframe/jpg/offset/7|imageView/2/w/640/h/480)
 
 
 <a name="hls"></a>
