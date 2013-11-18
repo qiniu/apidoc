@@ -240,7 +240,7 @@ EncodedEntryURIDest | 目标 EncodedEntryURI
 请求某个存储空间（bucket）下的文件列表，如果有前缀，可以按前缀（`prefix`）进行过滤；如果前一次返回`marker`就表示还有资源，下一步请求需要将`marker`参数填上。
 
     HTTP/1.1
-    POST http://rsf.qiniu.com/list?bucket=<BucketName>&
+    POST http://rsf.qbox.me/list?bucket=<BucketName>&
                                  marker=<Marker>&
                                  limit=<Limit>&
                                  prefix=<Prefix>
@@ -358,7 +358,7 @@ AccessToken的计算公式： `<ACCESS_KEY>`:`urlsafe_base64_encode(hmac_sha1(<S
      */
     $access_key = 'YOUR_ACCESS_KEY';
     $secret_key = 'YOUR_SECRET_KEY';
-    $url = 'http://rsf.qiniu.com/list';
+    $url = 'http://rsf.qbox.me/list';
     $query = 'bucket=myTestBucket&marker=200&limit=100&prefix='
     $url .= "?" . $query
     $body = null
@@ -395,7 +395,7 @@ AccessToken的计算公式： `<ACCESS_KEY>`:`urlsafe_base64_encode(hmac_sha1(<S
 
     access_key = 'YOUR_ACCESS_KEY_HERE'
     secret_key = 'YOUR_SECRET_KEY_HERE'
-    url = 'http://rsf.qiniu.com/list'
+    url = 'http://rsf.qbox.me/list'
     query = 'bucket=myTestBucket&marker=200&limit=100&prefix='
     url += '?' + query
     body = nil
